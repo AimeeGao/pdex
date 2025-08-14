@@ -81,7 +81,7 @@ RUN apt-get -yq update --fix-missing \
         echo 'RemoteIPInternalProxy 10.98.0.0/16'; \
         echo 'RemoteIPInternalProxy 127.0.0.1'; \
     } | tee "$APACHE_CONFDIR/conf-available/remoteip.conf" && \
-    a2enconf remoteip \
+    a2enconf remoteip && \
     a2enconf security-headers \
 # Apache - Hide version
   && sed -i -e 's/^ServerTokens OS$/ServerTokens Prod/g' \
