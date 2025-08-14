@@ -1,0 +1,177 @@
+.bcds-header {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-color-background-white);
+  border-bottom-color: var(--surface-color-border-default);
+  border-bottom-style: solid;
+  border-bottom-width: var(--layout-border-width-small);
+  width: 100%;
+  border-bottom: 1px solid rgb(217, 217, 217);
+}
+
+.bcds-header > .bcds-header--container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--layout-padding-medium);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--layout-padding-none) var(--layout-padding-medium);
+  min-height: 65px;
+}
+
+.bcds-header--logo {
+  flex-shrink: 0;
+}
+
+.bcds-header > .bcds-header--container > .bcds-header--title {
+  font: var(--typography-bold-h4);
+  color: var(--typography-color-primary);
+}
+
+/* Navigation Links */
+.bcds-header--nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+
+.bcds-header--nav-link {
+  color: var(--typography-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.bcds-header--nav-link:hover {
+  background-color: rgba(0, 51, 102, 0.1);
+  color: var(--typography-color-primary);
+}
+
+.bcds-header--nav-link.active {
+  background-color: var(--surface-color-background-blue-subtle);
+  color: var(--typography-color-primary);
+}
+
+/* Mobile Menu Button */
+.bcds-header--mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  margin-left: auto;
+  color: var(--typography-color-primary);
+}
+
+.hamburger-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Mobile Navigation */
+.bcds-header--mobile-nav {
+  background-color: var(--surface-color-background-white);
+  border-top: 1px solid var(--surface-color-border-default);
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bcds-header--mobile-nav-link {
+  color: var(--typography-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.bcds-header--mobile-nav-link:hover {
+  background-color: rgba(0, 51, 102, 0.1);
+  color: var(--typography-color-primary);
+}
+
+.bcds-header--mobile-nav-link.active {
+  background-color: var(--surface-color-background-blue-subtle);
+  color: var(--typography-color-primary);
+}
+
+/* Hide title on mobile devices to reduce clutter */
+@media (max-width: 768px) {
+  .bcds-header > .bcds-header--container > .bcds-header--title {
+    display: none;
+  }
+  
+  .bcds-header > .bcds-header--container > .bcds-header--line {
+    display: none;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  .bcds-header--mobile-toggle {
+    display: block;
+  }
+
+  .bcds-header > .bcds-header--container {
+    gap: 1rem;
+  }
+}
+
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li a,
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li button {
+  background-color: var(--surface-color-background-white);
+  box-sizing: border-box;
+  color: var(--typography-color-link);
+  font: var(--typography-regular-body);
+  margin-top: -17.5px; /* Center the link visually in a single line-height header */
+  padding: var(--layout-padding-xsmall) var(--layout-padding-medium);
+  position: absolute;
+  margin-left: -100000px;
+}
+
+.bcds-header > .bcds-header--container > ul.bcds-header--skiplinks li a:focus,
+.bcds-header
+  > .bcds-header--container
+  > ul.bcds-header--skiplinks
+  li
+  button:focus {
+  margin-left: 0; /* Line up left edge with left edge of logo image */
+  text-wrap: nowrap;
+}
+
+.bcds-header > .bcds-header--container > .bcds-header--line {
+  background-color: var(--surface-color-border-default);
+  width: 1px;
+  height: 32px;
+}
+
+.bcds-header > .bcds-header--container svg#bcgov-logo-header {
+  min-width: 129px;
+  width: 129px;
+}

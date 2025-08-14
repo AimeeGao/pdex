@@ -1,0 +1,368 @@
+.bcds-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+@media (min-width: 992px) {
+.bcds-footer {
+        padding-top: 56px;
+    }
+}
+@media (min-width: 576px) {
+.bcds-footer {
+        padding: 32px 0 32px 0;
+    }
+}
+
+.bcds-footer > .bcds-footer--acknowledgement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(41, 41, 41);
+  color: rgb(250, 249, 248);
+  font-size: 14px;
+  line-height: 21px;
+  border-top: 4px solid rgb(252, 186, 25);
+  border-bottom: 4px solid rgb(252, 186, 25);
+  padding: 32px 16px;
+}
+
+.bcds-footer
+  > .bcds-footer--acknowledgement
+  > .bcds-footer--acknowledgement-text {
+  max-width: 1120px;
+  margin: auto;
+  padding: 0;
+  color: rgb(250, 249, 248);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.bcds-footer
+  > .bcds-footer--acknowledgement
+  > .bcds-footer--acknowledgement-text
+  > p {
+  margin: var(--layout-margin-none);
+}
+
+.bcds-footer > .bcds-footer--container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0 0 0;
+}
+
+footer .bcds-footer--container {
+    max-width: 1120px;
+    margin: auto;
+    font-size: 14px;
+    color: rgb(70, 67, 65);
+    line-height: 21px;
+    padding: 16px;
+    width: 100%;
+}
+@media (min-width: 992px) {
+    footer .bcds-footer--container {
+        padding-top: 56px;
+        padding-bottom: 32px;
+    }
+}
+@media (min-width: 576px) {
+    footer .bcds-footer--container {
+        padding: 32px;
+    }
+}
+
+
+.bcds-footer > .bcds-footer--container > .bcds-footer--container-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  max-width: 1120px;
+  width: 100%;
+  padding: 0;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  column-gap: 48px;
+  row-gap: 24px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* `horizontal` class is the default, when no `children` prop is passed */
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links.horizontal {
+  flex-direction: row;
+}
+
+/* `vertical` class is used when a `children` prop is passed */
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links.vertical {
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: var(--layout-padding-xlarge);
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--logo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 324px;
+  max-width: 576px;
+  flex: 1;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--logo
+  > #bcgov-logo-footer {
+  width: 146px;
+  min-width: 146px;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--logo
+  > p {
+  font-size: 14px;
+  line-height: 21px;
+  color: rgb(70, 67, 65);
+  margin: 0;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--logo
+  > p
+  > a {
+  color: rgb(70, 67, 65);
+  font-size: 14px;
+  line-height: 21px;
+  text-decoration: underline;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--logo
+  > p
+  > a:hover {
+  text-decoration: none;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links {
+  margin: var(--layout-margin-none);
+}
+
+/*
+  When Footer hasn't been passed `children`, expand the links container to take
+  up 320px, as the default links are narrower.
+*/
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links.horizontal
+  > .bcds-footer--links {
+  min-width: 320px;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links
+  > .bcds-footer--links-title {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 21px;
+  color: rgb(70, 67, 65);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links
+  > ul {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+  grid-column-gap: var(--layout-padding-xlarge);
+  grid-row-gap: var(--layout-padding-small);
+  list-style: none;
+  margin: var(--layout-margin-none);
+  padding: var(--layout-padding-none);
+}
+
+/*
+  When a Footer has been passed `children`, the logo-links container fills the
+  full width of the container, so there's room for 4 columns of links.
+*/
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links.vertical
+  > .bcds-footer--links
+  > ul {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links
+  > ul
+  > li {
+  font-size: 14px;
+  line-height: 21px;
+  color: rgb(70, 67, 65);
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links
+  > ul
+  > li
+  > a {
+  color: rgb(70, 67, 65);
+  font-size: 14px;
+  line-height: 21px;
+  text-decoration: none;
+}
+
+.bcds-footer
+  > .bcds-footer--container
+  > .bcds-footer--container-content
+  > .bcds-footer--logo-links
+  > .bcds-footer--links
+  > ul
+  > li
+  > a:hover {
+  text-decoration: underline;
+}
+
+.bcds-footer > .bcds-footer--container > .bcds-footer--container-content > hr {
+  background-color: rgb(209, 209, 209);
+  border: none;
+  height: 1px;
+  margin: 0;
+  width: 100%;
+}
+
+p.bcds-footer--copyright {
+  color: rgb(70, 67, 65);
+  font-size: 14px;
+  line-height: 21px;
+  margin: 0;
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+  /* Links drop beneath logo in the default configuration */
+  .bcds-footer
+    > .bcds-footer--container
+    > .bcds-footer--container-content
+    > .bcds-footer--logo-links {
+    flex-wrap: wrap;
+  }
+
+  .bcds-footer
+    > .bcds-footer--container
+    > .bcds-footer--container-content
+    > .bcds-footer--logo-links
+    > .bcds-footer--logo {
+    max-width: 324px;
+  }
+
+  /*
+    When the `children` prop is used with multiple FooterLinks components,
+    only two columns of links appear on screen at once.
+  */
+  .bcds-footer
+    > .bcds-footer--container
+    > .bcds-footer--container-content
+    > .bcds-footer--logo-links.vertical
+    > .bcds-footer--links
+    > ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 575px) {
+  .bcds-footer > .bcds-footer--acknowledgement {
+    padding: 24px 16px;
+  }
+
+  .bcds-footer > .bcds-footer--container {
+    padding: 0;
+  }
+
+  footer .bcds-footer--container {
+    padding: 16px;
+  }
+
+  .bcds-footer > .bcds-footer--container > .bcds-footer--container-content {
+    gap: 16px;
+  }
+
+  .bcds-footer
+    > .bcds-footer--container
+    > .bcds-footer--container-content
+    > .bcds-footer--logo-links
+    > .bcds-footer--logo {
+    gap: 16px;
+  }
+
+  /*
+    When the `children` prop is used with multiple FooterLinks components,
+    only one column of links appear on screen at once.
+  */
+  .bcds-footer
+    > .bcds-footer--container
+    > .bcds-footer--container-content
+    > .bcds-footer--logo-links.vertical
+    > .bcds-footer--links
+    > ul {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

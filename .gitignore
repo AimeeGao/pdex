@@ -1,0 +1,81 @@
+.idea
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/
+/storage/debugbar/
+/storage/app/private/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/framework/views/
+/vendor
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+.phpactor.json
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+
+# Database files
+*.sqlite
+*.sqlite3
+/database/*.sqlite
+/database/*.sqlite3
+
+# Backup and dump files
+*.sql
+*.dump
+*.backup
+*.bak
+
+
+# Lock files
+composer.lock
+package-lock.json
+
+# Public assets (generated)
+/public/*.csv
+/public/*.xls
+/public/css
+/public/images
+/public/js
+/public/fonts
+
+# Cache directories
+/bootstrap/cache
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+/temp/
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

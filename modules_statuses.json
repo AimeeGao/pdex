@@ -1,0 +1,6 @@
+{
+    "Student": true,
+    "Admin": true,
+    "Institution": true,
+    "Ministry": true
+}

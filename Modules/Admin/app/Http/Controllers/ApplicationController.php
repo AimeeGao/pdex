@@ -1,0 +1,270 @@
+<?php
+
+namespace Modules\Admin\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Application;
+use App\Models\ApplicationDataPermission;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Modules\Admin\Events\ApplicationCreated;
+use Modules\Admin\Events\ApplicationUpdated;
+use Modules\Admin\Events\ApplicationSecurityApprovalChanged;
+use Modules\Admin\Events\ApplicationPrivacyApprovalChanged;
+use Modules\Admin\Events\ApplicationStatusToggled;
+use Modules\Admin\Http\Requests\ApplicationStoreRequest;
+use Modules\Admin\Http\Requests\ApplicationUpdateRequest;
+use Modules\Admin\Http\Requests\ApplicationSecurityApprovalRequest;
+use Modules\Admin\Http\Requests\ApplicationPrivacyApprovalRequest;
+use Modules\Admin\Http\Requests\ApplicationManagerUpdateRequest;
+
+class ApplicationController extends Controller
+{
+    public function __construct()
+    {
+        $this->authorizeResource(Application::class, 'application');
+    }
+
+    public function index()
+    {
+        $applications = Application::with([
+                'securityApprover:id,name,email',
+                'privacyApprover:id,name,email'
+            ])
+            ->withTrashed() // Include soft deleted records
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $userCanCreate = Auth::user()->can('create', Application::class);
+
+        return Inertia::render('Admin::Applications', [
+            'applications' => $applications,
+            'userCanCreate' => $userCanCreate,
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Admin::ApplicationsCreate');
+    }
+
+    public function store(ApplicationStoreRequest $request)
+    {
+        $data = $request->validated();
+
+        // Generate API credentials
+        $data['api_key'] = 'pdex_' . Str::random(32);
+        $data['api_secret'] = Str::random(64);
+        
+        // Set default status if not provided
+        if (!isset($data['status'])) {
+            $data['status'] = 'inactive';
+        }
+        
+        $data['security_approval_status'] = 'pending';
+        $data['privacy_approval_status'] = 'pending';
+
+        $application = Application::create($data);
+
+        // Dispatch event
+        ApplicationCreated::dispatch($application);
+
+        return redirect()->route('admin.applications.index')
+            ->with('success', 'Application created successfully. It requires security and privacy approval before activation.');
+    }
+
+    public function edit(Application $application)
+    {
+        return Inertia::render('Admin::ApplicationsEdit', [
+            'application' => $application->load([
+                'securityApprover:id,name',
+                'privacyApprover:id,name',
+                'dataPermissions'
+            ]),
+            'auth' => [
+                'user' => auth()->user()->load('roles'),
+            ],
+            'availableDataTables' => ApplicationDataPermission::getAvailableTables(),
+        ]);
+    }
+
+    public function update(ApplicationUpdateRequest $request, Application $application)
+    {
+        $originalData = $application->toArray();
+        $data = $request->validated();
+
+        // Extract data permissions from the validated data
+        $dataPermissions = $data['data_permissions'] ?? [];
+        unset($data['data_permissions']);
+
+        $application->update($data);
+
+        // Handle data permissions
+        if (isset($dataPermissions)) {
+            // Delete existing permissions for this application
+            $application->dataPermissions()->delete();
+
+            // Create new permissions
+            foreach ($dataPermissions as $permission) {
+                if ($permission['can_read'] || $permission['can_write']) {
+                    $application->dataPermissions()->create([
+                        'table_name' => $permission['table_name'],
+                        'column_name' => $permission['column_name'],
+                        'display_name' => $permission['display_name'] ?? ApplicationDataPermission::generateDisplayName($permission['column_name']),
+                        'can_read' => $permission['can_read'] ?? false,
+                        'can_write' => $permission['can_write'] ?? false,
+                    ]);
+                }
+            }
+        }
+
+        // Get the changes that were made
+        $changes = array_diff_assoc($data, $originalData);
+
+        // Dispatch event
+        ApplicationUpdated::dispatch($application, $changes);
+
+        return redirect()->route('admin.applications.index')
+            ->with('success', 'Application updated successfully.');
+    }
+
+    public function approverUpdate(ApplicationManagerUpdateRequest $request, Application $application)
+    {
+        $data = $request->validated();
+
+        $application->update($data);
+
+        return back()->with('success', 'Approver changes saved successfully.');
+    }
+
+    public function destroy(Application $application)
+    {
+        $application->delete(); // This will be a soft delete
+        
+        return redirect()->route('admin.applications.index')
+            ->with('success', 'Application deleted successfully. You can restore it if needed.');
+    }
+
+    public function restore($id)
+    {
+        $application = Application::withTrashed()->findOrFail($id);
+        $this->authorize('update', $application);
+        
+        $application->restore();
+        
+        return redirect()->route('admin.applications.index')
+            ->with('success', 'Application restored successfully.');
+    }
+
+    public function forceDelete($id)
+    {
+        $application = Application::withTrashed()->findOrFail($id);
+        $this->authorize('delete', $application);
+        
+        $application->forceDelete(); // Permanent delete
+        
+        return redirect()->route('admin.applications.index')
+            ->with('success', 'Application permanently deleted.');
+    }
+
+    /**
+     * Handle security approval for an application.
+     */
+    public function securityApproval(ApplicationSecurityApprovalRequest $request, Application $application)
+    {
+        $previousStatus = $application->security_approval_status;
+        $data = $request->validated();
+
+        $data['security_approved_at'] = now();
+        $data['security_approved_by'] = auth()->id();
+
+        $application->update($data);
+
+        // Dispatch event
+        ApplicationSecurityApprovalChanged::dispatch(
+            $application,
+            auth()->user(),
+            $previousStatus,
+            $data['security_approval_status']
+        );
+
+        return redirect()->route('admin.applications.edit', $application)
+            ->with('success', 'Security approval updated successfully.');
+    }
+
+    /**
+     * Handle privacy approval for an application.
+     */
+    public function privacyApproval(ApplicationPrivacyApprovalRequest $request, Application $application)
+    {
+        $previousStatus = $application->privacy_approval_status;
+        $data = $request->validated();
+
+        $data['privacy_approved_at'] = now();
+        $data['privacy_approved_by'] = auth()->id();
+
+        $application->update($data);
+
+        // Dispatch event
+        ApplicationPrivacyApprovalChanged::dispatch(
+            $application,
+            auth()->user(),
+            $previousStatus,
+            $data['privacy_approval_status']
+        );
+
+        return redirect()->route('admin.applications.edit', $application)
+            ->with('success', 'Privacy approval updated successfully.');
+    }
+
+    /**
+     * Handle manager update for an application.
+     */
+    public function managerUpdate(Request $request, Application $application)
+    {
+        $this->authorize('update', $application);
+
+        $data = $request->validate([
+            'active_alert_message' => 'nullable|string|max:1000',
+            'offline_alert_message' => 'nullable|string|max:1000',
+            'offline_start_time' => 'nullable|date',
+            'offline_end_time' => 'nullable|date|after:offline_start_time',
+        ]);
+
+        $application->update($data);
+
+        return redirect()->route('admin.applications.edit', $application)
+            ->with('success', 'Application settings updated successfully.');
+    }
+
+    public function toggleStatus(Request $request, Application $application)
+    {
+        $this->authorize('toggleStatus', $application);
+
+        $previousStatus = $application->status;
+
+        // Cycle through statuses: inactive -> active -> offline -> inactive
+        $statusCycle = [
+            'inactive' => 'active',
+            'active' => 'offline', 
+            'offline' => 'inactive'
+        ];
+        
+        $newStatus = $statusCycle[$application->status] ?? 'active';
+
+        // Check if trying to activate without approvals
+        if ($newStatus === 'active' && !$application->isFinallyApproved()) {
+            return back()->withErrors(['status' => 'Application must have both security and privacy approvals before it can be activated.']);
+        }
+
+        $application->update(['status' => $newStatus]);
+
+        // Dispatch event
+        ApplicationStatusToggled::dispatch($application, $previousStatus, $newStatus);
+
+        return redirect()->route('admin.applications.index')
+            ->with('success', "Application status changed to {$newStatus}.");
+    }
+}

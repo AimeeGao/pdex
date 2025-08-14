@@ -1,0 +1,53 @@
+/* TextField styles based on BC Gov design system */
+.text-field-container {
+  font-family: "Noto Sans", Verdana, Arial, sans-serif;
+  font-size: 18px;
+}
+
+.text_label {
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.text_label label {
+  font-weight: bold;
+  color: #313132;
+}
+
+.text_input {
+  font-family: "Noto Sans", Verdana, Arial, sans-serif;
+  font-size: 18px;
+  height: 34px;
+  border: 2px solid #606060;
+  border-radius: 4px;
+  padding: 5px 5px 5px 7px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.text_input:focus {
+  outline: 4px solid #3B99FC;
+  outline-offset: 1px;
+}
+
+.text_input:disabled {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.text_input.error {
+  border-color: #d8292f;
+}
+
+.error-message {
+  color: #d8292f;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.helper-text {
+  color: #666;
+  font-size: 14px;
+  margin-top: 4px;
+}

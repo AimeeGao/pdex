@@ -1,0 +1,64 @@
+/* AccordionGroup styles based on BC Gov design system */
+.accordion-group {
+  font-family: "Noto Sans", Verdana, Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #ddd;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-header {
+  width: 100%;
+  padding: 16px 20px;
+  background: #f8f8f8;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #313132;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-header:hover {
+  background-color: #efefef;
+}
+
+.accordion-header:focus {
+  outline: 4px solid #3B99FC;
+  outline-offset: -2px;
+}
+
+.accordion-header[aria-expanded="true"] {
+  background-color: #e8f4f8;
+}
+
+.accordion-icon {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.accordion-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  overflow: hidden;
+}
+
+.accordion-content-inner {
+  padding: 20px;
+  background-color: #fff;
+  color: #313132;
+  line-height: 1.6;
+}
