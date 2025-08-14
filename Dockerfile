@@ -99,7 +99,7 @@ RUN apt-get -yq update --fix-missing \
 #fix Action '-D FOREGROUND' failed.
     && a2enmod lbmethod_byrequests \
     && mkdir -p /var/log/php  \
-    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=Off\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /usr/local/etc/php/conf.d/security.ini \
+    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=On\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /usr/local/etc/php/conf.d/security.ini \
     && mkdir -p /etc/apache2/sites-enabled \
     # Install Composer - simplified method without checksum verification
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
