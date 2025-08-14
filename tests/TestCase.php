@@ -4,13 +4,14 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
 abstract class TestCase extends BaseTestCase
 {
-    use DatabaseMigrations;
+    use DatabaseMigrations, WithFaker;
 
     protected function setUp(): void
     {
@@ -19,8 +20,8 @@ abstract class TestCase extends BaseTestCase
         // Set queue driver to sync for tests to avoid async job issues
         config(['queue.default' => 'sync']);
         
-        // Disable job dispatching to prevent transaction conflicts
-        $this->withoutJobs();
+        // Fake queue to prevent jobs from being dispatched and causing transaction conflicts
+        Queue::fake();
         
         // Ensure we're in testing environment
         $this->assertSame('testing', app()->environment(), 'Tests must run in testing environment');
