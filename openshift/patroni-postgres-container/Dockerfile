@@ -28,8 +28,13 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y curl jq locales git build-essential libpq-dev python3 python3-dev python3-pip python3-wheel python3-setuptools python3-psycopg2 python3-venv \
     && echo 'Make sure we have a en_US.UTF-8 locale available' \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-    && pip3 --isolated --no-cache-dir install psycopg2-binary six psutil pyyaml \
-    && pip3 --isolated --no-cache-dir install "patroni[kubernetes]==${PATRONI_VERSION}" \
+    # Create virtual environment and install Python packages
+    && python3 -m venv /opt/patroni-venv \
+    && /opt/patroni-venv/bin/pip install --no-cache-dir psycopg2-binary six psutil pyyaml \
+    && /opt/patroni-venv/bin/pip install --no-cache-dir "patroni[kubernetes]==${PATRONI_VERSION}" \
+    # Create symlinks so patroni is available globally
+    && ln -s /opt/patroni-venv/bin/patroni /usr/local/bin/patroni \
+    && ln -s /opt/patroni-venv/bin/patronictl /usr/local/bin/patronictl \
     && PGHOME=/home/postgres \
     && mkdir -p $PGHOME \
     && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
