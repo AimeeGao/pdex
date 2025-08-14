@@ -99,10 +99,11 @@ RUN apt-get -yq update --fix-missing \
 #fix Action '-D FOREGROUND' failed.
     && a2enmod lbmethod_byrequests \
     && mkdir -p /var/log/php  \
-    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=On\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /usr/local/etc/php/conf.d/security.ini \
-    && mkdir -p /etc/apache2/sites-enabled \
-    # Install Composer - simplified method without checksum verification
+    # Install Composer first with allow_url_fopen enabled temporarily
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    # Now set secure PHP configuration with allow_url_fopen disabled
+    && printf 'error_log=/var/log/php/error.log\nlog_errors=1\nerror_reporting=E_ERROR\nmemory_limit=450M\nexpose_php=Off\nallow_url_fopen=Off\nallow_url_include=Off\ndisplay_errors=Off\ndisplay_startup_errors=Off\nmax_execution_time=30\nmax_input_time=60\npost_max_size=50M\nupload_max_filesize=50M\nsession.cookie_httponly=1\nsession.cookie_secure=1\nsession.use_strict_mode=1\n' > /usr/local/etc/php/conf.d/security.ini \
+    && mkdir -p /etc/apache2/sites-enabled \
     && sed -i -e 's/80/8080/g' -e 's/443/8443/g' -e 's/25/2525/g' /etc/apache2/ports.conf \
     # Apache- Prepare to be run as non root user
     && mkdir -p /var/lock/apache2 /var/run/apache2 \
