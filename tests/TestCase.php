@@ -40,7 +40,8 @@ abstract class TestCase extends BaseTestCase
         }
         
         // Run migrations fresh for each test to avoid transaction issues
-        $this->artisan('migrate:fresh', ['--force' => true]);
+        // Use simple migrate to avoid VACUUM and transaction conflicts
+        $this->artisan('migrate');
     }
 
     protected function tearDown(): void

@@ -138,6 +138,14 @@ class Application extends Model
     }
 
     /**
+     * Check if the application is accessible (both approvals are required).
+     */
+    public function isAccessible(): bool
+    {
+        return $this->isFinallyApproved() && $this->status === 'active';
+    }
+
+    /**
      * Get the OAuth client for this application
      */
     public function oauthClient()

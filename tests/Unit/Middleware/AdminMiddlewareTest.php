@@ -32,7 +32,7 @@ class AdminMiddlewareTest extends TestCase
         });
 
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertStringContains('/admin/login', $response->headers->get('Location'));
+        $this->assertStringContainsString('/admin/login', $response->headers->get('Location'));
     }
 
     #[Test]

@@ -77,10 +77,10 @@ class UserRoleTest extends TestCase
         $ministryUser = User::factory()->ministryUser()->create();
 
         $this->assertTrue($ministryUser->hasRole(Role::MINISTRY_USER));
-        $this->assertStringContains('@IDIR', $ministryUser->idir_username);
+        $this->assertStringContainsString('@IDIR', $ministryUser->idir_username);
         $this->assertNotNull($ministryUser->idir_user_guid);
         $this->assertEquals('idir', $ministryUser->identity_provider);
-        $this->assertStringContains('gov.bc.ca', $ministryUser->email);
+        $this->assertStringContainsString('gov.bc.ca', $ministryUser->email);
     }
 
     #[Test]
@@ -89,7 +89,7 @@ class UserRoleTest extends TestCase
         $adminManager = User::factory()->adminManager()->create();
 
         $this->assertTrue($adminManager->hasRole(Role::ADMIN_MANAGER));
-        $this->assertStringContains('@IDIR', $adminManager->idir_username);
+        $this->assertStringContainsString('@IDIR', $adminManager->idir_username);
         $this->assertEquals('idir', $adminManager->identity_provider);
     }
 
