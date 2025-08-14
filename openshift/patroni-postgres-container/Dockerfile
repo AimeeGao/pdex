@@ -8,8 +8,21 @@ ENV PATRONI_HOME=/opt/patroni
 
 ARG PGHOME=/home/postgres
 
+FROM postgres:16-bookworm
+
+LABEL Kal Marsh <kal.marsh@gov.bc.ca>
+
+ENV PATRONI_VERSION=3.3.0
+ENV LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV PATRONI_HOME=/opt/patroni
+
+ARG PGHOME=/home/postgres
+
 RUN export DEBIAN_FRONTEND=noninteractive \
     && set -x \
+    # Fix any legacy repository references
+    && sed -i 's/deb.debian.org\/debian buster/archive.debian.org\/debian buster/g' /etc/apt/sources.list || true \
+    && sed -i 's/security.debian.org\/debian-security buster/archive.debian.org\/debian-security buster/g' /etc/apt/sources.list || true \
     && echo 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' > /etc/apt/apt.conf.d/01norecommend \
     && apt-get update -y \
     && apt-get install -y curl jq locales git build-essential libpq-dev python3 python3-dev python3-pip python3-wheel python3-setuptools python3-psycopg2 python3-venv \
