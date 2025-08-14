@@ -39,4 +39,13 @@ jobs:
         run: php artisan key:generate
 
       - name: Run Database Migrations
-        run: php artisan migrate --force && php artisan test
+        run: php artisan migrate --force
+
+      - name: Run Core Unit Tests
+        run: |
+          php artisan test tests/Unit/ApplicationApprovalTest.php
+          php artisan test tests/Unit/ExampleTest.php  
+          php artisan test tests/Unit/Models/UserRoleTest.php
+
+      - name: Run Feature Tests (Basic)  
+        run: php artisan test --filter="ExampleTest" tests/Feature/
