@@ -3,17 +3,21 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 
 abstract class TestCase extends BaseTestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Fake the queue to prevent job-related transaction conflicts
+        Queue::fake();
         
         // Ensure we're in testing environment
         $this->assertSame('testing', app()->environment(), 'Tests must run in testing environment');
