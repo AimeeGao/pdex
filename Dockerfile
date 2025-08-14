@@ -143,6 +143,10 @@ RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage boot
 # Switch to non-root user for OpenShift compatibility
 USER 1001
 
+# Ensure cache directories are writable by non-root user before composer install
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && chmod -R 775 bootstrap/cache storage/
+
 #composer install
 RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
 
