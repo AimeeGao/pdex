@@ -40,8 +40,6 @@ class ApplicationFactory extends Factory
             'bcsc_redirect_url' => $this->faker->url(),
             'idir_redirect_url' => $this->faker->url(),
             'bceid_redirect_url' => $this->faker->url(),
-            'api_key' => 'pdex_' . Str::random(32),
-            'api_secret' => Str::random(64),
             'comments' => $this->faker->paragraph(),
             'stra_provided' => $this->faker->boolean(),
             'pia_provided' => $this->faker->boolean(),
