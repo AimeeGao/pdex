@@ -177,7 +177,7 @@ class ProfileFormUiUxTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_conditional_field_validation_disability_status()
     {
         $this->actingAs($this->user);
@@ -208,7 +208,7 @@ class ProfileFormUiUxTest extends TestCase
         $response->assertSessionHasErrors(['accommodation_needs']);
     }
 
-    /** @test */
+    #[Test]
     public function form_properly_structures_nested_data_for_related_models()
     {
         $this->actingAs($this->user);
@@ -241,7 +241,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->assertEquals($validData['identity']['citizenship_status'], $identity->citizenship_status);
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_boolean_field_conversion_correctly()
     {
         $this->actingAs($this->user);
@@ -262,7 +262,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->assertFalse($individual->identities->first()->indigenous_status);
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_numeric_field_validation_correctly()
     {
         $this->actingAs($this->user);
@@ -284,7 +284,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->assertEquals(25, $identity->years_in_country);
     }
 
-    /** @test */
+    #[Test]
     public function form_prevents_duplicate_submissions_with_same_email()
     {
         // Create an existing individual
@@ -302,7 +302,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->assertEquals(1, Individual::where('email_address', 'duplicate@example.com')->count());
     }
 
-    /** @test */
+    #[Test]
     public function form_properly_handles_optional_fields_as_null()
     {
         $this->actingAs($this->user);

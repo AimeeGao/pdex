@@ -142,7 +142,7 @@ class InstitutionAuthenticationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_can_toggle_user_roles()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -159,7 +159,7 @@ class InstitutionAuthenticationTest extends TestCase
         $this->assertTrue($user->hasRole(Role::INSTITUTION_ADMIN));
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_can_toggle_user_status()
     {
         $institution = Institution::factory()->bcit()->create();

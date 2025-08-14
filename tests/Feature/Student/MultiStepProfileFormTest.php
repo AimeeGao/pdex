@@ -143,7 +143,7 @@ class MultiStepProfileFormTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_with_invalid_sin_format()
     {
         $this->actingAs($this->user);
@@ -156,7 +156,7 @@ class MultiStepProfileFormTest extends TestCase
         $response->assertSessionHasErrors(['social_insurance_number']);
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_with_duplicate_email()
     {
         Individual::factory()->create(['email_address' => 'test@example.com']);
@@ -171,7 +171,7 @@ class MultiStepProfileFormTest extends TestCase
         $response->assertSessionHasErrors(['email_address']);
     }
 
-    /** @test */
+    #[Test]
     public function validation_requires_accommodation_needs_when_disability_status_is_true()
     {
         $this->actingAs($this->user);
@@ -185,7 +185,7 @@ class MultiStepProfileFormTest extends TestCase
         $response->assertSessionHasErrors(['accommodation_needs']);
     }
 
-    /** @test */
+    #[Test]
     public function can_access_edit_form_with_existing_profile()
     {
         $individual = Individual::factory()->create(['user_guid' => $this->user->guid]);
@@ -206,7 +206,7 @@ class MultiStepProfileFormTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function can_update_existing_profile()
     {
         $individual = Individual::factory()->create(['user_guid' => $this->user->guid]);
@@ -230,7 +230,7 @@ class MultiStepProfileFormTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function employment_fields_are_conditionally_validated_based_on_status()
     {
         $this->actingAs($this->user);
@@ -247,7 +247,7 @@ class MultiStepProfileFormTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function indigenous_fields_are_conditionally_validated()
     {
         $this->actingAs($this->user);
@@ -270,7 +270,7 @@ class MultiStepProfileFormTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_optional_fields_correctly()
     {
         $this->actingAs($this->user);
@@ -309,7 +309,7 @@ class MultiStepProfileFormTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function form_validates_date_fields_correctly()
     {
         $this->actingAs($this->user);
@@ -322,7 +322,7 @@ class MultiStepProfileFormTest extends TestCase
         $response->assertSessionHasErrors(['date_of_birth']);
     }
 
-    /** @test */
+    #[Test]
     public function form_validates_numeric_fields_correctly()
     {
         $this->actingAs($this->user);

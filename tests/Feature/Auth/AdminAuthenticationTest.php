@@ -139,7 +139,7 @@ class AdminAuthenticationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_access_all_admin_features()
     {
         $superAdmin = User::factory()->superAdmin()->create();
@@ -149,7 +149,7 @@ class AdminAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_has_correct_role()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -159,7 +159,7 @@ class AdminAuthenticationTest extends TestCase
         $this->assertFalse($adminManager->hasRole(Role::INSTITUTION_USER));
     }
 
-    /** @test */
+    #[Test]
     public function admin_middleware_blocks_non_admin_users()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -177,7 +177,7 @@ class AdminAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function admin_login_page_loads_correctly()
     {
         $response = $this->get('/admin/login');
@@ -186,7 +186,7 @@ class AdminAuthenticationTest extends TestCase
         $response->assertSee('Admin Login');
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_admin_access_redirects_to_admin_login()
     {
         $response = $this->get('/admin/dashboard');
@@ -195,7 +195,7 @@ class AdminAuthenticationTest extends TestCase
         $response->assertSessionHas('admin_intended_url');
     }
 
-    /** @test */
+    #[Test]
     public function inactive_admin_gets_logged_out()
     {
         $inactiveAdmin = User::factory()->adminManager()->inactive()->create();

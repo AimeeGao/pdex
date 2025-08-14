@@ -118,7 +118,7 @@ class UserRoleTest extends TestCase
         $this->assertFalse($user->hasAnyRole([Role::MINISTRY_USER, Role::ADMIN_MANAGER]));
     }
 
-    /** @test */
+    #[Test]
     public function inactive_user_factory_creates_inactive_user()
     {
         $inactiveUser = User::factory()->inactive()->create();
@@ -126,7 +126,7 @@ class UserRoleTest extends TestCase
         $this->assertFalse($inactiveUser->is_active);
     }
 
-    /** @test */
+    #[Test]
     public function role_constants_are_defined_correctly()
     {
         $this->assertEquals('Student', Role::STUDENT);
@@ -138,7 +138,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('Admin Manager', Role::ADMIN_MANAGER);
     }
 
-    /** @test */
+    #[Test]
     public function role_can_manage_institutions_method_works()
     {
         $this->assertTrue(Role::canManageInstitutions(Role::SUPER_ADMIN));
@@ -148,7 +148,7 @@ class UserRoleTest extends TestCase
         $this->assertFalse(Role::canManageInstitutions(Role::STUDENT));
     }
 
-    /** @test */
+    #[Test]
     public function get_admin_roles_returns_correct_roles()
     {
         $adminRoles = Role::getAdminRoles();

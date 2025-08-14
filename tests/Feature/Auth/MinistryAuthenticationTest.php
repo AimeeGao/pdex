@@ -147,7 +147,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertSee('Ministry');
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_has_read_only_permissions()
     {
         $ministryUser = User::factory()->ministryUser()->create();

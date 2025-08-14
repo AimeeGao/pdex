@@ -4,11 +4,9 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Models\Application;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ApplicationApprovalTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function testIsFinallyApprovedReturnsTrueWhenBothApproved()
     {
