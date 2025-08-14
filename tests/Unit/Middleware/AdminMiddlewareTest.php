@@ -5,7 +5,6 @@ namespace Tests\Unit\Middleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,7 +12,6 @@ use Tests\TestCase;
 
 class AdminMiddlewareTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected AdminMiddleware $middleware;
 

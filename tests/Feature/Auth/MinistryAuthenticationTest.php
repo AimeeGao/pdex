@@ -4,13 +4,11 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MinistryAuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected function setUp(): void
     {
