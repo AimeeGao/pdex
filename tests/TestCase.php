@@ -4,12 +4,45 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Artisan;
 
 abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Indicates whether the default seeder should run before each test.
+     *
+     * @var bool
+     */
+    protected $seed = false;
+
+    /**
+     * Run a specific seeder before each test.
+     *
+     * @var string
+     */
+    protected $seeder;
+
+    /**
+     * Define hooks to migrate the database before and after each test.
+     *
+     * @return void
+     */
+    public function refreshDatabase(): void
+    {
+        $this->artisan('migrate:fresh', [
+            '--drop-views' => true,
+            '--drop-types' => true,
+            '--seed' => $this->seed,
+            '--seeder' => $this->seeder,
+        ]);
+
+        $this->app[Kernel::class]->setArtisan(null);
+    }
 
     protected function setUp(): void
     {
