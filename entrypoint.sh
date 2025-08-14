@@ -24,8 +24,6 @@ echo "ENV_ARG: ${ENV_ARG}"
 echo "Install composer"
 composer dump-autoload
 
-chmod 755 /var/www/html/probe-check.sh
-
 echo "Permissions setup for NPM:"
 chmod -R u+w node_modules
 
