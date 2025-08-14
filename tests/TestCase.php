@@ -3,15 +3,15 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Artisan;
 
 abstract class TestCase extends BaseTestCase
 {
-    use DatabaseMigrations, WithFaker;
+    use WithFaker;
 
     protected function setUp(): void
     {
@@ -38,15 +38,14 @@ abstract class TestCase extends BaseTestCase
         if (app()->environment('production')) {
             throw new \Exception('Tests should never run in production environment');
         }
+        
+        // Run migrations fresh for each test to avoid transaction issues
+        $this->artisan('migrate:fresh', ['--force' => true]);
     }
 
     protected function tearDown(): void
     {
-        // Ensure database is properly cleaned up after each test
-        if (app()->bound('db')) {
-            DB::disconnect();
-        }
-        
+        // No need for explicit cleanup with migrate:fresh approach
         parent::tearDown();
     }
 }
