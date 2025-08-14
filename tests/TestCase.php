@@ -3,46 +3,14 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Console\Kernel;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Queue;
 
 abstract class TestCase extends BaseTestCase
 {
-    use RefreshDatabase;
-
-    /**
-     * Indicates whether the default seeder should run before each test.
-     *
-     * @var bool
-     */
-    protected $seed = false;
-
-    /**
-     * Run a specific seeder before each test.
-     *
-     * @var string
-     */
-    protected $seeder;
-
-    /**
-     * Define hooks to migrate the database before and after each test.
-     *
-     * @return void
-     */
-    public function refreshDatabase(): void
-    {
-        $this->artisan('migrate:fresh', [
-            '--drop-views' => true,
-            '--drop-types' => true,
-            '--seed' => $this->seed,
-            '--seeder' => $this->seeder,
-        ]);
-
-        $this->app[Kernel::class]->setArtisan(null);
-    }
+    use DatabaseMigrations;
 
     protected function setUp(): void
     {
@@ -50,6 +18,9 @@ abstract class TestCase extends BaseTestCase
         
         // Set queue driver to sync for tests to avoid async job issues
         config(['queue.default' => 'sync']);
+        
+        // Disable job dispatching to prevent transaction conflicts
+        $this->withoutJobs();
         
         // Ensure we're in testing environment
         $this->assertSame('testing', app()->environment(), 'Tests must run in testing environment');
