@@ -8,6 +8,7 @@ use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AdminMiddlewareTest extends TestCase
@@ -23,7 +24,7 @@ class AdminMiddlewareTest extends TestCase
         $this->middleware = new AdminMiddleware();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_user_is_redirected_to_admin_login()
     {
         $request = Request::create('/admin/dashboard', 'GET');
@@ -36,7 +37,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertStringContains('/admin/login', $response->headers->get('Location'));
     }
 
-    /** @test */
+    #[Test]
     public function admin_intended_url_is_stored_for_unauthenticated_access()
     {
         $request = Request::create('/admin/dashboard', 'GET');
@@ -48,7 +49,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertEquals('/admin/dashboard', session('admin_intended_url'));
     }
 
-    /** @test */
+    #[Test]
     public function inactive_user_is_logged_out_and_redirected()
     {
         $inactiveUser = User::factory()->adminManager()->inactive()->create();
@@ -64,7 +65,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertFalse(Auth::check());
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_pass_through_middleware()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -79,7 +80,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertEquals('Success', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_pass_through_middleware()
     {
         $superAdmin = User::factory()->superAdmin()->create();
@@ -94,7 +95,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertEquals('Success', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_is_blocked_and_logged_out()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -110,7 +111,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertFalse(Auth::check());
     }
 
-    /** @test */
+    #[Test]
     public function institution_user_is_blocked_and_logged_out()
     {
         $institutionUser = User::factory()->institutionUser()->create();
@@ -126,7 +127,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertFalse(Auth::check());
     }
 
-    /** @test */
+    #[Test]
     public function student_is_blocked_and_logged_out()
     {
         $student = User::factory()->student()->create();
@@ -142,7 +143,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertFalse(Auth::check());
     }
 
-    /** @test */
+    #[Test]
     public function all_admin_roles_can_access_admin_routes()
     {
         $adminRoles = [
@@ -173,7 +174,7 @@ class AdminMiddlewareTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function user_with_multiple_roles_including_admin_can_access()
     {
         $user = User::factory()->create();

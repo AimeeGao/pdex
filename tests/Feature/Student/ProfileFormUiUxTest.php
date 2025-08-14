@@ -9,6 +9,7 @@ use App\Models\IndividualAddress;
 use App\Models\IndividualEmployment;
 use App\Models\IndividualIdentity;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -35,7 +36,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->user->roles()->attach($studentRole);
     }
 
-    /** @test */
+    #[Test]
     public function create_form_displays_correct_progress_structure()
     {
         $this->actingAs($this->user);
@@ -54,7 +55,7 @@ class ProfileFormUiUxTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function edit_form_pre_populates_existing_data_correctly()
     {
         $individual = Individual::factory()->create([
@@ -96,7 +97,7 @@ class ProfileFormUiUxTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function form_validation_messages_are_properly_formatted()
     {
         $this->actingAs($this->user);
@@ -116,7 +117,7 @@ class ProfileFormUiUxTest extends TestCase
         $this->assertTrue($errors->has('email_address'));
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_conditional_field_validation_employment_status()
     {
         $this->actingAs($this->user);
@@ -144,7 +145,7 @@ class ProfileFormUiUxTest extends TestCase
         $response->assertRedirect(route('student.dashboard'));
     }
 
-    /** @test */
+    #[Test]
     public function form_handles_conditional_field_validation_indigenous_status()
     {
         $this->actingAs($this->user);

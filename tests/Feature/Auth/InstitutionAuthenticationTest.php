@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Institution;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class InstitutionAuthenticationTest extends TestCase
@@ -18,7 +19,7 @@ class InstitutionAuthenticationTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function institution_user_can_access_institution_dashboard()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -29,7 +30,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function institution_user_cannot_access_admin_routes()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -40,7 +41,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function institution_user_cannot_access_ministry_routes()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -51,7 +52,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function institution_user_cannot_access_institution_settings()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -63,7 +64,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_can_access_institution_dashboard()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -74,7 +75,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_can_access_institution_settings()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -85,7 +86,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_cannot_access_admin_routes()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -96,7 +97,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_cannot_access_ministry_routes()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -107,7 +108,7 @@ class InstitutionAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function institution_users_have_correct_roles()
     {
         $institution = Institution::factory()->bcit()->create();
@@ -121,7 +122,7 @@ class InstitutionAuthenticationTest extends TestCase
         $this->assertFalse($admin->hasRole(Role::ADMIN_MANAGER));
     }
 
-    /** @test */
+    #[Test]
     public function institution_admin_can_manage_institution_users()
     {
         $institution = Institution::factory()->bcit()->create();

@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserRoleTest extends TestCase
@@ -17,7 +18,7 @@ class UserRoleTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_have_roles_assigned()
     {
         $user = User::factory()->create();
@@ -28,7 +29,7 @@ class UserRoleTest extends TestCase
         $this->assertTrue($user->hasRole(Role::STUDENT));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_have_multiple_roles()
     {
         $user = User::factory()->create();
@@ -41,7 +42,7 @@ class UserRoleTest extends TestCase
         $this->assertTrue($user->hasRole(Role::MINISTRY_USER));
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_student_creates_user_with_student_role()
     {
         $student = User::factory()->student()->create();
@@ -52,7 +53,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('bcsc', $student->identity_provider);
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_institution_user_creates_user_with_institution_role()
     {
         $institutionUser = User::factory()->institutionUser('TEST-GUID-123')->create();
@@ -63,7 +64,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('bceid_business', $institutionUser->identity_provider);
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_institution_admin_creates_user_with_admin_role()
     {
         $institutionAdmin = User::factory()->institutionAdmin('TEST-GUID-123')->create();
@@ -72,7 +73,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('TEST-GUID-123', $institutionAdmin->bceid_business_guid);
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_ministry_user_creates_user_with_ministry_role()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -84,7 +85,7 @@ class UserRoleTest extends TestCase
         $this->assertStringContains('gov.bc.ca', $ministryUser->email);
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_admin_manager_creates_user_with_admin_manager_role()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -94,7 +95,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('idir', $adminManager->identity_provider);
     }
 
-    /** @test */
+    #[Test]
     public function user_factory_super_admin_creates_user_with_super_admin_role()
     {
         $superAdmin = User::factory()->superAdmin()->create();
@@ -103,7 +104,7 @@ class UserRoleTest extends TestCase
         $this->assertEquals('idir', $superAdmin->identity_provider);
     }
 
-    /** @test */
+    #[Test]
     public function user_has_any_role_method_works_correctly()
     {
         $user = User::factory()->create();

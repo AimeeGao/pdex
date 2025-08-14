@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Institution;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AdminAuthenticationTest extends TestCase
@@ -18,7 +19,7 @@ class AdminAuthenticationTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_access_admin_dashboard()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -28,7 +29,7 @@ class AdminAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_access_admin_institutions()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -42,7 +43,7 @@ class AdminAuthenticationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_view_institution_details()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -58,7 +59,7 @@ class AdminAuthenticationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_manage_institution_users()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -77,7 +78,7 @@ class AdminAuthenticationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_toggle_institution_user_roles()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -94,7 +95,7 @@ class AdminAuthenticationTest extends TestCase
         $this->assertTrue($user->hasRole(Role::INSTITUTION_ADMIN));
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_toggle_institution_user_status()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -111,7 +112,7 @@ class AdminAuthenticationTest extends TestCase
         $this->assertFalse($user->is_active);
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_accessing_regular_login_gets_redirected_appropriately()
     {
         $adminManager = User::factory()->adminManager()->create();
@@ -124,7 +125,7 @@ class AdminAuthenticationTest extends TestCase
         // Verify admin options are available
     }
 
-    /** @test */
+    #[Test]
     public function admin_manager_can_access_ministry_portal_if_dual_access_enabled()
     {
         $adminManager = User::factory()->adminManager()->create();

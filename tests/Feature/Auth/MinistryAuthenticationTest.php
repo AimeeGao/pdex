@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MinistryAuthenticationTest extends TestCase
@@ -17,7 +18,7 @@ class MinistryAuthenticationTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_can_access_ministry_dashboard()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -27,7 +28,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_cannot_access_admin_routes()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -40,7 +41,7 @@ class MinistryAuthenticationTest extends TestCase
         $this->followRedirects($response)->assertSee('sign in');
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_cannot_access_admin_dashboard()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -50,7 +51,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_cannot_access_admin_institutions()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -60,7 +61,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_cannot_access_institution_routes()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -70,7 +71,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_has_correct_role()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -81,7 +82,7 @@ class MinistryAuthenticationTest extends TestCase
         $this->assertFalse($ministryUser->hasRole(Role::INSTITUTION_USER));
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_gets_logged_out_when_accessing_admin()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -99,7 +100,7 @@ class MinistryAuthenticationTest extends TestCase
         $this->followRedirects($response)->assertSee('Please sign in');
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_sees_appropriate_error_message_for_admin_access()
     {
         $ministryUser = User::factory()->ministryUser()->create();
@@ -110,7 +111,7 @@ class MinistryAuthenticationTest extends TestCase
         $response->assertSessionHas('message', 'Please sign in to access the administrative area.');
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_first_login_gets_ministry_user_role()
     {
         // Simulate first-time login by creating user without roles
@@ -129,7 +130,7 @@ class MinistryAuthenticationTest extends TestCase
         $this->assertFalse($newUser->hasRole(Role::ADMIN_MANAGER));
     }
 
-    /** @test */
+    #[Test]
     public function ministry_user_navigation_shows_ministry_options_only()
     {
         $ministryUser = User::factory()->ministryUser()->create();

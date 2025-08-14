@@ -9,6 +9,7 @@ use App\Models\IndividualAddress;
 use App\Models\IndividualEmployment;
 use App\Models\IndividualIdentity;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -35,14 +36,14 @@ class MultiStepProfileFormTest extends TestCase
         $this->user->roles()->attach($studentRole);
     }
 
-    /** @test */
+    #[Test]
     public function guests_cannot_access_create_profile_form()
     {
         $response = $this->get(route('student.profile.create'));
         $response->assertRedirect('/login');
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_users_can_access_create_profile_form()
     {
         $this->actingAs($this->user);
@@ -61,7 +62,7 @@ class MultiStepProfileFormTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function create_form_returns_correct_fillable_fields_structure()
     {
         $this->actingAs($this->user);
@@ -85,7 +86,7 @@ class MultiStepProfileFormTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function can_successfully_create_complete_profile_with_all_steps()
     {
         $this->actingAs($this->user);
@@ -126,7 +127,7 @@ class MultiStepProfileFormTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_with_missing_required_general_fields()
     {
         $this->actingAs($this->user);

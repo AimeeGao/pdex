@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Institution;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StudentAuthenticationTest extends TestCase
@@ -18,7 +19,7 @@ class StudentAuthenticationTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function student_can_access_their_dashboard()
     {
         $student = User::factory()->student()->create();
@@ -29,7 +30,7 @@ class StudentAuthenticationTest extends TestCase
         // Verify student-specific content or redirects
     }
 
-    /** @test */
+    #[Test]
     public function student_cannot_access_admin_routes()
     {
         $student = User::factory()->student()->create();
@@ -40,7 +41,7 @@ class StudentAuthenticationTest extends TestCase
         // Should redirect to login or show unauthorized
     }
 
-    /** @test */
+    #[Test]
     public function student_cannot_access_institution_routes()
     {
         $student = User::factory()->student()->create();
@@ -51,7 +52,7 @@ class StudentAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function student_cannot_access_ministry_routes()
     {
         $student = User::factory()->student()->create();
@@ -62,7 +63,7 @@ class StudentAuthenticationTest extends TestCase
         $response->assertRedirect();
     }
 
-    /** @test */
+    #[Test]
     public function student_has_correct_role_assigned()
     {
         $student = User::factory()->student()->create();
@@ -73,7 +74,7 @@ class StudentAuthenticationTest extends TestCase
         $this->assertFalse($student->hasRole(Role::ADMIN_MANAGER));
     }
 
-    /** @test */
+    #[Test]
     public function inactive_student_cannot_login()
     {
         $student = User::factory()->student()->inactive()->create();
