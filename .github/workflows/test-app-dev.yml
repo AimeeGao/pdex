@@ -24,7 +24,6 @@ jobs:
 
       - name: Ensure Cache Directory Exists
         run: |
-          mkdir -p /bootstrap/cache
           chmod -R 777 /bootstrap/cache
 
       - name: Use Testing Environment File
