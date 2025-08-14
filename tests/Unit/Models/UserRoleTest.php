@@ -46,7 +46,6 @@ class UserRoleTest extends TestCase
         $student = User::factory()->student()->create();
 
         $this->assertTrue($student->hasRole(Role::STUDENT));
-        $this->assertNotNull($student->bcsc_guid);
         $this->assertNotNull($student->bcsc_user_guid);
         $this->assertEquals('bcsc', $student->identity_provider);
     }

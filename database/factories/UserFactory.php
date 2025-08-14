@@ -49,6 +49,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the model's email address should be unverified.
+     */
+    public function unverified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
+        ]);
+    }
+
+    /**
      * Create a student user with BCSC authentication.
      */
     public function student(): static
@@ -73,8 +83,8 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'bceid_username' => fake()->userName(),
             'bceid_user_guid' => fake()->uuid(),
-            'bceid_business_guid' => $businessGuid ?? fake()->regexify('[A-Z]{4}-GUID-[0-9]{3}'),
-            'identity_provider' => 'bceid',
+            'bceid_business_guid' => $businessGuid ?? 'TEST-GUID-123',
+            'identity_provider' => 'bceid_business',
             'email' => fake()->unique()->companyEmail(),
         ])->afterCreating(function (User $user) {
             $role = Role::where('name', Role::INSTITUTION_USER)->first();
@@ -112,7 +122,7 @@ class UserFactory extends Factory
             'idir_username' => fake()->userName() . '@IDIR',
             'idir_user_guid' => fake()->uuid(),
             'identity_provider' => 'idir',
-            'email' => fake()->unique()->email('gov.bc.ca'),
+            'email' => fake()->userName() . '@gov.bc.ca',
         ])->afterCreating(function (User $user) {
             $role = Role::where('name', Role::MINISTRY_USER)->first();
             if ($role) {
@@ -130,7 +140,7 @@ class UserFactory extends Factory
             'idir_username' => fake()->userName() . '@IDIR',
             'idir_user_guid' => fake()->uuid(),
             'identity_provider' => 'idir',
-            'email' => fake()->unique()->email('gov.bc.ca'),
+            'email' => fake()->userName() . '@gov.bc.ca',
         ])->afterCreating(function (User $user) {
             $role = Role::where('name', Role::ADMIN_MANAGER)->first();
             if ($role) {
@@ -148,7 +158,7 @@ class UserFactory extends Factory
             'idir_username' => fake()->userName() . '@IDIR',
             'idir_user_guid' => fake()->uuid(),
             'identity_provider' => 'idir',
-            'email' => fake()->unique()->email('gov.bc.ca'),
+            'email' => fake()->userName() . '@gov.bc.ca',
         ])->afterCreating(function (User $user) {
             $role = Role::where('name', Role::SUPER_ADMIN)->first();
             if ($role) {
