@@ -26,8 +26,13 @@ jobs:
       - name: Run composer install
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --verbose
 
+      - name: Ensure Cache Directory Exists
+        run: |
+          mkdir -p ./bootstrap/cache
+          chmod -R 777 ./bootstrap/cache
+
       - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: chmod -R 777 storage
 
       - name: Prepare Laravel Application
         run: php artisan key:generate
