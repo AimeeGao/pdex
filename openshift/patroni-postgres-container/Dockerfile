@@ -20,24 +20,28 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && python3 -m venv /opt/patroni-venv \
     && /opt/patroni-venv/bin/pip install --no-cache-dir psycopg2-binary six psutil \
     && /opt/patroni-venv/bin/pip install --no-cache-dir "patroni[kubernetes]==${PATRONI_VERSION}" \
-    # Create symlinks so patroni is available globally
-    && ln -s /opt/patroni-venv/bin/patroni /usr/local/bin/patroni \
-    && ln -s /opt/patroni-venv/bin/patronictl /usr/local/bin/patronictl \
     && PGHOME=/home/postgres \
     && mkdir -p $PGHOME \
     && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
-    && echo "PATH=\"$PATH\"" > /etc/environment \
     && echo 'Setting permissions for OpenShift' \
     && chmod 664 /etc/passwd \
     && mkdir -p $PGHOME/pgdata/pgroot \
     && chgrp -R 0 $PGHOME \
     && chown -R postgres $PGHOME \
     && chmod -R 775 $PGHOME \
+    # Set permissions on virtual environment for postgres user
+    && chgrp -R 0 /opt/patroni-venv \
+    && chmod -R g+r /opt/patroni-venv \
+    && chmod -R g+x /opt/patroni-venv/bin \
     && echo 'Cleaning up' \
     && apt-get remove -y git build-essential python3-dev \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /root/.cache
+
+# Set environment variables to include virtual environment in PATH
+ENV PATH="/opt/patroni-venv/bin:$PATH"
+ENV PYTHONPATH="/opt/patroni-venv/lib/python3.11/site-packages"
     
 
 COPY contrib/root /
