@@ -16,7 +16,7 @@ Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->nam
 
 // FSG-style authentication routes - following exact FSG pattern
 Route::middleware('guest')->group(function () {
-    // Route::get('/portal-login', [AuthController::class, 'portalLogin'])->name('portalLogin');
+    Route::get('/portal-login', [AuthController::class, 'portalLogin'])->name('portalLogin');
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/idir-login', [AuthController::class, 'idirLogin'])->name('idir-login');
     Route::get('/bceid-login', [AuthController::class, 'bceidLogin'])->name('bceid-login');
