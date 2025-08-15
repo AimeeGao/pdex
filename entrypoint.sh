@@ -27,6 +27,9 @@ composer dump-autoload
 echo "Starting apache in the background:"
 /usr/sbin/apache2ctl start
 
+echo "Run migration"
+php artisan migrate --force
+
 echo "Clear cache"
 php artisan cache:clear
 
