@@ -35,6 +35,7 @@ RUN apt-get -yq update --fix-missing \
     libzip-dev \
     libxml2-dev \
     zip \
+    nano \
     unzip \
 #    cron \
     zlib1g-dev g++ libicu-dev libpq-dev netcat-traditional curl apache2 libcurl4 libcurl3-dev \
