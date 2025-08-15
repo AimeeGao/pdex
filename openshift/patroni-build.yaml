@@ -52,7 +52,7 @@ objects:
           name: "${PATRONI_NAME}:${TAG}"
       runPolicy: SerialLatestOnly
       source:
-        contextDir: /openshift/patroni-postgres-container
+        contextDir: /
         git:
           uri: "${SOURCE_REPOSITORY_URL}"
           ref: "${SOURCE_REPOSITORY_REF}"
@@ -68,7 +68,7 @@ parameters:
     required: true
   - name: SOURCE_REPOSITORY_URL
     required: true
-    value: https://github.com/bcgov/pdex.git
+    value: https://github.com/bcgov/patroni-postgres-container.git
   - name: SOURCE_REPOSITORY_REF
     required: true
   - name: TAG

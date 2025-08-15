@@ -205,7 +205,7 @@ parameters:
   - name: IMAGE_STREAM_TAG
     description: |
       Patroni ImageTag
-    value: pdex-patroni:12.4-latest
+    value: pdex-patroni:16-latest
   - name: PVC_SIZE
     description:
       The size of the persistent volume to create.
