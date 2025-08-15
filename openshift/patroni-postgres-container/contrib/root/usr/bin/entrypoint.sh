@@ -17,7 +17,10 @@ echo "Current user: $(whoami)"
 echo "Current UID/GID: $(id)"
 
 # FIX -> FATAL:  data directory "..." has group or world access
+# Ensure the full directory structure exists
 mkdir -p "$PATRONI_POSTGRESQL_DATA_DIR"
+# Also ensure the parent directories are properly created
+mkdir -p "$(dirname "$PATRONI_POSTGRESQL_DATA_DIR")"
 
 # Clean up any failed bootstrap attempts to allow fresh initialization
 if [ -d "${PATRONI_POSTGRESQL_DATA_DIR}.failed" ]; then
