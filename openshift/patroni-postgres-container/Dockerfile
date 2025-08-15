@@ -38,6 +38,10 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 COPY contrib/root /
 
+# Make scripts executable
+RUN chmod +x /usr/bin/entrypoint.sh \
+    && chmod +x /usr/share/scripts/patroni/post_init.sh
+
 VOLUME /home/postgres/pgdata
 USER postgres
 WORKDIR /home/postgres
