@@ -7,6 +7,7 @@
 /storage/*.key
 /storage/logs/
 /storage/debugbar/
+/storage/api-docs/
 /storage/app/private/
 /storage/framework/cache/
 /storage/framework/sessions/

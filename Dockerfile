@@ -143,7 +143,7 @@ RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage boot
     && chmod 755 /sbin/entrypoint.sh
 
 # Ensure cache directories are writable by non-root user before composer install
-RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/api-docs \
     && chmod -R 775 bootstrap/cache storage/ \
     && npm config set cache /.npm/_cache --global
 
