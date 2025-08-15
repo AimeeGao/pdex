@@ -19,6 +19,12 @@ echo "Current UID/GID: $(id)"
 # FIX -> FATAL:  data directory "..." has group or world access
 mkdir -p "$PATRONI_POSTGRESQL_DATA_DIR"
 
+# Clean up any failed bootstrap attempts to allow fresh initialization
+if [ -d "${PATRONI_POSTGRESQL_DATA_DIR}.failed" ]; then
+    echo "Removing previous failed bootstrap attempt: ${PATRONI_POSTGRESQL_DATA_DIR}.failed"
+    rm -rf "${PATRONI_POSTGRESQL_DATA_DIR}.failed"
+fi
+
 # In OpenShift, we can't change ownership but we can set permissions on our own files
 # The data directory needs to be accessible only by the postgres user
 if [ -d "$PATRONI_POSTGRESQL_DATA_DIR" ]; then
