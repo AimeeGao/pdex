@@ -24,9 +24,6 @@ echo "ENV_ARG: ${ENV_ARG}"
 echo "Install composer"
 composer dump-autoload
 
-echo "Permissions setup for NPM:"
-chmod -R u+w node_modules
-
 echo "Starting apache in the background:"
 /usr/sbin/apache2ctl start
 

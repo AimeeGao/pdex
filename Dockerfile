@@ -146,7 +146,8 @@ USER 1001
 
 # Ensure cache directories are writable by non-root user before composer install
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && chmod -R 775 bootstrap/cache storage/
+    && chmod -R 775 bootstrap/cache storage/ \
+    && npm config set cache /.npm/_cache --global
 
 #composer install
 RUN composer install && npm install --prefix /var/www/html/ && npm run --prefix /var/www/html/ ${DEVENV}
