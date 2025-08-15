@@ -120,8 +120,10 @@ unset PATRONI_SUPERUSER_PASSWORD PATRONI_REPLICATION_PASSWORD
 export KUBERNETES_NAMESPACE=$PATRONI_KUBERNETES_NAMESPACE
 export POD_NAME=$PATRONI_NAME
 
-echo "=== Generated Patroni Configuration ==="
-cat /home/postgres/patroni.yml
+echo "=== Patroni Configuration Generated ==="
+echo "Configuration file created at: /home/postgres/patroni.yml"
+echo "Scope: ${PATRONI_SCOPE}"
+echo "Data directory: ${PATRONI_POSTGRESQL_DATA_DIR}"
 
 echo "=== Starting Patroni ==="
 exec /usr/bin/python3 /usr/local/bin/patroni /home/postgres/patroni.yml
