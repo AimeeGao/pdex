@@ -18,16 +18,16 @@ echo "Current UID/GID: $(id)"
 
 # FIX -> FATAL:  data directory "..." has group or world access
 mkdir -p "$PATRONI_POSTGRESQL_DATA_DIR"
-chmod 700 "$PATRONI_POSTGRESQL_DATA_DIR"
 
-# Ensure parent directories have proper permissions
-mkdir -p "$(dirname "$PATRONI_POSTGRESQL_DATA_DIR")"
-chown -R $(id -u):$(id -g) /home/postgres/pgdata
-chmod -R 775 /home/postgres/pgdata
+# In OpenShift, we can't change ownership but we can set permissions on our own files
+# The data directory needs to be accessible only by the postgres user
+if [ -d "$PATRONI_POSTGRESQL_DATA_DIR" ]; then
+    chmod 700 "$PATRONI_POSTGRESQL_DATA_DIR" 2>/dev/null || echo "Warning: Could not set data directory permissions (expected in OpenShift)"
+fi
 
 echo "=== Directory Permissions ==="
 ls -la /home/postgres/
-ls -la /home/postgres/pgdata/
+ls -la /home/postgres/pgdata/ 2>/dev/null || echo "pgdata directory not accessible"
 ls -la /home/postgres/pgdata/pgroot/ 2>/dev/null || echo "pgroot directory doesn't exist yet"
 
 cat > /home/postgres/patroni.yml <<__EOF__

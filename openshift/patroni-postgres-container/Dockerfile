@@ -24,10 +24,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && echo "PATH=\"$PATH\"" > /etc/environment \
     && echo 'Setting permissions for OpenShift' \
     && chmod 664 /etc/passwd \
-    && mkdir -p $PGHOME/pgdata/pgroot \
+    && mkdir -p $PGHOME/pgdata/pgroot/data \
     && chgrp -R 0 $PGHOME \
     && chown -R postgres $PGHOME \
     && chmod -R 775 $PGHOME \
+    && chmod 700 $PGHOME/pgdata/pgroot/data \
     && echo 'Cleaning up' \
     && apt-get remove -y git build-essential python3-dev \
     && apt-get autoremove -y \
