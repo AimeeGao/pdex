@@ -13,35 +13,26 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && set -x \
     && echo 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' > /etc/apt/apt.conf.d/01norecommend \
     && apt-get update -y \
-    && apt-get install -y curl jq locales git build-essential libpq-dev python3 python3-dev python3-pip python3-wheel python3-setuptools python3-venv python3-psycopg2 \
+    && apt-get install -y curl jq locales git build-essential libpq-dev python3 python3-dev python3-pip python3-wheel python3-setuptools python3-psycopg2 \
     && echo 'Make sure we have a en_US.UTF-8 locale available' \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-    # Create virtual environment and install Python packages
-    && python3 -m venv /opt/patroni-venv \
-    && /opt/patroni-venv/bin/pip install --no-cache-dir psycopg2-binary six psutil \
-    && /opt/patroni-venv/bin/pip install --no-cache-dir "patroni[kubernetes]==${PATRONI_VERSION}" \
+    && pip3 --isolated --no-cache-dir install --break-system-packages psycopg2-binary six psutil \
+    && pip3 --isolated --no-cache-dir install --break-system-packages "patroni[kubernetes]==${PATRONI_VERSION}" \
     && PGHOME=/home/postgres \
     && mkdir -p $PGHOME \
     && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
+    && echo "PATH=\"$PATH\"" > /etc/environment \
     && echo 'Setting permissions for OpenShift' \
     && chmod 664 /etc/passwd \
     && mkdir -p $PGHOME/pgdata/pgroot \
     && chgrp -R 0 $PGHOME \
     && chown -R postgres $PGHOME \
     && chmod -R 775 $PGHOME \
-    # Set permissions on virtual environment for postgres user
-    && chgrp -R 0 /opt/patroni-venv \
-    && chmod -R g+r /opt/patroni-venv \
-    && chmod -R g+x /opt/patroni-venv/bin \
     && echo 'Cleaning up' \
     && apt-get remove -y git build-essential python3-dev \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /root/.cache
-
-# Set environment variables to include virtual environment in PATH
-ENV PATH="/opt/patroni-venv/bin:$PATH"
-ENV PYTHONPATH="/opt/patroni-venv/lib/python3.11/site-packages"
     
 
 COPY contrib/root /
