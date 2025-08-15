@@ -7,9 +7,28 @@ if [[ $UID -ge 10000 ]]; then
     rm /tmp/passwd
 fi
 
+# Debug: Print environment variables
+echo "=== Environment Debug ==="
+echo "PATRONI_POSTGRESQL_DATA_DIR: ${PATRONI_POSTGRESQL_DATA_DIR}"
+echo "POD_IP: ${POD_IP}"
+echo "PATRONI_NAME: ${PATRONI_NAME}"
+echo "PATRONI_SCOPE: ${PATRONI_SCOPE}"
+echo "Current user: $(whoami)"
+echo "Current UID/GID: $(id)"
+
 # FIX -> FATAL:  data directory "..." has group or world access
 mkdir -p "$PATRONI_POSTGRESQL_DATA_DIR"
 chmod 700 "$PATRONI_POSTGRESQL_DATA_DIR"
+
+# Ensure parent directories have proper permissions
+mkdir -p "$(dirname "$PATRONI_POSTGRESQL_DATA_DIR")"
+chown -R $(id -u):$(id -g) /home/postgres/pgdata
+chmod -R 775 /home/postgres/pgdata
+
+echo "=== Directory Permissions ==="
+ls -la /home/postgres/
+ls -la /home/postgres/pgdata/
+ls -la /home/postgres/pgdata/pgroot/ 2>/dev/null || echo "pgroot directory doesn't exist yet"
 
 cat > /home/postgres/patroni.yml <<__EOF__
 scope: ${PATRONI_SCOPE}
@@ -27,17 +46,17 @@ kubernetes:
 bootstrap:
   post_bootstrap: /usr/share/scripts/patroni/post_init.sh
   dcs:
-    ttl: 30
+    ttl: 60
     loop_wait: 10
-    retry_timeout: 30
+    retry_timeout: 20
     maximum_lag_on_failover: 1048576
     postgresql:
       use_pg_rewind: true
       use_slots: true
       parameters:
-        max_connections: \${POSTGRESQL_MAX_CONNECTIONS:-100}
-        max_prepared_transactions: \${POSTGRESQL_MAX_PREPARED_TRANSACTIONS:-0}
-        max_locks_per_transaction: \${POSTGRESQL_MAX_LOCKS_PER_TRANSACTION:-64}
+        max_connections: ${POSTGRESQL_MAX_CONNECTIONS:-100}
+        max_prepared_transactions: ${POSTGRESQL_MAX_PREPARED_TRANSACTIONS:-0}
+        max_locks_per_transaction: ${POSTGRESQL_MAX_LOCKS_PER_TRANSACTION:-64}
         wal_level: replica
         hot_standby: "on"
         wal_keep_size: 128MB
@@ -55,19 +74,19 @@ bootstrap:
   - data-checksums
   pg_hba:
   - host all all 0.0.0.0/0 md5
-  - host replication \${PATRONI_REPLICATION_USERNAME} \${POD_IP}/16 md5
+  - host replication ${PATRONI_REPLICATION_USERNAME} ${POD_IP}/16 md5
 
 postgresql:
   listen: 0.0.0.0:5432
-  connect_address: '\${POD_IP}:5432'
-  data_dir: \${PATRONI_POSTGRESQL_DATA_DIR}
+  connect_address: '${POD_IP}:5432'
+  data_dir: ${PATRONI_POSTGRESQL_DATA_DIR}
   authentication:
     superuser:
-      username: \${PATRONI_SUPERUSER_USERNAME}
-      password: '\${PATRONI_SUPERUSER_PASSWORD}'
+      username: ${PATRONI_SUPERUSER_USERNAME}
+      password: '${PATRONI_SUPERUSER_PASSWORD}'
     replication:
-      username: \${PATRONI_REPLICATION_USERNAME}
-      password: '\${PATRONI_REPLICATION_PASSWORD}'
+      username: ${PATRONI_REPLICATION_USERNAME}
+      password: '${PATRONI_REPLICATION_PASSWORD}'
 
 log:
   level: INFO
@@ -77,4 +96,8 @@ unset PATRONI_SUPERUSER_PASSWORD PATRONI_REPLICATION_PASSWORD
 export KUBERNETES_NAMESPACE=$PATRONI_KUBERNETES_NAMESPACE
 export POD_NAME=$PATRONI_NAME
 
+echo "=== Generated Patroni Configuration ==="
+cat /home/postgres/patroni.yml
+
+echo "=== Starting Patroni ==="
 exec /usr/bin/python3 /usr/local/bin/patroni /home/postgres/patroni.yml
