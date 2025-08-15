@@ -191,21 +191,21 @@ parameters:
     description: |
       Starting amount of CPU the container can use.
     displayName: CPU REQUEST
-    value: '50m'
+    value: '150m'
   - name: CPU_LIMIT
     description:
       Maximum amount of CPU the container can use.
     displayName: CPU Limit
-    value: '150m'
+    value: '250m'
   - name: MEMORY_REQUEST
     description:
       Starting amount of memory the container can use.
     displayName: Memory Request
-    value: 100Mi
+    value: 200Mi
   - name: MEMORY_LIMIT
     description: Maximum amount of memory the container can use.
     displayName: Memory Limit
-    value: 200Mi
+    value: 400Mi
   - name: BUILD_NAMESPACE
     description: |
       The OpenShift Namespace where the patroni and postgresql

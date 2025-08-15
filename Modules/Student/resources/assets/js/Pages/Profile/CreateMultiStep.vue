@@ -355,21 +355,43 @@ const submitForm = () => {
   // Transform nested form data to match validation expectations
   const formData = {
     // General fields (flat)
-    ...form.general,
+    social_insurance_number: form.social_insurance_number,
+    government_issued_id: form.government_issued_id,
+    first_name: form.first_name,
+    middle_name: form.middle_name,
+    last_name: form.last_name,
+    preferred_name: form.preferred_name,
+    email_address: form.email_address,
+    phone_number: form.phone_number,
+    alternate_phone_number: form.alternate_phone_number,
+    date_of_birth: form.date_of_birth,
+    gender: form.gender,
+    preferred_pronouns: form.preferred_pronouns,
+    disability_status: form.disability_status,
+    accommodation_needs: form.accommodation_needs,
     
     // Address fields (nested under current_address)
     current_address: {
-      street_address: form.address.address_line1,
-      apartment_unit: form.address.address_line2,
-      city: form.address.city,
-      province_state: form.address.province,
-      postal_code: form.address.postal_code,
-      country: form.address.country
+      street_address: form.current_address.address_line1,
+      apartment_unit: form.current_address.address_line2,
+      city: form.current_address.city,
+      province_state: form.current_address.province,
+      postal_code: form.current_address.postal_code,
+      country: form.current_address.country
     },
+
+    // Mailing address fields
+    use_different_mailing_address: form.use_different_mailing_address,
+    mailing_street_address: form.mailing_address.address_line1,
+    mailing_apartment_unit: form.mailing_address.address_line2,
+    mailing_city: form.mailing_address.city,
+    mailing_province_state: form.mailing_address.province,
+    mailing_postal_code: form.mailing_address.postal_code,
+    mailing_country: form.mailing_address.country,
     
     // Employment fields (nested under current_employment)
     current_employment: {
-      ...form.employment
+      ...form.current_employment
     },
     
     // Identity fields (nested under identity)
