@@ -57,8 +57,10 @@ bootstrap:
   dcs:
     ttl: 60
     loop_wait: 10
-    retry_timeout: 20
+    retry_timeout: 30
     maximum_lag_on_failover: 1048576
+    synchronous_mode: false
+    synchronous_mode_strict: false
     postgresql:
       use_pg_rewind: true
       use_slots: true
@@ -75,6 +77,12 @@ bootstrap:
         archive_mode: "on"
         archive_timeout: 1800s
         archive_command: /bin/true
+        # Replica-specific parameters for better bootstrap reliability
+        wal_receiver_timeout: 60s
+        wal_sender_timeout: 60s
+        tcp_keepalives_idle: 600
+        tcp_keepalives_interval: 30
+        tcp_keepalives_count: 3
   initdb:
   - auth-host: md5
   - auth-local: trust
@@ -96,6 +104,13 @@ postgresql:
     replication:
       username: ${PATRONI_REPLICATION_USERNAME}
       password: '${PATRONI_REPLICATION_PASSWORD}'
+
+# Replica configuration for better bootstrap reliability
+replica_method: basebackup
+basebackup:
+  checkpoint: 'fast'
+  max-rate: '100M'
+  verbose: true
 
 log:
   level: INFO
