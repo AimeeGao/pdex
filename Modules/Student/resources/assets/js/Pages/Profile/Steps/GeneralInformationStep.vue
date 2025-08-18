@@ -8,44 +8,7 @@
       <p class="text-muted mb-0 small">Personal details and contact information</p>
     </div>
     <div class="card-body">
-      <!-- Identity Numbers -->
-      <div class="mb-4">
-        <h6 class="border-bottom pb-2 mb-3">
-          <i class="bi bi-card-text me-2"></i>Identity Numbers
-        </h6>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="sin" class="form-label">Social Insurance Number (SIN)</label>
-            <input
-              id="sin"
-              v-model="form.social_insurance_number"
-              type="text"
-              class="form-control"
-              :class="{ 'is-invalid': hasFieldError('social_insurance_number') }"
-              placeholder="000-000-000"
-              maxlength="11"
-            />
-            <div v-if="hasFieldError('social_insurance_number')" class="invalid-feedback">
-              {{ getFieldError('social_insurance_number') }}
-            </div>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="government_id_number" class="form-label">Government ID Number</label>
-            <input
-              id="government_id_number"
-              v-model="form.government_issued_id"
-              type="text"
-              class="form-control"
-              :class="{ 'is-invalid': hasFieldError('government_issued_id') }"
-              placeholder="Driver's License, Health Card, etc."
-            />
-            <div v-if="hasFieldError('government_issued_id')" class="invalid-feedback">
-              {{ getFieldError('government_issued_id') }}
-            </div>
-          </div>
-        </div>
-      </div>
-
+      
       <!-- Name Information -->
       <div class="mb-4">
         <h6 class="border-bottom pb-2 mb-3">
@@ -212,6 +175,44 @@
             />
             <div v-if="hasFieldError('alternate_phone_number')" class="invalid-feedback">
               {{ getFieldError('alternate_phone_number') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identity Numbers -->
+      <div class="mb-4">
+        <h6 class="border-bottom pb-2 mb-3">
+          <i class="bi bi-card-text me-2"></i>Identity Numbers
+        </h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="sin" class="form-label">Social Insurance Number (SIN)</label>
+            <input
+              id="sin"
+              v-model="form.social_insurance_number"
+              type="text"
+              class="form-control"
+              :class="{ 'is-invalid': hasFieldError('social_insurance_number') }"
+              placeholder="000-000-000"
+              maxlength="11"
+            />
+            <div v-if="hasFieldError('social_insurance_number')" class="invalid-feedback">
+              {{ getFieldError('social_insurance_number') }}
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="government_id_number" class="form-label">Government ID Number</label>
+            <input
+              id="government_id_number"
+              v-model="form.government_issued_id"
+              type="text"
+              class="form-control"
+              :class="{ 'is-invalid': hasFieldError('government_issued_id') }"
+              placeholder="Driver's License, Health Card, etc."
+            />
+            <div v-if="hasFieldError('government_issued_id')" class="invalid-feedback">
+              {{ getFieldError('government_issued_id') }}
             </div>
           </div>
         </div>
