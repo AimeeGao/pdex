@@ -4,7 +4,10 @@
       <div class="row">
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">My Profile</h1>
+            <div class="text-muted small">
+              <h1 class="h3 mb-0">My Profile</h1>
+              <div v-if="individual"><strong>Last Updated:</strong> {{ formatDate(individual.updated_at) }}</div>
+            </div>
             <div class="btn-group">
               <Link
                 href="/student/profile/edit"
@@ -38,59 +41,8 @@
 
           <!-- Profile Content -->
           <div v-if="individual">
-            <!-- Profile Header -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <h2 class="mb-1">{{ individual.display_name }}</h2>
-                    <p class="text-muted mb-2">{{ individual.full_name }}</p>
-                    <div class="d-flex align-items-center gap-3">
-                      <span class="badge" :class="statusBadgeClass">
-                        {{ individual.status.charAt(0).toUpperCase() + individual.status.slice(1) }}
-                      </span>
-                      <span class="badge" :class="verificationBadgeClass">
-                        {{ individual.verification_status.charAt(0).toUpperCase() + individual.verification_status.slice(1) }}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="col-md-4 text-md-end">
-                    <div class="text-muted small">
-                      <div><strong>Last Updated:</strong> {{ formatDate(individual.updated_at) }}</div>
-                      <div v-if="individual.last_login_at">
-                        <strong>Last Login:</strong> {{ formatDate(individual.last_login_at) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Profile Sections -->
             <div class="row">
-              <!-- Identity Information -->
-              <div class="col-lg-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="mb-0">Identity Information</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="row mb-3">
-                      <div class="col-sm-6">
-                        <strong>Social Insurance Number: <span class="text-danger">*</span></strong>
-                        <div>{{ individual.social_insurance_number || 'Not provided' }}</div>
-                      </div>
-                    </div>
-                    <div class="row mb-3" v-if="individual.government_issued_id">
-                      <div class="col-sm-6">
-                        <strong>Government Issued ID:</strong>
-                        <div>{{ individual.government_issued_id }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+              
               <!-- Personal Information -->
               <div class="col-lg-6 mb-4">
                 <div class="card h-100">
@@ -101,11 +53,11 @@
                     <div class="row mb-3">
                       <div class="col-sm-6">
                         <strong>First Name:</strong>
-                        <div>{{ individual.first_name }}</div>
+                        <div>{{ individual.first_name || 'Not provided' }}</div>
                       </div>
                       <div class="col-sm-6">
                         <strong>Last Name:</strong>
-                        <div>{{ individual.last_name }}</div>
+                        <div>{{ individual.last_name || 'Not provided' }}</div>
                       </div>
                     </div>
                     <div class="row mb-3" v-if="individual.middle_name">
@@ -134,8 +86,78 @@
                     </div>
                     <div class="row mb-3" v-if="individual.preferred_pronouns">
                       <div class="col-sm-6">
-                        <strong>Pronouns:</strong>
+                        <strong>Preferred Pronouns:</strong>
                         <div>{{ individual.preferred_pronouns }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.disability_status">
+                      <div class="col-sm-12">
+                        <strong>Accessibility Needs:</strong>
+                        <div class="mb-2">
+                          <span class="badge bg-info">Has accessibility needs</span>
+                        </div>
+                        <div v-if="individual.accommodation_needs">{{ individual.accommodation_needs }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Identity Information -->
+              <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">Identity Information</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row mb-3" v-if="individual.social_insurance_number">
+                      <div class="col-sm-6">
+                        <strong>Social Insurance Number:</strong>
+                        <div>{{ individual.social_insurance_number }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.government_issued_id">
+                      <div class="col-sm-6">
+                        <strong>Government Issued ID:</strong>
+                        <div>{{ individual.government_issued_id }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.identity?.citizenship_status">
+                      <div class="col-sm-6">
+                        <strong>Citizenship Status:</strong>
+                        <div>{{ individual.identity.citizenship_status }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.identity?.country_of_birth">
+                      <div class="col-sm-6">
+                        <strong>Country of Birth:</strong>
+                        <div>{{ individual.identity.country_of_birth }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.identity?.language_spoken_at_home">
+                      <div class="col-sm-6">
+                        <strong>Language Spoken at Home:</strong>
+                        <div>{{ individual.identity.language_spoken_at_home }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.identity?.racial_identity">
+                      <div class="col-sm-6">
+                        <strong>Racial Identity:</strong>
+                        <div>{{ individual.identity.racial_identity }}</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.identity?.indigenous_status">
+                      <div class="col-sm-12">
+                        <strong>Indigenous Identity:</strong>
+                        <div class="mb-2">
+                          <span class="badge bg-success">Indigenous</span>
+                        </div>
+                        <div v-if="individual.identity.indigenous_group" class="mb-1">
+                          <strong>Group:</strong> {{ individual.identity.indigenous_group }}
+                        </div>
+                        <div v-if="individual.identity.band_affiliation" class="mb-1">
+                          <strong>Band/Nation:</strong> {{ individual.identity.band_affiliation }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -152,7 +174,7 @@
                     <div class="mb-3">
                       <strong>Email:</strong>
                       <div class="d-flex align-items-center">
-                        <span>{{ individual.email_address }}</span>
+                        <span>{{ individual.email_address || 'Not provided' }}</span>
                         <span v-if="individual.email_verified_at" class="badge bg-success ms-2">
                           <i class="bi bi-check-circle me-1"></i>Verified
                         </span>
@@ -180,32 +202,32 @@
                     <h5 class="mb-0">Current Address</h5>
                   </div>
                   <div class="card-body">
-                    <div class="mb-3" v-if="individual.current_street_address">
+                    <div class="mb-3" v-if="individual.current_address?.street_address">
                       <strong>Street Address:</strong>
-                      <div>{{ individual.current_street_address }}</div>
+                      <div>{{ individual.current_address.street_address }}</div>
                     </div>
-                    <div class="mb-3" v-if="individual.current_apartment_unit">
+                    <div class="mb-3" v-if="individual.current_address?.apartment_unit">
                       <strong>Apartment/Unit:</strong>
-                      <div>{{ individual.current_apartment_unit }}</div>
+                      <div>{{ individual.current_address.apartment_unit }}</div>
                     </div>
                     <div class="row mb-3">
-                      <div class="col-sm-6" v-if="individual.current_city">
+                      <div class="col-sm-6" v-if="individual.current_address?.city">
                         <strong>City:</strong>
-                        <div>{{ individual.current_city }}</div>
+                        <div>{{ individual.current_address.city }}</div>
                       </div>
-                      <div class="col-sm-6" v-if="individual.current_province_state">
+                      <div class="col-sm-6" v-if="individual.current_address?.province_state">
                         <strong>Province/State:</strong>
-                        <div>{{ individual.current_province_state }}</div>
+                        <div>{{ individual.current_address.province_state }}</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <div class="col-sm-6" v-if="individual.current_postal_code">
+                      <div class="col-sm-6" v-if="individual.current_address?.postal_code">
                         <strong>Postal Code:</strong>
-                        <div>{{ individual.current_postal_code }}</div>
+                        <div>{{ individual.current_address.postal_code }}</div>
                       </div>
-                      <div class="col-sm-6" v-if="individual.current_country">
+                      <div class="col-sm-6" v-if="individual.current_address?.country">
                         <strong>Country:</strong>
-                        <div>{{ individual.current_country }}</div>
+                        <div>{{ individual.current_address.country }}</div>
                       </div>
                     </div>
                   </div>
@@ -251,117 +273,51 @@
                 </div>
               </div>
 
-              <!-- Permanent Address -->
-              <div class="col-lg-6 mb-4" v-if="hasPermanentAddress">
+              <!-- Employment Information -->
+              <div class="col-lg-6 mb-4" v-if="hasEmploymentInfo">
                 <div class="card h-100">
                   <div class="card-header">
-                    <h5 class="mb-0">Permanent Address</h5>
+                    <h5 class="mb-0">Employment Information</h5>
                   </div>
                   <div class="card-body">
-                    <div class="mb-3" v-if="individual.permanent_street_address">
-                      <strong>Street Address:</strong>
-                      <div>{{ individual.permanent_street_address }}</div>
+                    <div class="mb-3" v-if="individual.current_employment?.employment_status">
+                      <strong>Employment Status:</strong>
+                      <div>{{ individual.current_employment.employment_status }}</div>
                     </div>
-                    <div class="mb-3" v-if="individual.permanent_apartment_unit">
-                      <strong>Apartment/Unit:</strong>
-                      <div>{{ individual.permanent_apartment_unit }}</div>
+                    <div class="mb-3" v-if="individual.current_employment?.job_title">
+                      <strong>Job Title:</strong>
+                      <div>{{ individual.current_employment.job_title }}</div>
                     </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-6" v-if="individual.permanent_city">
-                        <strong>City:</strong>
-                        <div>{{ individual.permanent_city }}</div>
+                    <div class="mb-3" v-if="individual.current_employment?.employer_name">
+                      <strong>Employer:</strong>
+                      <div>{{ individual.current_employment.employer_name }}</div>
+                    </div>
+                    <div class="mb-3" v-if="individual.current_employment?.employer_industry">
+                      <strong>Industry:</strong>
+                      <div>{{ individual.current_employment.employer_industry }}</div>
+                    </div>
+                    <div class="row mb-3" v-if="individual.current_employment?.work_hours_per_week || individual.current_employment?.monthly_income">
+                      <div class="col-sm-6" v-if="individual.current_employment?.work_hours_per_week">
+                        <strong>Hours per Week:</strong>
+                        <div>{{ individual.current_employment.work_hours_per_week }}</div>
                       </div>
-                      <div class="col-sm-6" v-if="individual.permanent_province_state">
-                        <strong>Province/State:</strong>
-                        <div>{{ individual.permanent_province_state }}</div>
+                      <div class="col-sm-6" v-if="individual.current_employment?.monthly_income">
+                        <strong>Monthly Income:</strong>
+                        <div>${{ individual.current_employment.monthly_income }}</div>
                       </div>
                     </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-6" v-if="individual.permanent_postal_code">
-                        <strong>Postal Code:</strong>
-                        <div>{{ individual.permanent_postal_code }}</div>
-                      </div>
-                      <div class="col-sm-6" v-if="individual.permanent_country">
-                        <strong>Country:</strong>
-                        <div>{{ individual.permanent_country }}</div>
-                      </div>
+                    <div class="mb-3" v-if="individual.current_employment?.career_interest_area">
+                      <strong>Career Interest Area:</strong>
+                      <div>{{ individual.current_employment.career_interest_area }}</div>
+                    </div>
+                    <div class="mb-3" v-if="individual.current_employment?.desired_job_title">
+                      <strong>Desired Job Title:</strong>
+                      <div>{{ individual.current_employment.desired_job_title }}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Emergency Contact -->
-              <div class="col-lg-6 mb-4" v-if="individual.emergency_contact">
-                <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="mb-0">Emergency Contact</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="mb-3" v-if="individual.emergency_contact.name">
-                      <strong>Name:</strong>
-                      <div>{{ individual.emergency_contact.name }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.emergency_contact.relationship">
-                      <strong>Relationship:</strong>
-                      <div>{{ individual.emergency_contact.relationship }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.emergency_contact.phone">
-                      <strong>Phone:</strong>
-                      <div>{{ individual.emergency_contact.phone }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.emergency_contact.email">
-                      <strong>Email:</strong>
-                      <div>{{ individual.emergency_contact.email }}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Additional Information -->
-              <div class="col-lg-6 mb-4" v-if="hasAdditionalInfo">
-                <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="mb-0">Additional Information</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="mb-3" v-if="individual.citizenship_status">
-                      <strong>Citizenship Status:</strong>
-                      <div>{{ individual.citizenship_status }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.country_of_birth">
-                      <strong>Country of Birth:</strong>
-                      <div>{{ individual.country_of_birth }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.language_spoken_at_home">
-                      <strong>Language Spoken at Home:</strong>
-                      <div>{{ individual.language_spoken_at_home }}</div>
-                    </div>
-                    <div class="mb-3" v-if="individual.disability_status">
-                      <strong>Accessibility Support:</strong>
-                      <div class="d-flex align-items-center">
-                        <span class="badge bg-info me-2">
-                          <i class="bi bi-universal-access-circle me-1"></i>Support Required
-                        </span>
-                      </div>
-                      <div v-if="individual.accommodation_needs" class="mt-2">
-                        <small class="text-muted">{{ individual.accommodation_needs }}</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Notes -->
-              <div class="col-12 mb-4" v-if="individual.notes">
-                <div class="card">
-                  <div class="card-header">
-                    <h5 class="mb-0">Notes</h5>
-                  </div>
-                  <div class="card-body">
-                    <p class="mb-0">{{ individual.notes }}</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -388,33 +344,12 @@ export default {
     }
   },
   computed: {
-    statusBadgeClass() {
-      const statusClasses = {
-        'active': 'bg-success',
-        'inactive': 'bg-secondary',
-        'suspended': 'bg-danger'
-      }
-      return statusClasses[this.individual?.status] || 'bg-secondary'
-    },
-    verificationBadgeClass() {
-      const verificationClasses = {
-        'verified': 'bg-success',
-        'pending': 'bg-warning',
-        'unverified': 'bg-secondary',
-        'rejected': 'bg-danger'
-      }
-      return verificationClasses[this.individual?.verification_status] || 'bg-secondary'
-    },
-    hasIdentityInfo() {
-      return this.individual?.social_insurance_number ||
-             this.individual?.government_issued_id
-    },
     hasCurrentAddress() {
-      return this.individual?.current_street_address ||
-             this.individual?.current_city ||
-             this.individual?.current_province_state ||
-             this.individual?.current_postal_code ||
-             this.individual?.current_country
+      return this.individual?.current_address?.street_address ||
+             this.individual?.current_address?.city ||
+             this.individual?.current_address?.province_state ||
+             this.individual?.current_address?.postal_code ||
+             this.individual?.current_address?.country
     },
     hasMailingAddress() {
       return this.individual?.use_different_mailing_address && (
@@ -425,18 +360,13 @@ export default {
         this.individual?.mailing_country
       )
     },
-    hasPermanentAddress() {
-      return this.individual?.permanent_street_address ||
-             this.individual?.permanent_city ||
-             this.individual?.permanent_province_state ||
-             this.individual?.permanent_postal_code ||
-             this.individual?.permanent_country
-    },
-    hasAdditionalInfo() {
-      return this.individual?.citizenship_status ||
-             this.individual?.country_of_birth ||
-             this.individual?.language_spoken_at_home ||
-             this.individual?.disability_status
+    hasEmploymentInfo() {
+      return this.individual?.current_employment?.employment_status ||
+             this.individual?.current_employment?.job_title ||
+             this.individual?.current_employment?.employer_name ||
+             this.individual?.current_employment?.employer_industry ||
+             this.individual?.current_employment?.career_interest_area ||
+             this.individual?.current_employment?.desired_job_title
     }
   },
   methods: {
