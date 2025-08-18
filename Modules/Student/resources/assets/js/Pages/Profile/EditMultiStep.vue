@@ -367,16 +367,16 @@ const progressPercentage = computed(() => {
 const canProceedToNextStep = computed(() => {
   switch (currentStep.value) {
     case 1:
-      return form.social_insurance_number && 
-             form.first_name && 
+      return form.first_name && 
              form.last_name && 
              form.email_address
     case 2:
-      return form.current_address.address_line1 && 
-             form.current_address.city && 
-             form.current_address.province && 
-             form.current_address.postal_code &&
-             form.current_address.country
+      return true // Employment is optional
+      // return form.current_address.address_line1 && 
+      //        form.current_address.city && 
+      //        form.current_address.province && 
+      //        form.current_address.postal_code &&
+      //        form.current_address.country
     case 3:
       return true // Employment is optional
     case 4:
