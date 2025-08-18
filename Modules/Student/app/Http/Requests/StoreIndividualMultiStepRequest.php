@@ -25,28 +25,7 @@ class StoreIndividualMultiStepRequest extends FormRequest
         return [
 
             // General Information Step
-
-            /* General info should collect the following
-            $table->string('social_insurance_number')->nullable();
-            $table->string('government_issued_id')->nullable();
-            // Name & Contact
-            $table->string('first_name');
-            $table->string('middle_name')->nullable();
-            $table->string('last_name');
-            $table->string('preferred_name')->nullable();
-            $table->string('email_address')->unique();
-            $table->string('phone_number')->nullable();
-            $table->string('alternate_phone_number')->nullable();
-            // Demographics (minimal, no address/identity/minority fields)
-            $table->date('date_of_birth')->nullable();
-            $table->string('gender')->nullable();
-            $table->string('preferred_pronouns')->nullable();
-            // Health & Accessibility
-            $table->boolean('disability_status')->default(false);
-            $table->text('accommodation_needs')->nullable();
-            */
-
-            'social_insurance_number' => ['required', 'string', 'max:255', new ValidSin()],
+            'social_insurance_number' => ['nullable', 'string', 'max:255', new ValidSin()],
             'government_issued_id' => 'nullable|string|max:255',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -62,26 +41,13 @@ class StoreIndividualMultiStepRequest extends FormRequest
             'accommodation_needs' => 'nullable|string|required_if:disability_status,true',
 
             // Address Information Step
-            /* address info should collect the following
-            
-            // Address Information
-            $table->string('address_line1')->nullable()->comment('Primary address line (street number and name)');
-            $table->string('address_line2')->nullable()->comment('Secondary address line (apartment, unit, etc.)');
-            $table->string('city')->nullable()->comment('City or municipality');
-            $table->string('province')->nullable()->comment('Province, state, or region');
-            $table->string('postal_code')->nullable()->comment('Postal code or ZIP code');
-            $table->string('country')->nullable()->comment('Country');
-            
-            // Status and Metadata
-            $table->boolean('is_primary')->default(false)->comment('Indicates if this is the primary address');
-            */
-            'current_address' => 'required|array',
-            'current_address.address_line1' => 'required|string|max:255',
+            'current_address' => 'nullable|array',
+            'current_address.address_line1' => 'nullable|string|max:255',
             'current_address.address_line2' => 'nullable|string|max:50',
-            'current_address.city' => 'required|string|max:255',
-            'current_address.province' => 'required|string|max:255',
-            'current_address.postal_code' => 'required|string|max:20',
-            'current_address.country' => 'required|string|max:255',
+            'current_address.city' => 'nullable|string|max:255',
+            'current_address.province' => 'nullable|string|max:255',
+            'current_address.postal_code' => 'nullable|string|max:20',
+            'current_address.country' => 'nullable|string|max:255',
             
             'use_different_mailing_address' => 'boolean',
             'mailing_address' => 'nullable|array|required_if:use_different_mailing_address,true',
@@ -93,45 +59,6 @@ class StoreIndividualMultiStepRequest extends FormRequest
             'mailing_address.country' => 'nullable|string|max:255|required_if:use_different_mailing_address,true',
 
             // Employment Information Step
-            /* Employment info should collect the following
-            
-            // Current Employment Status
-            $table->string('employment_status')->nullable()->comment('Current employment status: employed, unemployed, student, retired');
-            $table->boolean('is_looking_for_work')->default(false)->comment('Indicates if actively seeking employment');
-            
-            // Current Job Information
-            $table->string('job_title')->nullable()->comment('Current job title or position');
-            $table->string('employer_name')->nullable()->comment('Name of current employer or organization');
-            $table->string('employer_industry')->nullable()->comment('Industry sector of current employer');
-            $table->date('employment_start_date')->nullable()->comment('Start date of current employment');
-            $table->date('employment_end_date')->nullable()->comment('End date of current employment (if applicable)');
-            $table->integer('work_hours_per_week')->nullable()->comment('Number of hours worked per week');
-            $table->decimal('monthly_income', 10, 2)->nullable()->comment('Monthly income in CAD');
-            $table->boolean('is_job_related_to_program')->default(false)->comment('Indicates if current job is related to study program');
-            
-            // Previous Employment
-            $table->string('previous_job_title')->nullable()->comment('Most recent previous job title');
-            $table->string('previous_employer_name')->nullable()->comment('Most recent previous employer name');
-            $table->date('previous_employment_start_date')->nullable()->comment('Start date of previous employment');
-            $table->date('previous_employment_end_date')->nullable()->comment('End date of previous employment');
-            $table->string('reason_for_leaving')->nullable()->comment('Reason for leaving previous employment');
-            
-            // Career Goals and Development
-            $table->string('career_interest_area')->nullable()->comment('Primary area of career interest');
-            $table->string('desired_job_title')->nullable()->comment('Desired future job title or position');
-            $table->string('career_readiness_level')->nullable()->comment('Self-assessed career readiness: beginner, intermediate, advanced');
-            $table->boolean('has_career_plan')->default(false)->comment('Indicates if individual has a formal career plan');
-            
-            // Employment Support and Benefits
-            $table->boolean('is_receiving_employment_insurance')->default(false)->comment('Indicates if receiving employment insurance benefits');
-            $table->boolean('is_participating_in_work_study_program')->default(false)->comment('Indicates if participating in work-study program');
-            
-            // Employment Barriers
-            $table->text('barriers_to_employment')->nullable()->comment('Description of barriers to employment (disability, lack of experience, etc.)');
-            
-            // Status
-            $table->boolean('is_current')->default(true)->comment('Indicates if this is the current employment record');
-            */
             'current_employment' => 'nullable|array',
             'current_employment.employment_status' => 'nullable|string|max:255',
             'current_employment.is_looking_for_work' => 'boolean',
@@ -157,34 +84,6 @@ class StoreIndividualMultiStepRequest extends FormRequest
             'current_employment.barriers_to_employment' => 'nullable|string',
 
             // Identity Information Step
-            /* Identity info should collect the following:
-            
-            // Citizenship and Origin
-            $table->string('citizenship_status')->nullable()->comment('Citizenship status: citizen, permanent_resident, temporary_resident, refugee');
-            $table->string('country_of_birth')->nullable()->comment('Country where individual was born');
-            $table->string('language_spoken_at_home')->nullable()->comment('Primary language spoken at home');
-            $table->integer('years_in_country')->nullable()->comment('Number of years individual has lived in the country');
-            
-            // Immigration Status
-            $table->boolean('refugee_status')->default(false)->comment('Indicates if individual has refugee status');
-            $table->string('immigration_status')->nullable()->comment('Detailed immigration status: permanent_resident, refugee, temporary_resident, work_permit, study_permit');
-            
-            // Indigenous Identity
-            $table->boolean('indigenous_status')->default(false)->comment('Indicates whether individual identifies as Indigenous (First Nations, Métis, Inuit, etc.)');
-            $table->string('indigenous_group')->nullable()->comment('Specific Indigenous group: First Nations, Métis, Inuit, Other');
-            $table->string('band_affiliation')->nullable()->comment('Name of the band or Indigenous community affiliated with');
-            $table->string('indigenous_status_card_number')->nullable()->comment('Government-issued Indigenous status card number, if applicable');
-            $table->boolean('is_registered_with_band')->default(false)->comment('Indicates if officially registered with Indigenous band');
-            $table->boolean('on_reserve_resident')->default(false)->comment('Indicates if resides on a recognized Indigenous reserve');
-            
-            // Racial and Cultural Identity
-            $table->string('racial_identity')->nullable()->comment('Self-identified racial group: Black, East Asian, South Asian, Latinx, White, Other');
-            $table->boolean('is_visible_minority')->default(false)->comment('Indicates if identifies as member of visible minority group');
-            
-            // Support Services
-            $table->boolean('receives_indigenous_support_services')->default(false)->comment('Indicates if receives support services for Indigenous students');
-            $table->boolean('receives_minority_support_services')->default(false)->comment('Indicates if receives support services for minority groups');
-            */
             'identity' => 'nullable|array',
             'identity.citizenship_status' => 'nullable|string|max:255',
             'identity.country_of_birth' => 'nullable|string|max:255',

@@ -27,7 +27,7 @@ class UpdateIndividualMultiStepRequest extends FormRequest
 
         return [
             // General Information Step
-            'social_insurance_number' => ['required', 'string', 'max:255', new ValidSin()],
+            'social_insurance_number' => ['nullable', 'string', 'max:255', new ValidSin()],
             'government_issued_id' => 'nullable|string|max:255',
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -46,13 +46,13 @@ class UpdateIndividualMultiStepRequest extends FormRequest
             'accommodation_needs' => 'nullable|string|required_if:disability_status,true',
 
             // Address Information Step
-            'current_address' => 'required|array',
-            'current_address.address_line1' => 'required|string|max:255',
+            'current_address' => 'nullable|array',
+            'current_address.address_line1' => 'nullable|string|max:255',
             'current_address.address_line2' => 'nullable|string|max:50',
-            'current_address.city' => 'required|string|max:255',
-            'current_address.province' => 'required|string|max:255',
-            'current_address.postal_code' => 'required|string|max:20',
-            'current_address.country' => 'required|string|max:255',
+            'current_address.city' => 'nullable|string|max:255',
+            'current_address.province' => 'nullable|string|max:255',
+            'current_address.postal_code' => 'nullable|string|max:20',
+            'current_address.country' => 'nullable|string|max:255',
             
             'use_different_mailing_address' => 'boolean',
             'mailing_address' => 'nullable|array|required_if:use_different_mailing_address,true',

@@ -46,28 +46,26 @@
         </div>
         <div class="row">
           <div class="col-md-3 mb-3">
-            <label for="current_city" class="form-label">City <span class="text-danger">*</span></label>
+            <label for="current_city" class="form-label">City</label>
             <input
               id="current_city"
               v-model="currentAddress.city"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('city') }"
-              required
             />
             <div v-if="hasFieldError('city')" class="invalid-feedback">
               {{ getFieldError('city') }}
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="current_province" class="form-label">{{ isCanada(currentAddress.country) ? 'Province' : 'Province/State' }} <span class="text-danger">*</span></label>
+            <label for="current_province" class="form-label">{{ isCanada(currentAddress.country) ? 'Province' : 'Province/State' }}</label>
             <select
               v-if="isCanada(currentAddress.country)"
               id="current_province"
               v-model="currentAddress.province"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('province') }"
-              required
             >
               <option value="">Select Province</option>
               <option value="AB">Alberta</option>
@@ -92,14 +90,13 @@
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('province') }"
               placeholder="Enter province or state"
-              required
             />
             <div v-if="hasFieldError('province')" class="invalid-feedback">
               {{ hasFieldError('province') }}
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="current_postal_code" class="form-label">{{ isCanada(currentAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }} <span class="text-danger">*</span></label>
+            <label for="current_postal_code" class="form-label">{{ isCanada(currentAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }}</label>
             <input
               id="current_postal_code"
               v-model="currentAddress.postal_code"
@@ -108,7 +105,6 @@
               :class="{ 'is-invalid': hasFieldError('postal_code') }"
               :placeholder="isCanada(currentAddress.country) ? 'A1A 1A1' : 'Enter postal or ZIP code'"
               :maxlength="isCanada(currentAddress.country) ? 7 : 10"
-              required
             />
             <div v-if="hasFieldError('postal_code')" class="invalid-feedback">
               {{ hasFieldError('postal_code') }}
@@ -120,7 +116,7 @@
               label="Country"
               v-model="currentAddress.country"
               :countries="countries"
-              :required="true"
+              :required="false"
               :error="getFieldError('country')"
               placeholder="Type to search countries..."
             />
@@ -154,7 +150,7 @@
         </h6>
         <div class="row">
           <div class="col-md-7 mb-3">
-            <label for="mailing_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
+            <label for="mailing_address_line_1" class="form-label">Address Line 1</label>
             <input
               id="mailing_address_line_1"
               v-model="mailingAddress.address_line1"
@@ -162,7 +158,6 @@
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_address_line1') }"
               placeholder="Street number and name"
-              required
             />
             <div v-if="hasFieldError('mailing_address_line1')" class="invalid-feedback">
               {{ getFieldError('mailing_address_line1') }}
@@ -185,28 +180,26 @@
         </div>
         <div class="row">
           <div class="col-md-3 mb-3">
-            <label for="mailing_city" class="form-label">City <span class="text-danger">*</span></label>
+            <label for="mailing_city" class="form-label">City</label>
             <input
               id="mailing_city"
               v-model="mailingAddress.city"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_city') }"
-              required
             />
             <div v-if="hasFieldError('mailing_city')" class="invalid-feedback">
               {{ getFieldError('mailing_city') }}
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="mailing_province" class="form-label">{{ isCanada(mailingAddress.country) ? 'Province' : 'Province/State' }} <span class="text-danger">*</span></label>
+            <label for="mailing_province" class="form-label">{{ isCanada(mailingAddress.country) ? 'Province' : 'Province/State' }}</label>
             <select
               v-if="isCanada(mailingAddress.country)"
               id="mailing_province"
               v-model="mailingAddress.province"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('mailing_province') }"
-              required
             >
               <option value="">Select Province</option>
               <option value="AB">Alberta</option>
@@ -231,14 +224,13 @@
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_province') }"
               placeholder="Enter province or state"
-              required
             />
             <div v-if="hasFieldError('mailing_province')" class="invalid-feedback">
               {{ hasFieldError('mailing_province') }}
             </div>
           </div>
           <div class="col-md-3 mb-3">
-            <label for="mailing_postal_code" class="form-label">{{ isCanada(mailingAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }} <span class="text-danger">*</span></label>
+            <label for="mailing_postal_code" class="form-label">{{ isCanada(mailingAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }}</label>
             <input
               id="mailing_postal_code"
               v-model="mailingAddress.postal_code"
@@ -247,7 +239,6 @@
               :class="{ 'is-invalid': hasFieldError('mailing_postal_code') }"
               :placeholder="isCanada(mailingAddress.country) ? 'A1A 1A1' : 'Enter postal or ZIP code'"
               :maxlength="isCanada(mailingAddress.country) ? 7 : 10"
-              required
             />
             <div v-if="hasFieldError('mailing_postal_code')" class="invalid-feedback">
               {{ hasFieldError('mailing_postal_code') }}
@@ -259,7 +250,7 @@
               label="Country"
               v-model="mailingAddress.country"
               :countries="countries"
-              :required="true"
+              :required="false"
               :error="getFieldError('mailing_country')"
               placeholder="Type to search countries..."
             />

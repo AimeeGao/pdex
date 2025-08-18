@@ -15,7 +15,7 @@
         </h6>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="sin" class="form-label">Social Insurance Number (SIN) <span class="text-danger">*</span></label>
+            <label for="sin" class="form-label">Social Insurance Number (SIN)</label>
             <input
               id="sin"
               v-model="form.social_insurance_number"
@@ -24,7 +24,6 @@
               :class="{ 'is-invalid': hasFieldError('social_insurance_number') }"
               placeholder="000-000-000"
               maxlength="11"
-              required
             />
             <div v-if="hasFieldError('social_insurance_number')" class="invalid-feedback">
               {{ getFieldError('social_insurance_number') }}
