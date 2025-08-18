@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Illuminate\Support\Facades\Session;
 
 class GatewayController extends Controller
 {
@@ -45,7 +46,7 @@ class GatewayController extends Controller
                 'redirect_url' => $redirectUrl,
                 'user_idp' => $userIdp
             ]);
-            return redirect()->route('dashboard')->with('error', 'You do not have access to this application or the application URL is not configured.');
+            return redirect()->route('login')->with('error', 'You do not have access to this application or the application URL is not configured.');
         }
         
         // Get the token from user record (stored during Keycloak authentication)
@@ -58,18 +59,18 @@ class GatewayController extends Controller
                 'application_id' => $application->id,
                 'user_idp' => $userIdp
             ]);
-            return redirect()->route('dashboard')->with('error', 'Authentication token not found. Please login again.');
+            return redirect()->route('login')->with('error', 'Authentication token not found. Please login again.');
         }
         
+        $logoutUrl = Session::get('kc_logout_uri_' . $request->user()->id);
+
         // Prepare form data
         $formData = [
             'token' => $accessToken,
             'refresh_token' => $refreshToken,
             'user_type' => $userIdp,
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_name' => $user->name,
-            'api_key' => $application->api_key,
+            'ud' => $user->id,
+            'logoutUrl' => $logoutUrl
         ];
         
         // Log the redirect for auditing

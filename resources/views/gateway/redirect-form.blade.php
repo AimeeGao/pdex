@@ -71,7 +71,7 @@
         // Auto-submit the form after a brief delay
         setTimeout(function() {
             document.getElementById('redirectForm').submit();
-        }, 3000);
+        }, 2000);
     </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->validateCsrfTokens(except: ['/login']);
 
         $middleware->web(append: [
             HandleAppearance::class,
@@ -24,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Configure authentication redirection
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo('/home');
+        $middleware->redirectUsersTo('/');
 
         // Register custom middleware aliases
         $middleware->alias([
