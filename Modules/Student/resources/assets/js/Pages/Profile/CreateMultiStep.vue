@@ -187,6 +187,7 @@ const form = useForm({
   // General information
   social_insurance_number: '',
   government_issued_id: '',
+  provincial_education_number: '',
   first_name: '',
   middle_name: '',
   last_name: '',

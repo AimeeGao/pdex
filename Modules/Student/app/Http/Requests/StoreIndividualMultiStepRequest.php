@@ -25,8 +25,17 @@ class StoreIndividualMultiStepRequest extends FormRequest
         return [
 
             // General Information Step
-            'social_insurance_number' => ['nullable', 'string', 'max:255', new ValidSin()],
+            'social_insurance_number' => ['nullable', 'string', 'max:255', 
+                new ValidSin(),
+                Rule::unique('individuals', 'social_insurance_number'),
+            ],
             'government_issued_id' => 'nullable|string|max:255',
+            'provincial_education_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('individuals', 'provincial_education_number'),
+            ],
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',

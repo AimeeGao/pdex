@@ -320,6 +320,7 @@ const form = useForm({
   // General Information - flat structure to match step components
   social_insurance_number: props.individual.social_insurance_number || '',
   government_issued_id: props.individual.government_issued_id || '',
+  provincial_education_number: props.individual.provincial_education_number || '',
   first_name: props.individual.first_name || '',
   middle_name: props.individual.middle_name || '',
   last_name: props.individual.last_name || '',

@@ -17,8 +17,9 @@ return new class extends Migration
             $table->uuid('user_guid');
             $table->foreign('user_guid')->references('guid')->on('users')->onDelete('cascade');
             // Identity Numbers
-            $table->string('social_insurance_number')->nullable();
+            $table->string('social_insurance_number')->nullable()->unique();
             $table->string('government_issued_id')->nullable();
+            $table->string('provincial_education_number')->nullable()->unique();
             // Name & Contact
             $table->string('first_name');
             $table->string('middle_name')->nullable();

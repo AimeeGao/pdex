@@ -186,7 +186,7 @@
           <i class="bi bi-card-text me-2"></i>Identity Numbers
         </h6>
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
             <label for="sin" class="form-label">Social Insurance Number (SIN)</label>
             <input
               id="sin"
@@ -201,7 +201,21 @@
               {{ getFieldError('social_insurance_number') }}
             </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
+            <label for="pen_number" class="form-label">Provincial Education Number (PEN)</label>
+            <input
+              id="pen_number"
+              v-model="form.provincial_education_number"
+              type="text"
+              class="form-control"
+              :class="{ 'is-invalid': hasFieldError('provincial_education_number') }"
+              placeholder="e.g., BC Student Number"
+            />
+            <div v-if="hasFieldError('provincial_education_number')" class="invalid-feedback">
+              {{ getFieldError('provincial_education_number') }}
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
             <label for="government_id_number" class="form-label">Government ID Number</label>
             <input
               id="government_id_number"
