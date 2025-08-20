@@ -15,7 +15,7 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // FSG-style authentication routes - following exact FSG pattern
-Route::middleware('guest')->group(function () {
+// Route::middleware('guest')->group(function () {
     Route::get('/portal-login', [AuthController::class, 'portalLogin'])->name('portalLogin');
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/idir-login', [AuthController::class, 'idirLogin'])->name('idir-login');
@@ -32,7 +32,7 @@ Route::middleware('guest')->group(function () {
     Route::get('admin/auth', [AdminAuthController::class, 'redirectToKeycloak'])
         ->defaults('idp', 'idir')
         ->name('admin.auth');
-});
+// });
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {

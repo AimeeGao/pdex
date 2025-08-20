@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use App\Models\Role;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,7 +26,19 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Configure authentication redirection
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo('/');
+        // Redirect authenticated users to the dashboard allowed by their role: /ministry, /institution, /student
+
+        // $middleware->redirectUsersTo('/');
+        // Redirect authenticated users based on their role
+        $middleware->redirectUsersTo(function ($request) {
+            $user = $request->user();
+            if ($user && $user->role) {
+                // Use the Role model to determine the redirect path
+                return Role::redirectPath($user->role);
+            }
+            return '/';
+        });
+
 
         // Register custom middleware aliases
         $middleware->alias([

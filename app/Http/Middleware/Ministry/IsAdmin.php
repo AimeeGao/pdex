@@ -35,7 +35,6 @@ class IsAdmin
             Role::SUPER_ADMIN,
             Role::ADMIN_MANAGER,
             Role::APPLICATION_MANAGER,
-            Role::ADMIN_MANAGER,
         ];
 
         if (!$user->hasAnyRole($ministryAdminRoles)) {

@@ -115,4 +115,26 @@ class Role extends Model
     {
         return in_array($roleName, self::getInstitutionManagerRoles());
     }
+
+    
+    public static function redirectPath(string $role): string
+    {
+        return match ($role) {
+            self::MINISTRY_ADMIN,
+            self::MINISTRY_USER   => '/ministry',
+
+            self::INSTITUTION_USER,
+            self::INSTITUTION_ADMIN => '/institution',
+
+            self::STUDENT         => '/student',
+
+            self::SUPER_ADMIN,
+            self::ADMIN_MANAGER,
+            self::APPLICATION_MANAGER,
+            self::SECURITY_OFFICER,
+            self::PRIVACY_OFFICER => '/admin',
+
+            default               => '/', // fallback
+        };
+    }
 }

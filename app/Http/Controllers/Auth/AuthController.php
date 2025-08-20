@@ -24,7 +24,7 @@ class AuthController extends Controller
     /**
      * Display the login view - FSG style.
      */
-    public function login(Request $request): Response
+    public function login(Request $request): Response|RedirectResponse
     {
         if (Auth::check()) {
             return $this->redirectToDashboard();
