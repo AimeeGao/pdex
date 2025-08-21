@@ -26,8 +26,8 @@
                 class="admin-sidebar bg-white border-end" 
                 :class="{ 'show': sidebarVisible }"
             >
-                <div class="p-3">
-                    <h6 class="text-muted text-uppercase small fw-bold mb-3">Admin Menu</h6>
+                <div class="p-3 pe-0 ps-0">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-3 ps-3">Admin Menu</h6>
                     <AdminMenu />
                 </div>
             </aside>
