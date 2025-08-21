@@ -105,6 +105,8 @@ class Role extends Model
             self::SECURITY_OFFICER,
             self::PRIVACY_OFFICER,
             self::ADMIN_GUEST,
+            self::MINISTRY_ADMIN,
+            self::MINISTRY_USER
         ];
     }
 
@@ -115,7 +117,6 @@ class Role extends Model
     {
         return in_array($roleName, self::getInstitutionManagerRoles());
     }
-
     
     public static function redirectPath(string $role): string
     {

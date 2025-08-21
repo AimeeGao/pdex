@@ -20,29 +20,26 @@ class AdminUserController extends Controller
         // Get all admin roles
         $adminRoles = [Role::SUPER_ADMIN, Role::APPLICATION_MANAGER, Role::SECURITY_OFFICER, Role::PRIVACY_OFFICER, Role::ADMIN_GUEST];
 
-        // Get users who have admin roles and are IDIR users, excluding ministry users
-        $adminUsers = User::whereHas('roles', function($query) use ($adminRoles) {
-                $query->whereIn('name', $adminRoles);
-            })
-            ->where('identity_provider', 'idir')
-            ->whereDoesntHave('roles', function($query) {
-                $query->whereIn('name', [Role::MINISTRY_ADMIN, Role::MINISTRY_USER]);
-            })
+        $adminUsers = User::where('identity_provider', 'idir')
+            ->where('is_active', true)
+            ->where('name', 'ilike', '%' . env('MINISTRY_SHORT_NAME', 'psfs') . '%')
             ->with(['roles:id,name,display_name'])
             ->withTrashed()
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                $user->admin_roles = $user->roles->pluck('name')->toArray();
+                return $user;
+            });
 
         // Get available admin roles for assignment
         $availableRoles = Role::whereIn('name', $adminRoles)
             ->get(['id', 'name', 'display_name']);
 
-        $userCanManage = Auth::user()->hasAnyRole([Role::SUPER_ADMIN]);
-
         return Inertia::render('Admin::Users', [
             'users' => $adminUsers,
             'availableRoles' => $availableRoles,
-            'userCanManage' => $userCanManage,
+            'canManageUsers' => Auth::user()->canManageAdminUsers(),
         ]);
     }
 
@@ -51,25 +48,40 @@ class AdminUserController extends Controller
      */
     public function updateRoles(Request $request, User $user)
     {
-        $this->authorize('manageUsers');
+
+        // Debug: Log current user's roles
+        \Log::info('Current user roles', [
+            'user_id' => Auth::id(),
+            'roles' => Auth::user()->roles->pluck('name')->toArray(),
+        ]);
+
+        // Debug: Log result of canManageAdminUsers
+        \Log::info('canManageAdminUsers', [
+            'result' => Auth::user()->canManageAdminUsers()
+        ]);
+
+        $this->authorize('manageUsers', $user);
 
         $data = $request->validate([
-            'role_ids' => 'required|array',
-            'role_ids.*' => 'exists:roles,id',
+            'admin_roles' => 'required|array',
+            'admin_roles.*' => 'exists:roles,name',
         ]);
 
         // Get the role names to ensure they're admin roles
-        $roles = Role::whereIn('id', $data['role_ids'])->get();
-        $adminRoles = [Role::SUPER_ADMIN, Role::APPLICATION_MANAGER, Role::SECURITY_OFFICER, Role::PRIVACY_OFFICER, Role::ADMIN_GUEST];
+        $roles = Role::whereIn('name', $data['admin_roles'])->get();
+        $adminRoles = Role::getAdminRoles();
 
         foreach ($roles as $role) {
             if (!in_array($role->name, $adminRoles)) {
-                return back()->withErrors(['role_ids' => 'Invalid role selected. Only admin roles are allowed.']);
+                return back()->withErrors(['admin_roles' => 'Invalid role selected. Only admin roles are allowed.']);
             }
         }
 
+        // Get role ids
+        $roleIds = $roles->pluck('id')->toArray();
+
         // Sync the roles
-        $user->roles()->sync($data['role_ids']);
+        $user->roles()->sync($roleIds);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User roles updated successfully.');
@@ -80,7 +92,7 @@ class AdminUserController extends Controller
      */
     public function toggleStatus(Request $request, User $user)
     {
-        $this->authorize('manageUsers');
+        $this->authorize('manageUsers', $user);
 
         $user->update(['is_active' => !$user->is_active]);
 
@@ -95,7 +107,7 @@ class AdminUserController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->authorize('manageUsers');
+        $this->authorize('manageUsers', $user);
 
         // Prevent self-deletion
         if ($user->id === Auth::id()) {
@@ -113,7 +125,7 @@ class AdminUserController extends Controller
      */
     public function restore($id)
     {
-        $this->authorize('manageUsers');
+        $this->authorize('manageUsers', Auth::user());
 
         $user = User::withTrashed()->findOrFail($id);
         $user->restore();
@@ -127,7 +139,7 @@ class AdminUserController extends Controller
      */
     public function forceDelete($id)
     {
-        $this->authorize('manageUsers');
+        $this->authorize('manageUsers', Auth::user());
 
         $user = User::withTrashed()->findOrFail($id);
         

@@ -96,6 +96,14 @@ class User extends Authenticatable
     {
         return $this->hasAnyRole(Role::getInstitutionManagerRoles());
     }
+    
+    /**
+     * Check if user can manage admin users.
+     */
+    public function canManageAdminUsers(): bool
+    {
+        return $this->hasAnyRole([Role::SUPER_ADMIN, Role::ADMIN_MANAGER, Role::SECURITY_OFFICER]);
+    }
 
     /**
      * Check if user has admin privileges.

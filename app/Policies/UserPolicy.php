@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
@@ -14,9 +15,7 @@ class UserPolicy
      */
     public function manageUsers(User $user): bool
     {
-        return $user->hasAnyRole([
-            'Super Admin'
-        ]);
+        return $user->hasAnyRole([Role::SUPER_ADMIN, Role::ADMIN_MANAGER, Role::SECURITY_OFFICER]);
     }
 
     /**
@@ -25,10 +24,11 @@ class UserPolicy
     public function viewUsers(User $user): bool
     {
         return $user->hasAnyRole([
-            'Super Admin',
-            'Application Manager',
-            'Security Officer',
-            'Privacy Officer'
+            Role::SUPER_ADMIN,
+            Role::ADMIN_MANAGER,
+            Role::APPLICATION_MANAGER,
+            Role::SECURITY_OFFICER,
+            Role::PRIVACY_OFFICER
         ]);
     }
 }

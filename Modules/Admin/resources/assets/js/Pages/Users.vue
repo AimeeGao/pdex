@@ -26,6 +26,7 @@
         <select v-model="roleFilter" class="form-select" @change="filterUsers">
           <option value="">All Roles</option>
           <option value="Super Admin">Super Admin</option>
+          <option value="Admin Manager">Admin Manager</option>
           <option value="Application Manager">Application Manager</option>
           <option value="Security Officer">Security Officer</option>
           <option value="Privacy Officer">Privacy Officer</option>
@@ -273,6 +274,7 @@ export default {
     const loading = ref(false)
     const processing = ref(null)
     const updatingRoles = ref(false)
+    const canManageUsers = ref(pageProps.canManageUsers || false)
 
     // Search and filter
     const searchQuery = ref(props.filters?.search || '')
@@ -284,17 +286,12 @@ export default {
     const selectedRoles = ref([])
     const availableRoles = [
       'Super Admin',
+      'Admin Manager', 
       'Application Manager', 
       'Security Officer',
       'Privacy Officer',
       'Admin Guest'
     ]
-
-    // Permissions
-    const canManageUsers = computed(() => {
-      const userRoles = pageProps.auth?.user?.admin_roles || []
-      return userRoles.includes('Super Admin')
-    })
 
     // Computed properties
     const filteredUsers = computed(() => {
@@ -349,9 +346,10 @@ export default {
     const getRoleBadgeClass = (role) => {
       const classes = {
         'Super Admin': 'bg-danger',
+        'Admin Manager': 'bg-primary',
         'Application Manager': 'bg-warning text-dark',
         'Security Officer': 'bg-info',
-        'Privacy Officer': 'bg-purple text-white',
+        'Privacy Officer': 'bg-success',
         'Admin Guest': 'bg-secondary'
       }
       return classes[role] || 'bg-secondary'
@@ -360,6 +358,7 @@ export default {
     const getRoleDescription = (role) => {
       const descriptions = {
         'Super Admin': 'Full system access and user management',
+        'Admin Manager': 'Manage admin users and permissions',
         'Application Manager': 'Manage applications',
         'Security Officer': 'Security oversight and application approvals',
         'Privacy Officer': 'Privacy compliance and data protection',
