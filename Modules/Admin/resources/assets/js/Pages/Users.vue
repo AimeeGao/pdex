@@ -67,7 +67,6 @@
                 <th>Email</th>
                 <th>Roles</th>
                 <th>Status</th>
-                <th>Last Login</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -105,12 +104,6 @@
                     {{ user.is_active ? 'Active' : 'Inactive' }}
                   </span>
                   <span v-else class="badge bg-danger">Deleted</span>
-                </td>
-                <td>
-                  <span v-if="user.last_login_at" class="text-muted">
-                    {{ formatDate(user.last_login_at) }}
-                  </span>
-                  <span v-else class="text-muted">Never</span>
                 </td>
                 <td>
                   <div class="btn-group btn-group-sm" role="group">
