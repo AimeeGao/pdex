@@ -114,7 +114,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                  <div v-if="app.status" class="d-flex align-items-center">
+                  <div v-if="app.status === 'active'" class="d-flex align-items-center">
                     <a 
                       href="javascript:void(0)" 
                       @click="redirectToApp(app.id)"

@@ -175,7 +175,7 @@
               <div class="col-12">
                 <div class="d-flex">
                   <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3 me-3 flex-shrink-0">
-                    <i class="bi bi-person-shield" style="font-size: 1.25rem;"></i>
+                    <i class="bi bi-person-lock" style="font-size: 1.25rem;"></i>
                   </div>
                   <div>
                     <h6 class="fw-bold mb-2">Privacy Compliance</h6>
@@ -215,10 +215,10 @@
                 <i class="bi bi-box-arrow-in-right me-2"></i>
                 Login to PDEX
               </a>
-              <button class="btn btn-outline-light btn-lg px-5" @click="scrollToSection('contact')">
+              <a class="btn btn-outline-light btn-lg px-5" href="#contact">
                 <i class="bi bi-envelope me-2"></i>
                 Contact Support
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -242,7 +242,7 @@
             <h6 class="fw-bold mb-3">Quick Links</h6>
             <ul class="list-unstyled">
               <li><a href="/login" class="text-white text-decoration-none hover-link">Login</a></li>
-              <li><a href="#about" class="text-white text-decoration-none hover-link" @click="scrollToSection('about')">About</a></li>
+              <li><a href="#about" class="text-white text-decoration-none hover-link">About</a></li>
               <li><a href="#contact" class="text-white text-decoration-none hover-link">Contact</a></li>
             </ul>
           </div>
@@ -251,7 +251,7 @@
             <ul class="list-unstyled">
               <li class="text-white mb-2">
                 <i class="bi bi-envelope me-2"></i>
-                pdex.support@gov.bc.ca
+                requestIT@gov.bc.ca
               </li>
               <li class="text-white mb-2">
                 <i class="bi bi-telephone me-2"></i>
