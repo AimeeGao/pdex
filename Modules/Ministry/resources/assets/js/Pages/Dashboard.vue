@@ -60,8 +60,8 @@
               <div class="card-body">
                 <p class="card-text text-muted">{{ app.description }}</p>
 
-                <!-- Data Permissions Display -->
-                <div v-if="app.data_permission_groups && app.data_permission_groups.length > 0" class="mb-3">
+                <!-- Data Permissions Display - relative only to students -->
+                <!-- <div v-if="app.data_permission_groups && app.data_permission_groups.length > 0" class="mb-3">
                   <div class="small text-muted mb-2">
                     <i class="bi bi-shield-check me-1"></i>
                     <strong>Data Access Permissions:</strong>
@@ -77,7 +77,7 @@
                     View {{ getTotalPermissions(app.data_permission_groups) }} permission{{ getTotalPermissions(app.data_permission_groups) !== 1 ? 's' : '' }}
                     <i class="bi bi-arrow-right ms-1"></i>
                   </button>
-                </div>
+                </div> -->
 
                 <!-- Alert Message -->
                 <div v-if="app.alert_message" class="alert border-0 mb-3"
