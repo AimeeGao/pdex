@@ -157,6 +157,8 @@ class UserRoleTest extends TestCase
             Role::SECURITY_OFFICER,
             Role::PRIVACY_OFFICER,
             Role::ADMIN_GUEST,
+            Role::MINISTRY_ADMIN,
+            Role::MINISTRY_USER,
         ];
 
         $this->assertEquals($expectedRoles, $adminRoles);
