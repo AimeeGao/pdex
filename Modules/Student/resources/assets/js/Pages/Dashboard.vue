@@ -115,11 +115,10 @@
                     :href="app.info_url" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    class="text-decoration-none text-info"
+                    class="text-decoration-none text-primary"
                   >
-                    <i class="bi bi-info-circle me-1"></i>
+                    <i class="bi bi-info-circle"></i>
                     <small class="fw-medium">{{ app.info_label }}</small>
-                    <i class="bi bi-box-arrow-up-right ms-1"></i>
                   </a>
                 </div>
 
