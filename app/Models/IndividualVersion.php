@@ -12,19 +12,40 @@ class IndividualVersion extends Model
     protected $fillable = [
         'individual_id',
         'version_number',
-        'data',
+        'individual_data',
+        'individual_address',
+        'individual_employment',
+        'individual_identity',
         'created_by',
         'notes',
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'individual_data' => 'array',
+        'individual_address' => 'array',
+        'individual_employment' => 'array',
+        'individual_identity' => 'array',
     ];
 
     // Relationships
     public function individual()
     {
         return $this->belongsTo(Individual::class);
+    }
+
+    public function individualAddress()
+    {
+        return $this->hasOne(IndividualAddress::class);
+    }
+
+    public function individualEmployment()
+    {
+        return $this->hasOne(IndividualEmployment::class);
+    }
+
+    public function individualIdentity()
+    {
+        return $this->hasOne(IndividualIdentity::class);
     }
 
     // Static method to create a new version before updating an individual
@@ -36,7 +57,10 @@ class IndividualVersion extends Model
             return static::create([
                 'individual_id' => $individual->id,
                 'version_number' => $nextVersion,
-                'data' => $individual->toArray(),
+                'individual_data' => $individual->toArray(),
+                'individual_address' => $individual->address->toArray(),
+                'individual_employment' => $individual->employment->toArray(),
+                'individual_identity' => $individual->identity->toArray(),
                 'created_by' => $createdBy ?: auth()->user()?->guid,
                 'notes' => $notes ?: 'Profile updated',
             ]);
@@ -84,11 +108,23 @@ class IndividualVersion extends Model
         static::createVersion($individual, "Restored to version {$this->version_number}");
         
         // Update individual with this version's data
-        $restoreData = $this->data;
-        unset($restoreData['id'], $restoreData['created_at'], $restoreData['updated_at']);
-        
-        $individual->update($restoreData);
-        
+        $individualData = $this->individual_data;
+        $employmentData = $this->individual_employment;
+        $addressData = $this->individual_address;
+        $identityData = $this->individual_identity;
+
+        // Unset unnecessary fields
+        unset($individualData['id'], $individualData['created_at'], $individualData['updated_at']);
+        unset($employmentData['id'], $employmentData['created_at'], $employmentData['updated_at']);
+        unset($addressData['id'], $addressData['created_at'], $addressData['updated_at']);
+        unset($identityData['id'], $identityData['created_at'], $identityData['updated_at']);
+
+        // Update individual with this version's data
+        $individual->update($individualData);
+        $individual->address()->update($addressData);
+        $individual->employment()->update($employmentData);
+        $individual->identity()->update($identityData);
+
         return $individual->fresh();
     }
 }

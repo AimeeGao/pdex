@@ -14,25 +14,18 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 // Support both GET and POST for logout for compatibility
 Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
-// FSG-style authentication routes - following exact FSG pattern
-// Route::middleware('guest')->group(function () {
-    Route::get('/portal-login', [AuthController::class, 'portalLogin'])->name('portalLogin');
-    Route::get('/login', [AuthController::class, 'login'])->name('login');
-    Route::get('/idir-login', [AuthController::class, 'idirLogin'])->name('idir-login');
-    Route::get('/bceid-login', [AuthController::class, 'bceidLogin'])->name('bceid-login');
-    Route::get('/bcsc-login', [AuthController::class, 'bcscLogin'])->name('bcsc-login');
-    
+Route::get('/portal-login', [AuthController::class, 'portalLogin'])->name('portalLogin');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/idir-login', [AuthController::class, 'idirLogin'])->name('idir-login');
+Route::get('/bceid-login', [AuthController::class, 'bceidLogin'])->name('bceid-login');
+Route::get('/bcsc-login', [AuthController::class, 'bcscLogin'])->name('bcsc-login');
 
-    // Handle SSO callback
-    // Route::get('/callback', [AuthController::class, 'callback'])->name('callback');
-    
-    // Admin login routes
-    Route::get('admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
-    Route::get('admin/applogin', [AdminAuthController::class, 'redirectToKeycloak'])->name('admin.callback');
-    Route::get('admin/auth', [AdminAuthController::class, 'redirectToKeycloak'])
-        ->defaults('idp', 'idir')
-        ->name('admin.auth');
-// });
+// Admin login routes
+Route::get('admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
+Route::get('admin/applogin', [AdminAuthController::class, 'redirectToKeycloak'])->name('admin.callback');
+Route::get('admin/auth', [AdminAuthController::class, 'redirectToKeycloak'])
+    ->defaults('idp', 'idir')
+    ->name('admin.auth');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {

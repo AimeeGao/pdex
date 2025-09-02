@@ -106,7 +106,7 @@
                     rel="noopener noreferrer"
                     class="text-decoration-none text-primary"
                   >
-                    <i class="bi bi-info-circle"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <small class="fw-medium">{{ app.info_label }}</small>
                   </a>
                 </div>

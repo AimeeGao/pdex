@@ -43,7 +43,7 @@ class Role extends Model
     }
 
     /**
-     * FSG-style role constants
+     * role constants
      */
     public const MINISTRY_ADMIN = 'Ministry Admin';
     public const MINISTRY_USER = 'Ministry User';

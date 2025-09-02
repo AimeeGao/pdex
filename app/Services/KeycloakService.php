@@ -32,7 +32,7 @@ class KeycloakService
             'scope' => 'openid profile email',
         ];
 
-        // Add identity provider hint for FSG authentication
+        // Add identity provider hint for authentication
         if ($idp) {
             $options['kc_idp_hint'] = $idp;
         }
@@ -82,7 +82,7 @@ class KeycloakService
     }
 
     /**
-     * Find or create user based on Keycloak data (FSG pattern).
+     * Find or create user based on Keycloak data.
      */
     private function findOrCreateUser(array $userData): User
     {
@@ -106,7 +106,7 @@ class KeycloakService
             $user = new User();
         }
 
-        // Update user data following FSG pattern
+        // Update user data following
         $user->keycloak_id = $keycloakId;
         $user->email = $email;
         $user->name = $userData['name'] ?? $userData['preferred_username'] ?? $email;
@@ -114,7 +114,7 @@ class KeycloakService
         $user->given_name = $userData['given_name'] ?? null;
         $user->family_name = $userData['family_name'] ?? null;
 
-        // Identity provider detection (FSG pattern)
+        // Identity provider detection
         $identityProvider = $this->detectIdentityProvider($userData);
         $user->identity_provider = $identityProvider;
 
@@ -143,7 +143,7 @@ class KeycloakService
     }
 
     /**
-     * Detect identity provider from Keycloak claims (FSG pattern).
+     * Detect identity provider from Keycloak claims
      */
     private function detectIdentityProvider(array $userData): string
     {
@@ -167,7 +167,7 @@ class KeycloakService
     }
 
     /**
-     * Assign roles to user based on Keycloak claims (FSG pattern).
+     * Assign roles to user based on Keycloak claims
      */
     private function assignRoles(User $user, array $userData): void
     {

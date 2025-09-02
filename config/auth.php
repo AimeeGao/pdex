@@ -117,7 +117,7 @@ return [
     | Keycloak Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuration for Keycloak SSO integration following FSG pattern.
+    | Configuration for Keycloak SSO integration.
     | These values should be set in your .env file.
     |
     */

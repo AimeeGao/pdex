@@ -15,11 +15,16 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('individual_id')->index();
             $table->integer('version_number')->default(1);
-            $table->json('data'); // Store the complete individual data as JSON
+            $table->json('individual_data'); // Store the complete individual data as JSON
+            $table->json('individual_data'); // Store the complete individual data as JSON
+            $table->json('individual_data'); // Store the complete individual data as JSON
+            $table->json('individual_address'); // Store the complete individual address as JSON
+            $table->json('individual_employment'); // Store the complete individual employment as JSON
+            $table->json('individual_identity'); // Store the complete individual identity as JSON
             $table->string('created_by')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             // Foreign key constraint
             $table->foreign('individual_id')->references('id')->on('individuals')->onDelete('cascade');
             

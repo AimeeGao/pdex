@@ -16,9 +16,9 @@
 
 <p align="center">
 
-  | Project Lead   | Security Officer | Project Owner   | Business Analyst |
-  | -------------- | ---------------- | --------------- | ---------------- |
-  | Kal Marsh      | David Malcolm    | Nino Samson |        |
+  | Project Lead   | Security Officer | Project Owner   |
+  | -------------- | ---------------- | --------------- |
+  | Kal Marsh      | David Malcolm    | Nino Samson |
 
 </p>
 

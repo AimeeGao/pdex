@@ -22,7 +22,7 @@ class AuthController extends Controller
     ) {}
 
     /**
-     * Display the login view - FSG style.
+     * Display the login view.
      */
     public function login(Request $request): Response|RedirectResponse
     {
@@ -55,24 +55,8 @@ class AuthController extends Controller
         return $this->loginUser($request, $provider);
     }
 
-    // /**
-    //  * IDIR/Government staff login - FSG style.
-    //  */
-    // public function appLogin(Request $request)
-    // {
-    //     $provider = new Keycloak([
-    //         'authServerUrl' => config('auth.keycloak.auth_server_url'),
-    //         'realm' => config('auth.keycloak.realm'),
-    //         'clientId' => config('auth.keycloak.client_id'),
-    //         'clientSecret' => config('auth.keycloak.client_secret'),
-    //         'redirectUri' => config('auth.keycloak.redirect_uri'),
-    //     ]);
-
-    //     return $this->loginUser($request, $provider, 'idir');
-    // }
-
     /**
-     * IDIR/Government staff login - FSG style.
+     * IDIR/Government staff login.
      */
     public function idirLogin(Request $request)
     {
@@ -89,7 +73,7 @@ class AuthController extends Controller
     }
 
     /**
-     * BC Services Card login - FSG style.
+     * BC Services Card login.
      */
     public function bcscLogin(Request $request)
     {
@@ -106,7 +90,7 @@ class AuthController extends Controller
     }
 
     /**
-     * BCeID login - FSG style.
+     * BCeID login.
      */
     public function bceidLogin(Request $request)
     {
@@ -123,7 +107,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle OAuth login flow - FSG style.
+     * Handle OAuth login flow.
      */
     private function loginUser(Request $request, $provider, string $idpType = null)
     {
@@ -241,7 +225,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Find or create user based on identity provider - FSG style.
+     * Find or create user based on identity provider.
      * @return array|null [User, idpType] or null
      */
     private function findOrCreateUser(array $providerUser, $token = null, Request $request = null): ?array
@@ -311,7 +295,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Create new user - FSG style.
+     * Create new user.
      */
     private function createNewUser(array $providerUser, string $idpType, $token = null): User
     {
@@ -409,7 +393,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Log the user out - FSG style (handles both GET and POST).
+     * Log the user out (handles both GET and POST).
      */
     public function logout(Request $request): RedirectResponse
     {
@@ -481,12 +465,6 @@ class AuthController extends Controller
     private function redirectToDashboard(): RedirectResponse
     {
         $user = Auth::user();
-        // $intendedUrl = session('intended_url');
-        
-        // if ($intendedUrl) {
-        //     session()->forget('intended_url');
-        //     return redirect($intendedUrl);
-        // }
 
         // Check if user is inactive (Admin Guest status)
         if (!$user->is_active && $user->hasRole(Role::ADMIN_GUEST)) {
@@ -527,11 +505,8 @@ class AuthController extends Controller
             return redirect()->route('student.dashboard');
         }
 
-
         // Default dashboard for other cases
         return redirect()->route('login')
             ->withErrors(['error' => 'Could not access dashboard. Please contact an administrator. Error #0082940']);
-
-        // return redirect()->route('dashboard');
     }
 }

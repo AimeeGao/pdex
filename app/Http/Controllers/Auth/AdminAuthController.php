@@ -48,7 +48,7 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * Redirect to Keycloak for admin authentication (FSG pattern).
+     * Redirect to Keycloak for admin authentication.
      */
     public function redirectToKeycloak(Request $request): RedirectResponse|Response
     {
