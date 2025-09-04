@@ -9,6 +9,7 @@ ARG DEVENV=prod
 # set entrypoint variables
 ENV USER_NAME=${USER_ID}
 ENV USER_HOME=/var/www/html
+ENV PSYSH_CONFIG_DIR=/tmp
 
 ENV APACHE_REMOTE_IP_HEADER=X-Forwarded-For
 # BC Gov Silver and Gold clusters specific proxy configuration
@@ -135,9 +136,9 @@ RUN mkdir -p storage && mkdir -p bootstrap/cache && chmod -R ug+rwx storage boot
     && chmod 755 /var/www/html/probe-check.sh \
     && cd /var/www/html/public && chmod 644 mix-manifest.json \
     && mkdir /.npm && mkdir /.npm/_cache && chown -R 1001:0 "/.npm" \
-    && mkdir -p /.config/psysh && chown -R 1001:root /.config && chmod -R 755 /.config \
+    && mkdir -p /.config/psysh && chown -R 1001:root /.config && chmod -R 775 /.config \
     && mkdir -p /.composer && chown -R 1001:root /.composer && chmod -R 755 /.composer \
-    && echo "<?php return ['runtimeDir' => '/tmp'];" >> /.config/psysh/config.php \
+    && echo "<?php return ['runtimeDir' => '/tmp', 'configDir' => '/tmp', 'dataDir' => '/tmp'];" >> /.config/psysh/config.php \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && chmod 755 /sbin/entrypoint.sh

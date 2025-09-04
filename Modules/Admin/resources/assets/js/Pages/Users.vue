@@ -19,11 +19,10 @@
           type="text"
           class="form-control"
           placeholder="Search users..."
-          @input="debouncedSearch"
         />
       </div>
       <div class="col-md-3">
-        <select v-model="roleFilter" class="form-select" @change="filterUsers">
+        <select v-model="roleFilter" class="form-select">
           <option value="">All Roles</option>
           <option value="Super Admin">Super Admin</option>
           <option value="Admin Manager">Admin Manager</option>
@@ -34,12 +33,24 @@
         </select>
       </div>
       <div class="col-md-3">
-        <select v-model="statusFilter" class="form-select" @change="filterUsers">
+        <select v-model="statusFilter" class="form-select">
           <option value="">All Users</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
           <option value="deleted">Deleted</option>
         </select>
+      </div>
+      <div class="col-md-2">
+        <button 
+          type="button" 
+          class="btn btn-primary w-100" 
+          @click="filterUsers"
+          :disabled="loading"
+        >
+          <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i v-else class="bi bi-funnel me-2"></i>
+          Filter
+        </button>
       </div>
     </div>
 
@@ -241,7 +252,6 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import Authenticated from '../Layouts/Authenticated.vue';
 import AdminMenu from '../Components/Menu.vue';
-import { debounce } from 'lodash'
 
 export default {
   name: 'UsersIndex',
@@ -288,40 +298,13 @@ export default {
 
     // Computed properties
     const filteredUsers = computed(() => {
-      let filtered = users.value
-
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(user => 
-          (user.display_name || user.name || '').toLowerCase().includes(query) ||
-          (user.email || '').toLowerCase().includes(query)
-        )
-      }
-
-      if (roleFilter.value) {
-        filtered = filtered.filter(user => 
-          user.admin_roles && user.admin_roles.includes(roleFilter.value)
-        )
-      }
-
-      if (statusFilter.value) {
-        if (statusFilter.value === 'active') {
-          filtered = filtered.filter(user => user.is_active && !user.deleted_at)
-        } else if (statusFilter.value === 'inactive') {
-          filtered = filtered.filter(user => !user.is_active && !user.deleted_at)
-        } else if (statusFilter.value === 'deleted') {
-          filtered = filtered.filter(user => user.deleted_at)
-        }
-      }
-
-      return filtered
+      // Since we're doing server-side filtering now, just return the users as-is
+      return users.value
     })
 
-    const debouncedSearch = debounce(() => {
-      filterUsers()
-    }, 300)
-
     const filterUsers = () => {
+      loading.value = true
+      
       router.get('/admin/users', {
         search: searchQuery.value,
         role: roleFilter.value,
@@ -332,6 +315,9 @@ export default {
         only: ['users'],
         onSuccess: (page) => {
           users.value = page.props.users
+        },
+        onFinish: () => {
+          loading.value = false
         }
       })
     }
@@ -509,7 +495,6 @@ export default {
       availableRoles,
       canManageUsers,
       filteredUsers,
-      debouncedSearch,
       filterUsers,
       getRoleBadgeClass,
       getRoleDescription,

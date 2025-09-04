@@ -15,22 +15,59 @@ class AdminUserController extends Controller
     /**
      * Display a listing of admin users.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        // Get filter parameters from request
+        $search = $request->get('search');
+        $roleFilter = $request->get('role');
+        $statusFilter = $request->get('status');
+
         // Get all admin roles
         $adminRoles = [Role::SUPER_ADMIN, Role::APPLICATION_MANAGER, Role::SECURITY_OFFICER, Role::PRIVACY_OFFICER, Role::ADMIN_GUEST];
 
-        $adminUsers = User::where('identity_provider', 'idir')
-            ->where('is_active', true)
+        // Start building the query
+        $query = User::where('identity_provider', 'idir')
             ->where('name', 'ilike', '%' . env('MINISTRY_SHORT_NAME', 'psfs') . '%')
             ->with(['roles:id,name,display_name'])
             ->withTrashed()
-            ->orderBy('name')
-            ->get()
-            ->map(function ($user) {
-                $user->admin_roles = $user->roles->pluck('name')->toArray();
-                return $user;
+            ->orderBy('name');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', '%' . $search . '%')
+                  ->orWhere('email', 'ilike', '%' . $search . '%')
+                  ->orWhere('display_name', 'ilike', '%' . $search . '%');
             });
+        }
+
+        // Apply status filter
+        if ($statusFilter) {
+            switch ($statusFilter) {
+                case 'active':
+                    $query->where('is_active', true)->whereNull('deleted_at');
+                    break;
+                case 'inactive':
+                    $query->where('is_active', false)->whereNull('deleted_at');
+                    break;
+                case 'deleted':
+                    $query->whereNotNull('deleted_at');
+                    break;
+                // If no status filter or "All Users", don't add any additional where clause
+            }
+        }
+
+        $adminUsers = $query->get()->map(function ($user) {
+            $user->admin_roles = $user->roles->pluck('name')->toArray();
+            return $user;
+        });
+
+        // Apply role filter (done after query to filter by role relationships)
+        if ($roleFilter) {
+            $adminUsers = $adminUsers->filter(function ($user) use ($roleFilter) {
+                return in_array($roleFilter, $user->admin_roles);
+            })->values(); // Reset array keys
+        }
 
         // Get available admin roles for assignment
         $availableRoles = Role::whereIn('name', $adminRoles)
@@ -40,6 +77,11 @@ class AdminUserController extends Controller
             'users' => $adminUsers,
             'availableRoles' => $availableRoles,
             'canManageUsers' => Auth::user()->canManageAdminUsers(),
+            'filters' => [
+                'search' => $search,
+                'role' => $roleFilter,
+                'status' => $statusFilter,
+            ],
         ]);
     }
 
