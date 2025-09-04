@@ -5,6 +5,8 @@ namespace Modules\Admin\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\ApplicationDataPermission;
+use App\Models\ApplicationIndividualPermission;
+use App\Models\ApplicationApiPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -77,57 +79,106 @@ class ApplicationController extends Controller
 
     public function edit(Application $application)
     {
+        // Load both individual and API permissions
+        $individualPermissions = $application->individualPermissions()->get();
+        $apiPermissions = $application->apiPermissions()->get();
+        
+        // Combine permissions for backward compatibility with frontend
+        $combinedPermissions = $individualPermissions->merge($apiPermissions);
+        
         return Inertia::render('Admin::ApplicationsEdit', [
             'application' => $application->load([
                 'securityApprover:id,name',
-                'privacyApprover:id,name',
-                'dataPermissions'
-            ]),
+                'privacyApprover:id,name'
+            ])->setRelation('data_permissions', $combinedPermissions),
             'auth' => [
                 'user' => auth()->user()->load('roles'),
             ],
-            'availableDataTables' => ApplicationDataPermission::getAvailableTables(),
+            'availableDataTables' => ApplicationIndividualPermission::getIndividualTables(),
+            'apiAccessTables' => ApplicationApiPermission::getApiAccessTables(),
         ]);
     }
 
     public function update(ApplicationUpdateRequest $request, Application $application)
     {
-        $originalData = $application->toArray();
-        $data = $request->validated();
+        try {
+            $originalData = $application->toArray();
+            $data = $request->validated();
 
-        // Extract data permissions from the validated data
-        $dataPermissions = $data['data_permissions'] ?? [];
-        unset($data['data_permissions']);
+            // Extract data permissions from the validated data
+            $dataPermissions = $data['data_permissions'] ?? [];
+            unset($data['data_permissions']);
 
-        $application->update($data);
+            $application->update($data);
 
-        // Handle data permissions
-        if (isset($dataPermissions)) {
-            // Delete existing permissions for this application
-            $application->dataPermissions()->delete();
+            // Handle data permissions - separate individual and API permissions
+            if (isset($dataPermissions)) {
+                // Delete existing permissions for this application
+                $application->individualPermissions()->delete();
+                $application->apiPermissions()->delete();
 
-            // Create new permissions
-            foreach ($dataPermissions as $permission) {
-                if ($permission['can_read'] || $permission['can_write']) {
-                    $application->dataPermissions()->create([
+                // Separate permissions by source (Data Access vs API Access)
+                $individualPermissions = [];
+                $apiPermissions = [];
+
+                foreach ($dataPermissions as $permission) {
+                    if ($permission['can_read'] || $permission['can_write']) {
+                        // Check if this permission came from the Data Access Permissions section
+                        // (these use Required/Optional and have is_required field)
+                        if (isset($permission['is_required'])) {
+                            $individualPermissions[] = $permission;
+                        } else {
+                            // This came from API Access Permissions section (Read/Write system)
+                            $apiPermissions[] = $permission;
+                        }
+                    }
+                }
+
+                // Create individual permissions (Data Access Permissions)
+                foreach ($individualPermissions as $permission) {
+                    $application->individualPermissions()->create([
                         'table_name' => $permission['table_name'],
                         'column_name' => $permission['column_name'],
-                        'display_name' => $permission['display_name'] ?? ApplicationDataPermission::generateDisplayName($permission['column_name']),
+                        'display_name' => $permission['display_name'] ?? ucwords(str_replace('_', ' ', $permission['column_name'])),
+                        'can_read' => $permission['can_read'] ?? false,
+                        'can_write' => $permission['can_write'] ?? false,
+                        'is_required' => $permission['is_required'] ?? false,
+                    ]);
+                }
+
+                // Create API permissions (API Access Permissions)
+                foreach ($apiPermissions as $permission) {
+                    $application->apiPermissions()->create([
+                        'table_name' => $permission['table_name'],
+                        'column_name' => $permission['column_name'],
+                        'display_name' => $permission['display_name'] ?? ucwords(str_replace('_', ' ', $permission['column_name'])),
                         'can_read' => $permission['can_read'] ?? false,
                         'can_write' => $permission['can_write'] ?? false,
                     ]);
                 }
             }
+
+            // Get the changes that were made
+            $changes = array_diff_assoc($data, $originalData);
+
+            // Dispatch event
+            ApplicationUpdated::dispatch($application, $changes);
+
+            return back()
+                ->with('success', 'Application updated successfully.');
+                
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Application update failed: ' . $e->getMessage(), [
+                'application_id' => $application->id,
+                'user_id' => auth()->id(),
+                'error' => $e->getTraceAsString()
+            ]);
+
+            return back()
+                ->with('error', 'Failed to update application. Please try again or contact support if the problem persists.')
+                ->withInput();
         }
-
-        // Get the changes that were made
-        $changes = array_diff_assoc($data, $originalData);
-
-        // Dispatch event
-        ApplicationUpdated::dispatch($application, $changes);
-
-        return redirect()->route('admin.applications.index')
-            ->with('success', 'Application updated successfully.');
     }
 
     public function approverUpdate(ApplicationManagerUpdateRequest $request, Application $application)

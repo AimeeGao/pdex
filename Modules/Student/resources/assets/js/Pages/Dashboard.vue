@@ -78,17 +78,6 @@
                   </button>
                 </div>
 
-                <!-- Profile Completeness Alert -->
-                <div v-if="app.status === 'active' && !app.profile_complete" class="alert alert-warning border-0 mb-3">
-                  <div class="d-flex align-items-start">
-                    <i class="bi bi-exclamation-triangle text-warning me-2 mt-1"></i>
-                    <div class="small">
-                      <strong>Profile Update Required:</strong><br>
-                      {{ app.missing_data_message }}
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Alert Message -->
                 <div v-if="app.alert_message" class="alert border-0 mb-3"
                      :class="{
@@ -123,8 +112,8 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                  <!-- Profile Complete - Show Launch Button -->
-                  <div v-if="app.status === 'active' && app.profile_complete" class="d-flex align-items-center">
+                  <!-- Profile Complete or No Permissions - Show Launch Button -->
+                  <div v-if="app.status === 'active' && (app.profile_complete || !app.has_permissions)" class="d-flex align-items-center">
                     <a 
                       href="javascript:void(0)" 
                       @click="redirectToApp(app.id)"
@@ -136,16 +125,16 @@
                     </a>
                   </div>
 
-                  <!-- Profile Incomplete - Show Update Profile Link -->
-                  <div v-else-if="app.status === 'active' && !app.profile_complete" class="d-flex align-items-center">
+                  <!-- Profile Incomplete but has permissions - Show Modal Launch Button -->
+                  <div v-else-if="app.status === 'active' && !app.profile_complete && app.has_permissions" class="d-flex align-items-center">
                     <a 
-                      href="/student/profile"
-                      class="text-decoration-none text-warning d-flex align-items-center"
-                      :title="app.missing_data_message"
+                      href="javascript:void(0)" 
+                      @click="redirectToApp(app.id)"
+                      class="text-decoration-none text-primary d-flex align-items-center"
                     >
-                      <div class="bg-warning rounded-circle me-2" style="width: 8px; height: 8px;"></div>
-                      <small class="fw-semibold">Update Profile</small>
-                      <i class="bi bi-arrow-right ms-2"></i>
+                      <div class="bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                      <small class="fw-semibold">Click to Launch</small>
+                      <i class="bi bi-box-arrow-up-right ms-2"></i>
                     </a>
                   </div>
 
@@ -210,11 +199,196 @@
       :application-name="app.name"
       :permission-groups="app.data_permission_groups || []"
     />
+
+    <!-- Application Launch Modal -->
+    <div 
+      v-if="selectedApp"
+      class="modal fade" 
+      :class="{ show: showModal }"
+      :style="{ display: showModal ? 'block' : 'none' }"
+      tabindex="-1" 
+      aria-labelledby="applicationModalLabel" 
+      aria-hidden="true"
+      @click.self="closeModal"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title" id="applicationModalLabel">
+              <i class="bi bi-rocket-takeoff me-2 text-primary"></i>
+              Launch {{ selectedApp.name }}
+            </h5>
+            <button 
+              type="button" 
+              class="btn-close" 
+              @click="closeModal"
+              aria-label="Close"
+            ></button>
+          </div>
+          
+          <div class="modal-body">
+            <!-- Info Message -->
+            <div class="alert alert-info border-0 mb-4">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle text-info me-3 mt-1 fs-5"></i>
+                <div>
+                  <h6 class="alert-heading mb-2">Application Data Requirements</h6>
+                  <p class="mb-0">
+                    <strong>{{ selectedApp.name }}</strong> will request the following information from you during the application process. 
+                    You can choose to share your PDEX profile data to pre-fill these fields, or provide the information directly to the application.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Required Fields List -->
+            <div v-if="getRequiredFields(selectedApp).length > 0" class="mb-4">
+              <h6 class="text-danger mb-3">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Required Information
+              </h6>
+              <div class="list-group list-group-flush border rounded">
+                <div 
+                  v-for="field in getRequiredFields(selectedApp)" 
+                  :key="`required-${field}`"
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-asterisk text-danger me-2 small"></i>
+                    <span>{{ getFieldLabel(field) }}</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <span v-if="hasProfileValue(field)" class="badge bg-success">
+                      <i class="bi bi-check2 me-1"></i>Available
+                    </span>
+                    <span v-else class="badge bg-warning">
+                      <i class="bi bi-exclamation-triangle me-1"></i>Missing
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Optional Fields List -->
+            <div v-if="getOptionalFields(selectedApp).length > 0" class="mb-4">
+              <h6 class="text-primary mb-3">
+                <i class="bi bi-plus-circle me-1"></i>
+                Optional Information
+              </h6>
+              <div class="list-group list-group-flush border rounded">
+                <div 
+                  v-for="field in getOptionalFields(selectedApp)" 
+                  :key="`optional-${field}`"
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-plus text-primary me-2 small"></i>
+                    <span>{{ getFieldLabel(field) }}</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <span v-if="hasProfileValue(field)" class="badge bg-success">
+                      <i class="bi bi-check2 me-1"></i>Available
+                    </span>
+                    <span v-else class="badge bg-secondary">
+                      <i class="bi bi-dash me-1"></i>Not Set
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Profile Section -->
+            <div v-if="hasMissingRequiredFields(selectedApp)" class="alert alert-warning border-0 mb-4">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-exclamation-triangle text-warning me-3 mt-1"></i>
+                <div class="flex-grow-1">
+                  <h6 class="alert-heading mb-2">Profile Update Recommended</h6>
+                  <p class="mb-3">Some required fields are missing from your profile. You can update your profile now or provide this information directly to the application.</p>
+                  <button type="button" class="btn btn-warning btn-sm" @click="updateProfileFirst">
+                    <i class="bi bi-person-gear me-1"></i>
+                    Update Profile First
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Share Profile Option -->
+            <div class="card border-primary border-opacity-25 mb-4">
+              <div class="card-body">
+                <div class="form-check">
+                  <input
+                    id="shareProfileCheck"
+                    v-model="shareProfile"
+                    class="form-check-input"
+                    type="checkbox"
+                  >
+                  <label class="form-check-label fw-medium" for="shareProfileCheck">
+                    <i class="bi bi-share me-1"></i>
+                    Share my PDEX profile information with {{ selectedApp.name }}
+                  </label>
+                </div>
+                <div class="form-text mt-2">
+                  <div v-if="shareProfile" class="text-success">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Your available profile data will be shared to pre-fill application fields.
+                  </div>
+                  <div v-else class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    You will need to provide all required information directly to the application.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Fields Message -->
+            <div v-if="getRequiredFields(selectedApp).length === 0 && getOptionalFields(selectedApp).length === 0" class="text-center py-4">
+              <i class="bi bi-info-circle text-primary fs-2 mb-3"></i>
+              <h6>No Additional Information Required</h6>
+              <p class="text-muted">This application doesn't require any additional information from your profile.</p>
+            </div>
+          </div>
+          
+          <div class="modal-footer border-top">
+            <button 
+              type="button" 
+              class="btn btn-secondary" 
+              @click="closeModal"
+            >
+              <i class="bi bi-x-circle me-1"></i>
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-primary"
+              :disabled="form.processing"
+              @click="launchApplication"
+            >
+              <span v-if="form.processing">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Launching...
+              </span>
+              <span v-else>
+                <i class="bi bi-rocket-takeoff me-1"></i>
+                Launch {{ selectedApp.name }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div 
+      v-if="showModal" 
+      class="modal-backdrop fade show"
+      @click="closeModal"
+    ></div>
   </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '../Layouts/Authenticated.vue'
 import DataPermissionsOffcanvas from '@/Components/DataPermissionsOffcanvas.vue'
 
@@ -227,15 +401,287 @@ const props = defineProps({
   user: {
     type: Object,
     required: true
+  },
+  profileData: {
+    type: Object,
+    default: null
   }
 })
 
-// Methods
+// Reactive state
+const selectedApp = ref(null)
+const showModal = ref(false)
+const shareProfile = ref(true) // Default to sharing profile
+
+// Form state using Inertia's useForm
+const form = useForm({
+  share_profile: true,
+  profile_data: null
+})
+
+// Watch for changes to help debug
+watch(selectedApp, (newApp) => {
+  if (newApp) {
+    console.log('Selected app changed:', newApp)
+    console.log('App permissions:', newApp.application_individual_permissions)
+    console.log('App data_permission_groups:', newApp.data_permission_groups)
+    
+    // Debug the computed fields
+    const required = getRequiredFields(newApp)
+    const optional = getOptionalFields(newApp)
+    console.log('Computed required fields:', required)
+    console.log('Computed optional fields:', optional)
+  }
+})
+
+watch(() => props.profileData, (newData) => {
+  console.log('Profile data changed:', newData)
+}, { deep: true })
+
 const redirectToApp = (appId) => {
-  if (appId) {
-    // Use the centralized gateway route and open in new tab
+  const app = props.applications.find(a => a.id === appId)
+  
+  if (!app) return
+  
+  // If application has permissions, show modal instead of direct redirect
+  if (app.has_permissions) {
+    selectedApp.value = app
+    prepareFormData(app)
+    showModal.value = true
+  } else {
+    // Direct redirect for apps without permissions
     window.open(`/gateway/${appId}`, '_blank')
   }
+}
+
+const prepareFormData = (app) => {
+  // Reset form data and default to sharing profile
+  shareProfile.value = true
+  form.share_profile = true
+  form.profile_data = props.profileData
+  
+  // Debug: log the app data and what fields we're getting
+  console.log('App data:', app)
+  console.log('Required fields:', getRequiredFields(app))
+  console.log('Optional fields:', getOptionalFields(app))
+  console.log('Profile data:', props.profileData)
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedApp.value = null
+  shareProfile.value = true
+  form.reset()
+  form.clearErrors()
+}
+
+const canSubmit = () => {
+  // Always allow submission since we're not requiring form completion
+  return !form.processing
+}
+
+// Watch for shareProfile changes and update form
+watch(shareProfile, (newValue) => {
+  form.share_profile = newValue
+  form.profile_data = newValue ? props.profileData : null
+})
+
+const hasProfileValue = (field) => {
+  if (!props.profileData) return false
+  
+  // Define field mappings to profile sections
+  const fieldMappings = {
+    // General/Individual fields
+    'first_name': 'general',
+    'last_name': 'general', 
+    'middle_name': 'general',
+    'preferred_first_name': 'general',
+    'preferred_last_name': 'general',
+    'preferred_name': 'general',
+    'date_of_birth': 'general',
+    'gender': 'general',
+    'preferred_pronouns': 'general',
+    'phone': 'general',
+    'phone_number': 'general',
+    'alternate_phone': 'general',
+    'alternate_phone_number': 'general',
+    'email': 'general',
+    'email_address': 'general',
+    'alternate_email': 'general',
+    'government_issued_id': 'general',
+    'social_insurance_number': 'general',
+    'provincial_education_number': 'general',
+    'disability_status': 'general',
+    'accommodation_needs': 'general',
+    
+    // Address fields - check if any address exists
+    'street_address_1': 'addresses',
+    'address_line1': 'addresses',
+    'street_address_2': 'addresses', 
+    'address_line2': 'addresses',
+    'city': 'addresses',
+    'province_state': 'addresses',
+    'province': 'addresses',
+    'postal_zip_code': 'addresses',
+    'postal_code': 'addresses',
+    'country': 'addresses',
+    
+    // Employment fields - check if any employment exists  
+    'employer_name': 'employments',
+    'position_title': 'employments',
+    'job_title': 'employments',
+    'industry': 'employments',
+    'employer_industry': 'employments',
+    'employment_status': 'employments',
+    'start_date': 'employments',
+    'employment_start_date': 'employments',
+    'end_date': 'employments',
+    'employment_end_date': 'employments',
+    'is_current': 'employments',
+    'is_receiving_employment_insurance': 'employments',
+    'is_participating_in_work_study_program': 'employments',
+    'is_looking_for_work': 'employments',
+    'work_hours_per_week': 'employments',
+    'monthly_income': 'employments',
+    'is_job_related_to_program': 'employments',
+    'has_career_plan': 'employments',
+    
+    // Identity fields - check if any identity exists
+    'identity_type': 'identities',
+    'identity_number': 'identities',
+    'issuing_country': 'identities',
+    'issuing_province_state': 'identities',
+    'issue_date': 'identities',
+    'expiry_date': 'identities',
+    'citizenship_status': 'identities',
+    'country_of_birth': 'identities',
+    'indigenous_status': 'identities',
+    'racial_identity': 'identities'
+  }
+  
+  const section = fieldMappings[field]
+  
+  if (!section) {
+    // Field not mapped, try direct access as fallback
+    const value = props.profileData[field]
+    return value !== null && value !== undefined && value !== ''
+  }
+  
+  if (section === 'general') {
+    const value = props.profileData.general?.[field]
+    return value !== null && value !== undefined && value !== ''
+  } else if (section === 'addresses') {
+    // Check if any address has this field with a value
+    const addresses = props.profileData.addresses
+    if (!addresses || !Array.isArray(addresses) || addresses.length === 0) return false
+    return addresses.some(addr => {
+      const value = addr[field]
+      return value !== null && value !== undefined && value !== ''
+    })
+  } else if (section === 'employments') {
+    // Check if any employment has this field with a value
+    const employments = props.profileData.employments
+    if (!employments || !Array.isArray(employments) || employments.length === 0) return false
+    return employments.some(emp => {
+      const value = emp[field]
+      return value !== null && value !== undefined && value !== ''
+    })
+  } else if (section === 'identities') {
+    // Check if any identity has this field with a value
+    const identities = props.profileData.identities
+    if (!identities || !Array.isArray(identities) || identities.length === 0) return false
+    return identities.some(id => {
+      const value = id[field]
+      return value !== null && value !== undefined && value !== ''
+    })
+  }
+  
+  return false
+}
+
+const hasMissingRequiredFields = (app) => {
+  const requiredFields = getRequiredFields(app)
+  return requiredFields.some(field => !hasProfileValue(field))
+}
+
+const updateProfileFirst = () => {
+  // Redirect to profile edit page
+  router.visit('/student/profile/edit')
+}
+
+const getRequiredFields = (app) => {
+  const requiredFields = []
+  
+  if (app.data_permission_groups) {
+    app.data_permission_groups.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.is_required === true) {
+          requiredFields.push(permission.column_name)
+        }
+      })
+    })
+  }
+  
+  return requiredFields
+}
+
+const getOptionalFields = (app) => {
+  const optionalFields = []
+  
+  if (app.data_permission_groups) {
+    app.data_permission_groups.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.is_required === false && permission.can_read) {
+          optionalFields.push(permission.column_name)
+        }
+      })
+    })
+  }
+  
+  return optionalFields
+}
+
+const getFieldLabel = (field) => {
+  // Convert snake_case to Title Case
+  return field.replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+}
+
+const launchApplication = async () => {
+  if (!canSubmit()) return
+  
+  console.log('Launching application:', selectedApp.value.id)
+  console.log('Share profile:', shareProfile.value)
+  console.log('Profile data available:', props.profileData)
+  
+  // Update form data before submission
+  form.share_profile = shareProfile.value
+  form.profile_data = shareProfile.value ? props.profileData : null
+  
+  // Submit form using Inertia
+  form.post(`/student/launch-application/${selectedApp.value.id}`, {
+    onSuccess: (page) => {
+      console.log('Success response:', page)
+      console.log('selectedApp:', selectedApp)
+      
+      // Check for launch URL in flash data or redirect directly to gateway
+      const launchUrl = page.props.flash?.launch_url || `/gateway/${selectedApp.value.id}`
+      
+      // Redirect to gateway route in same tab to handle the token
+      // window.location.href = launchUrl
+      window.open(`/gateway/${selectedApp.value.id}`, '_blank')
+      closeModal()
+
+    },
+    onError: (errors) => {
+      console.error('Launch errors:', errors)
+      if (errors.message) {
+        alert('Error: ' + errors.message)
+      } else {
+        alert('Failed to launch application. Please try again.')
+      }
+    }
+  })
 }
 
 const getTotalPermissions = (permissionGroups) => {
@@ -259,5 +705,45 @@ const getTotalPermissions = (permissionGroups) => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* Modal styling */
+.modal.show {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 </style>

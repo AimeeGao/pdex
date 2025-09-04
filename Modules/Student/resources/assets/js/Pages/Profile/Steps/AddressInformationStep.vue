@@ -18,7 +18,7 @@
             <label for="current_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
             <input
               id="current_address_line_1"
-              v-model="currentAddress.address_line1"
+              v-model="currentAddressProxy.address_line1"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('address_line1') }"
@@ -33,7 +33,7 @@
             <label for="current_address_line_2" class="form-label">Address Line 2</label>
             <input
               id="current_address_line_2"
-              v-model="currentAddress.address_line2"
+              v-model="currentAddressProxy.address_line2"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('address_line2') }"
@@ -49,7 +49,7 @@
             <label for="current_city" class="form-label">City</label>
             <input
               id="current_city"
-              v-model="currentAddress.city"
+              v-model="currentAddressProxy.city"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('city') }"
@@ -63,7 +63,7 @@
             <select
               v-if="isCanada(currentAddress.country)"
               id="current_province"
-              v-model="currentAddress.province"
+              v-model="currentAddressProxy.province"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('province') }"
             >
@@ -85,7 +85,7 @@
             <input
               v-else
               id="current_province"
-              v-model="currentAddress.province"
+              v-model="currentAddressProxy.province"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('province') }"
@@ -99,7 +99,7 @@
             <label for="current_postal_code" class="form-label">{{ isCanada(currentAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }}</label>
             <input
               id="current_postal_code"
-              v-model="currentAddress.postal_code"
+              v-model="currentAddressProxy.postal_code"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('postal_code') }"
@@ -114,7 +114,7 @@
             <CountryAutocomplete
               id="current_country"
               label="Country"
-              v-model="currentAddress.country"
+              v-model="currentAddressProxy.country"
               :countries="countries"
               :required="false"
               :error="getFieldError('country')"
@@ -153,7 +153,7 @@
             <label for="mailing_address_line_1" class="form-label">Address Line 1</label>
             <input
               id="mailing_address_line_1"
-              v-model="mailingAddress.address_line1"
+              v-model="mailingAddressProxy.address_line1"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_address_line1') }"
@@ -167,7 +167,7 @@
             <label for="mailing_address_line_2" class="form-label">Address Line 2</label>
             <input
               id="mailing_address_line_2"
-              v-model="mailingAddress.address_line2"
+              v-model="mailingAddressProxy.address_line2"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_address_line2') }"
@@ -183,7 +183,7 @@
             <label for="mailing_city" class="form-label">City</label>
             <input
               id="mailing_city"
-              v-model="mailingAddress.city"
+              v-model="mailingAddressProxy.city"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_city') }"
@@ -197,7 +197,7 @@
             <select
               v-if="isCanada(mailingAddress.country)"
               id="mailing_province"
-              v-model="mailingAddress.province"
+              v-model="mailingAddressProxy.province"
               class="form-select"
               :class="{ 'is-invalid': hasFieldError('mailing_province') }"
             >
@@ -219,7 +219,7 @@
             <input
               v-else
               id="mailing_province"
-              v-model="mailingAddress.province"
+              v-model="mailingAddressProxy.province"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_province') }"
@@ -233,7 +233,7 @@
             <label for="mailing_postal_code" class="form-label">{{ isCanada(mailingAddress.country) ? 'Postal Code' : 'Postal/ZIP Code' }}</label>
             <input
               id="mailing_postal_code"
-              v-model="mailingAddress.postal_code"
+              v-model="mailingAddressProxy.postal_code"
               type="text"
               class="form-control"
               :class="{ 'is-invalid': hasFieldError('mailing_postal_code') }"
@@ -248,7 +248,7 @@
             <CountryAutocomplete
               id="mailing_country"
               label="Country"
-              v-model="mailingAddress.country"
+              v-model="mailingAddressProxy.country"
               :countries="countries"
               :required="false"
               :error="getFieldError('mailing_country')"
@@ -262,33 +262,128 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CountryAutocomplete from '@/Components/CountryAutocomplete.vue'
 
 const props = defineProps({
-  currentAddress: Object,
-  mailingAddress: Object,
-  useDifferentMailing: Boolean,
+  form: Array, // Array of addresses
   countries: Array,
   errors: Object
 })
 
-const emit = defineEmits(['update:currentAddress', 'update:mailingAddress', 'update:useDifferentMailing'])
+const emit = defineEmits(['update:form'])
 
-// Create reactive computed refs for the addresses
-const currentAddress = computed({
-  get: () => props.currentAddress,
-  set: (value) => emit('update:currentAddress', value)
+// Reactive state for mailing address toggle
+// Initialize based on whether mailing address already exists
+const useDifferentMailing = ref((props.form || []).some(address => !address.is_primary))
+
+// Get current and mailing addresses
+const currentAddress = computed(() => {
+  return (props.form || []).find(address => address.is_primary) || {}
 })
 
-const mailingAddress = computed({
-  get: () => props.mailingAddress,
-  set: (value) => emit('update:mailingAddress', value)
+const mailingAddress = computed(() => {
+  const existing = (props.form || []).find(address => !address.is_primary)
+  if (existing) {
+    return existing
+  }
+  
+  // Return default mailing address structure when none exists
+  return {
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    province: '',
+    postal_code: '',
+    country: '',
+    is_primary: false,
+    is_active: true
+  }
 })
 
-const useDifferentMailing = computed({
-  get: () => props.useDifferentMailing,
-  set: (value) => emit('update:useDifferentMailing', value)
+// Helper function to update addresses array
+const updateAddresses = (newAddresses) => {
+  emit('update:form', newAddresses)
+}
+
+// Helper function to update current address field
+const updateCurrentField = (field, value) => {
+  const addresses = [...(props.form || [])]
+  const currentIndex = addresses.findIndex(addr => addr.is_primary)
+  
+  if (currentIndex !== -1) {
+    addresses[currentIndex] = { ...addresses[currentIndex], [field]: value }
+  } else {
+    // Create new current address
+    addresses.push({
+      [field]: value,
+      is_primary: true,
+      is_active: true
+    })
+  }
+  
+  updateAddresses(addresses)
+}
+
+// Helper function to update mailing address field  
+const updateMailingField = (field, value) => {
+  const addresses = [...(props.form || [])]
+  let mailingIndex = addresses.findIndex(addr => !addr.is_primary)
+  
+  if (mailingIndex === -1) {
+    // Create new mailing address and append to array
+    const newMailingAddress = {
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      province: '',
+      postal_code: '',
+      country: '',
+      is_primary: false,
+      is_active: true,
+      [field]: value  // Set the specific field being updated
+    }
+    addresses.push(newMailingAddress)
+  } else {
+    // Update existing mailing address
+    addresses[mailingIndex] = { ...addresses[mailingIndex], [field]: value }
+  }
+  
+  updateAddresses(addresses)
+}
+
+// Create proxy objects for v-model compatibility
+const currentAddressProxy = computed(() => {
+  return new Proxy(currentAddress.value || {}, {
+    get(target, prop) {
+      return target[prop] || ''
+    },
+    set(target, prop, value) {
+      updateCurrentField(prop, value)
+      return true
+    }
+  })
+})
+
+const mailingAddressProxy = computed(() => {
+  return new Proxy(mailingAddress.value || {}, {
+    get(target, prop) {
+      return target[prop] || ''
+    },
+    set(target, prop, value) {
+      updateMailingField(prop, value)
+      return true
+    }
+  })
+})
+
+// Watch for changes to useDifferentMailing checkbox
+watch(useDifferentMailing, (newValue) => {
+  if (!newValue) {
+    // Remove mailing address when checkbox is unchecked
+    const addresses = (props.form || []).filter(addr => addr.is_primary)
+    updateAddresses(addresses)
+  }
 })
 
 // Helper function to check if country is Canada
@@ -297,42 +392,6 @@ const isCanada = (country) => {
   return country.toLowerCase() === 'canada'
 }
 
-// Watch for changes in useDifferentMailing to clear mailing address when unchecked
-watch(useDifferentMailing, (newValue) => {
-  if (!newValue) {
-    emit('update:mailingAddress', {
-      address_line1: '',
-      address_line2: '',
-      city: '',
-      province: '',
-      postal_code: '',
-      country: ''
-    })
-  }
-})
-
-// Watch for country changes to clear province when switching between Canada and non-Canada
-watch(() => props.currentAddress?.country, (newCountry, oldCountry) => {
-  const wasCanada = isCanada(oldCountry)
-  const isNowCanada = isCanada(newCountry)
-  
-  if (wasCanada !== isNowCanada) {
-    // Clear province when switching between Canada and non-Canada
-    const updatedAddress = { ...props.currentAddress, province: '' }
-    emit('update:currentAddress', updatedAddress)
-  }
-})
-
-watch(() => props.mailingAddress?.country, (newCountry, oldCountry) => {
-  const wasCanada = isCanada(oldCountry)
-  const isNowCanada = isCanada(newCountry)
-  
-  if (wasCanada !== isNowCanada) {
-    // Clear province when switching between Canada and non-Canada
-    const updatedAddress = { ...props.mailingAddress, province: '' }
-    emit('update:mailingAddress', updatedAddress)
-  }
-})
 
 // Helper function to check for errors in multiple formats
 const getFieldError = (fieldName) => {

@@ -17,6 +17,7 @@ class Individual extends Model
         'version_number',
         'social_insurance_number',
         'government_issued_id',
+        'provincial_education_number',
         'first_name',
         'middle_name',
         'last_name',
@@ -50,6 +51,22 @@ class Individual extends Model
     public function identities()
     {
         return $this->hasMany(IndividualIdentity::class);
+    }
+
+    // Singular relationships for current/primary records
+    public function currentAddress()
+    {
+        return $this->hasOne(IndividualAddress::class)->where('is_primary', true);
+    }
+
+    public function currentEmployment()
+    {
+        return $this->hasOne(IndividualEmployment::class)->where('is_current', true);
+    }
+
+    public function identity()
+    {
+        return $this->hasOne(IndividualIdentity::class);
     }
 
     protected $casts = [
@@ -170,7 +187,7 @@ class Individual extends Model
             // Mark all identities as not latest version
             $this->identities()->update(['latest_version' => false]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to mark related records as old version', [
+            \Log::warning('Failed to mark related records as old version', [
                 'error' => $e->getMessage(),
                 'individual_id' => $this->id
             ]);

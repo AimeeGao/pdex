@@ -58,9 +58,9 @@ class IndividualVersion extends Model
                 'individual_id' => $individual->id,
                 'version_number' => $nextVersion,
                 'individual_data' => $individual->toArray(),
-                'individual_address' => $individual->address->toArray(),
-                'individual_employment' => $individual->employment->toArray(),
-                'individual_identity' => $individual->identity->toArray(),
+                'individual_address' => $individual->addresses ? $individual->addresses->toArray() : null,
+                'individual_employment' => $individual->employments ? $individual->employments->toArray() : null,
+                'individual_identity' => $individual->identities ? $individual->identities->toArray() : null,
                 'created_by' => $createdBy ?: auth()->user()?->guid,
                 'notes' => $notes ?: 'Profile updated',
             ]);

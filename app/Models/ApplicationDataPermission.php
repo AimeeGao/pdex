@@ -17,16 +17,18 @@ class ApplicationDataPermission extends Model
         'display_name',
         'can_read',
         'can_write',
+        'is_required',
         'access_notes'
     ];
 
     protected $casts = [
         'can_read' => 'boolean',
-        'can_write' => 'boolean'
+        'can_write' => 'boolean',
+        'is_required' => 'boolean'
     ];
 
     /**
-     * Available tables for data access permissions
+     * Available tables for individual data access permissions (individual_* tables only)
      */
     public static function getAvailableTables(): array
     {
@@ -236,6 +238,70 @@ class ApplicationDataPermission extends Model
                 'is_visible_minority' => ['label' => 'Visible Minority', 'description' => 'Visible minority status', 'sensitive' => true],
                 'receives_indigenous_support_services' => ['label' => 'Indigenous Support Services', 'description' => 'Receives indigenous services', 'sensitive' => true],
                 'receives_minority_support_services' => ['label' => 'Minority Support Services', 'description' => 'Receives minority services', 'sensitive' => true],
+            ],
+            'institutions' => [
+                'guid' => ['label' => 'GUID', 'description' => 'Unique institution identifier', 'pii' => false],
+                'bceid_business_guid' => ['label' => 'BCeID Business GUID', 'description' => 'Business BCeID identifier', 'pii' => false],
+                'legal_operating_name' => ['label' => 'Legal Operating Name', 'description' => 'Official institution name', 'pii' => false],
+                'institution_type' => ['label' => 'Institution Type', 'description' => 'Type of educational institution', 'pii' => false],
+                'dli' => ['label' => 'DLI Number', 'description' => 'Designated Learning Institution number', 'pii' => false],
+                'active_status' => ['label' => 'Active Status', 'description' => 'Whether institution is active', 'pii' => false],
+            ],
+            'institution_staff' => [
+                'guid' => ['label' => 'GUID', 'description' => 'Unique staff identifier', 'pii' => false],
+                'user_guid' => ['label' => 'User GUID', 'description' => 'User system identifier', 'pii' => false],
+                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Institution identifier', 'pii' => false],
+                'bceid_business_guid' => ['label' => 'BCeID Business GUID', 'description' => 'Business BCeID identifier', 'pii' => false],
+                'bceid_user_guid' => ['label' => 'BCeID User GUID', 'description' => 'User BCeID identifier', 'pii' => false],
+                'bceid_user_id' => ['label' => 'BCeID User ID', 'description' => 'BCeID user ID', 'pii' => false],
+                'bceid_user_name' => ['label' => 'BCeID Username', 'description' => 'BCeID username', 'pii' => true],
+                'bceid_user_email' => ['label' => 'BCeID Email', 'description' => 'BCeID email address', 'pii' => true],
+                'status' => ['label' => 'Status', 'description' => 'Staff member status', 'pii' => false],
+                'last_touch_by_user_guid' => ['label' => 'Last Modified By', 'description' => 'Last modifier user GUID', 'pii' => false],
+            ],
+            'institution_sites' => [
+                'guid' => ['label' => 'GUID', 'description' => 'Unique site identifier', 'pii' => false],
+                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Parent institution identifier', 'pii' => false],
+                'operating_name' => ['label' => 'Operating Name', 'description' => 'Site operating name', 'pii' => false],
+                'site_type' => ['label' => 'Site Type', 'description' => 'Type of site or campus', 'pii' => false],
+                'contact_first_name' => ['label' => 'Contact First Name', 'description' => 'Site contact first name', 'pii' => true],
+                'contact_last_name' => ['label' => 'Contact Last Name', 'description' => 'Site contact last name', 'pii' => true],
+                'contact_email' => ['label' => 'Contact Email', 'description' => 'Site contact email', 'pii' => true],
+                'contact_phone' => ['label' => 'Contact Phone', 'description' => 'Site contact phone', 'pii' => true],
+                'address_line_1' => ['label' => 'Address Line 1', 'description' => 'Street address', 'pii' => true],
+                'address_line_2' => ['label' => 'Address Line 2', 'description' => 'Apartment, suite, etc.', 'pii' => true],
+                'city' => ['label' => 'City', 'description' => 'City name', 'pii' => true],
+                'province_state' => ['label' => 'Province/State', 'description' => 'Province or state', 'pii' => true],
+                'country' => ['label' => 'Country', 'description' => 'Country name', 'pii' => true],
+                'postal_code' => ['label' => 'Postal Code', 'description' => 'Postal/ZIP code', 'pii' => true],
+                'public' => ['label' => 'Public', 'description' => 'Public institution flag', 'pii' => false],
+                'active_status' => ['label' => 'Active Status', 'description' => 'Site active status', 'pii' => false],
+                'standing_status' => ['label' => 'Standing Status', 'description' => 'Institutional standing', 'pii' => false],
+                'economic_region' => ['label' => 'Economic Region', 'description' => 'BC economic region', 'pii' => false],
+                'notes' => ['label' => 'Notes', 'description' => 'Administrative notes', 'pii' => false],
+            ],
+            'programs' => [
+                'guid' => ['label' => 'GUID', 'description' => 'Unique program identifier', 'pii' => false],
+                'institution_guid' => ['label' => 'Institution GUID', 'description' => 'Institution identifier', 'pii' => false],
+                'program_name' => ['label' => 'Program Name', 'description' => 'Name of the program', 'pii' => false],
+                'program_type' => ['label' => 'Program Type', 'description' => 'Type of educational program', 'pii' => false],
+                'program_number' => ['label' => 'Program Number', 'description' => 'Historical program number', 'pii' => false],
+                'delivery_method' => ['label' => 'Delivery Method', 'description' => 'How program is delivered', 'pii' => false],
+                'online_delivery_type' => ['label' => 'Online Delivery Type', 'description' => 'Synchronous or asynchronous', 'pii' => false],
+                'credential_type' => ['label' => 'Credential Type', 'description' => 'Type of credential awarded', 'pii' => false],
+                'micro_credential_type' => ['label' => 'Micro Credential Type', 'description' => 'Micro credential classification', 'pii' => false],
+                'high_priority_industry' => ['label' => 'High Priority Industry', 'description' => 'Industry priority level', 'pii' => false],
+                'total_duration_hrs' => ['label' => 'Total Duration (Hours)', 'description' => 'Program duration in hours', 'pii' => false],
+                'creditable' => ['label' => 'Creditable', 'description' => 'Whether program offers credits', 'pii' => false],
+                'full_time' => ['label' => 'Full Time', 'description' => 'Full-time program flag', 'pii' => false],
+                'prov_funded_micro_cred' => ['label' => 'Provincially Funded Micro Credential', 'description' => 'Provincial funding flag', 'pii' => false],
+                'indigenous_related_learning' => ['label' => 'Indigenous Related Learning', 'description' => 'Indigenous content flag', 'pii' => false],
+                'diversity_inclusion_related_learning' => ['label' => 'Diversity & Inclusion Related', 'description' => 'D&I content flag', 'pii' => false],
+                'active_status' => ['label' => 'Active Status', 'description' => 'Program active status', 'pii' => false],
+                'last_touch_by_user_guid' => ['label' => 'Last Modified By', 'description' => 'Last modifier user GUID', 'pii' => false],
+                'excel_guid' => ['label' => 'Excel GUID', 'description' => 'Excel import identifier', 'pii' => false],
+                'start_date' => ['label' => 'Start Date', 'description' => 'Program start date', 'pii' => false],
+                'end_date' => ['label' => 'End Date', 'description' => 'Program end date', 'pii' => false],
             ]
         ];
 

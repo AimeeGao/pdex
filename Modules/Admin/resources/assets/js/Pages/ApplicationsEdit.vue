@@ -17,6 +17,32 @@
               </div>
             </div>
             <div class="card-body">
+
+              <!-- Success Message -->
+              <div v-if="$page.props.flash?.success" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                {{ $page.props.flash.success }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+
+              <!-- Error Message -->
+              <div v-if="$page.props.flash?.error" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {{ $page.props.flash.error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+
+              <!-- General Form Errors -->
+              <div v-if="form.errors && Object.keys(form.errors).length > 0 && !Object.keys(form.errors).some(key => ['name', 'description', 'info_url', 'info_label', 'contact_name', 'contact_email', 'contact_phone'].includes(key))" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Please check the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                  <li v-for="(error, field) in form.errors" :key="field" v-if="!['name', 'description', 'info_url', 'info_label', 'contact_name', 'contact_email', 'contact_phone'].includes(field)">
+                    {{ field.replace('_', ' ') }}: {{ Array.isArray(error) ? error[0] : error }}
+                  </li>
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
     
     <div class="row">
       <div class="col-lg-8">
@@ -62,27 +88,10 @@
                     </div>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-12">
-                    <div class="mb-3">
-                      <label class="form-label">Application Status <span class="text-danger">*</span></label>
-                      <select v-model="form.status" :class="{'is-invalid': form.errors.status}" class="form-select" required>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="offline">Offline</option>
-                      </select>
-                      <div v-if="form.errors.status" class="invalid-feedback">{{ form.errors.status }}</div>
-                      <div class="form-text">
-                        <small class="text-muted">
-                          <strong>Active:</strong> Application is fully operational and available to users.<br>
-                          <strong>Inactive:</strong> Application is temporarily disabled but not offline.<br>
-                          <strong>Offline:</strong> Application is down for maintenance or scheduled outage.
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                
               </div>
+
+              <hr/>
 
               <!-- Contact Information -->
               <div class="mb-4">
@@ -111,6 +120,8 @@
                   </div>
                 </div>
               </div>
+
+              <hr/>
 
               <!-- Identity Providers & Redirect URLs -->
               <div class="mb-4">
@@ -162,9 +173,38 @@
                 </div>
               </div>
 
+              <hr/>
+
               <!-- Compliance -->
               <div class="mb-4">
                 <h5 class="card-title">Compliance Documentation</h5>
+                <div class="row">
+                  <div class="col-12">
+                    <div class="mb-3">
+                      <label class="form-label">Application Status <span class="text-danger">*</span></label>
+                      <select v-model="form.status" :class="{'is-invalid': form.errors.status}" class="form-select" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="offline">Offline</option>
+                          
+                        <option value="draft">Draft</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>  
+                      </select>
+                      <div v-if="form.errors.status" class="invalid-feedback">{{ form.errors.status }}</div>
+                      <div class="form-text">
+                        <small class="text-muted">
+                          <strong>Active:</strong> Application is fully operational and available to users.<br>
+                          <strong>Inactive:</strong> Application is temporarily disabled but not offline.<br>
+                          <strong>Offline:</strong> Application is down for maintenance or scheduled outage.
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-check">
@@ -234,6 +274,8 @@
                 <div v-if="form.errors.comments" class="invalid-feedback">{{ form.errors.comments }}</div>
               </div>
 
+              <hr/>
+
               <!-- Data Access Permissions -->
               <div class="mb-4">
                 <h5 class="card-title">
@@ -244,7 +286,6 @@
                   Configure which individual data fields this application can access. 
                   <span class="text-warning">⚠️</span> indicates personally identifiable information (PII).
                 </p>
-                
                 <div class="accordion" id="dataPermissionsAccordion">
                   <div v-for="table in Object.values(availableDataTables)" :key="table.name" class="accordion-item">
                     <h2 class="accordion-header">
@@ -277,7 +318,7 @@
                                 class="btn btn-sm btn-outline-primary"
                                 @click="selectAllTableColumns(table.name)"
                               >
-                                Select All
+                                Select All as Optional
                               </button>
                               <button 
                                 type="button" 
@@ -301,7 +342,6 @@
                                       <span v-if="column.is_sensitive" class="text-danger" title="Sensitive Data">🔒</span>
                                     </h6>
                                     <p class="card-text text-muted small mb-2">{{ column.description }}</p>
-                                    
                                     <!-- Display Name Input -->
                                     <div class="mb-2">
                                       <label :for="`display-name-${table.name}-${column.name}`" class="form-label small">Display Name</label>
@@ -313,17 +353,26 @@
                                         :placeholder="column.default_display_name"
                                       >
                                     </div>
-                                    
-                                    <div class="form-check">
-                                      <input 
-                                        :id="`access-${table.name}-${column.name}`"
-                                        v-model="dataPermissions[`${table.name}.${column.name}`].has_access" 
-                                        class="form-check-input" 
-                                        type="checkbox"
+                                    <div class="mb-2">
+                                      <label class="form-label small">Access Level</label>
+                                      <select 
+                                        v-model="dataPermissions[`${table.name}.${column.name}`].access_level"
+                                        class="form-select form-select-sm"
+                                        :class="{
+                                          'border-success': dataPermissions[`${table.name}.${column.name}`].access_level === 'required',
+                                          'border-warning': dataPermissions[`${table.name}.${column.name}`].access_level === 'optional'
+                                        }"
                                       >
-                                      <label :for="`access-${table.name}-${column.name}`" class="form-check-label small">
-                                        <strong>Share this data</strong>
-                                      </label>
+                                        <option value="none">No Access</option>
+                                        <option value="optional">Optional</option>
+                                        <option value="required">Required</option>
+                                      </select>
+                                      <div v-if="dataPermissions[`${table.name}.${column.name}`].access_level === 'required'" class="small text-success mt-1">
+                                        <i class="bi bi-check-circle me-1"></i>Required field
+                                      </div>
+                                      <div v-else-if="dataPermissions[`${table.name}.${column.name}`].access_level === 'optional'" class="small text-warning mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>Optional field
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -335,8 +384,296 @@
                     </div>
                   </div>
                 </div>
+              </div>
 
+              <hr/>
+              
+              <!-- Application Manager Controls Accordion -->
+              <div class="mb-4">
+                <h5 class="card-title">
+                  <i class="bi bi-gear me-1"></i>
+                  Application Manager Controls
+                </h5>
+                <p class="text-muted small mb-3">
+                  Configure API access for institutions and individual data fields this application can access. 
+                </p>
 
+                <div class="accordion" id="managerControlsAccordion">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="managerControlsHeading">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#managerControlsCollapse" aria-expanded="false" aria-controls="managerControlsCollapse">
+                        <strong>API and Application Status Settings</strong>
+                      </button>
+                    </h2>
+                    <div id="managerControlsCollapse" class="accordion-collapse collapse" aria-labelledby="managerControlsHeading" data-bs-parent="#managerControlsAccordion">
+                      <div class="accordion-body">
+                        <!-- API Credentials Section -->
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">
+                            <i class="bi bi-key me-1"></i>
+                            API Credentials
+                          </label>
+                          <!-- Client ID -->
+                          <div class="mb-2">
+                            <label for="client_id" class="form-label">Client ID</label>
+                            <div class="input-group">
+                              <input 
+                                v-model="form.client_id" 
+                                type="text"
+                                id="client_id"
+                                class="form-control font-monospace"
+                                :class="{ 'is-invalid': form.errors.client_id }"
+                                placeholder="Auto-generated client ID"
+                                readonly
+                              >
+                              <button 
+                                type="button" 
+                                class="btn btn-outline-secondary"
+                                @click="generateClientId"
+                                title="Generate new Client ID"
+                              >
+                                <i class="bi bi-arrow-clockwise"></i>
+                              </button>
+                            </div>
+                            <div v-if="form.errors.client_id" class="invalid-feedback">
+                              {{ form.errors.client_id }}
+                            </div>
+                          </div>
+                          <!-- API Key -->
+                          <div class="mb-2">
+                            <label for="api_key" class="form-label">API Key</label>
+                            <div class="input-group">
+                              <input 
+                                v-model="form.api_key" 
+                                type="text"
+                                id="api_key"
+                                class="form-control font-monospace"
+                                :class="{ 'is-invalid': form.errors.api_key }"
+                                placeholder="Auto-generated API key"
+                                readonly
+                              >
+                              <button 
+                                type="button" 
+                                class="btn btn-outline-secondary"
+                                @click="generateApiKey"
+                                title="Generate new API Key"
+                              >
+                                <i class="bi bi-arrow-clockwise"></i>
+                              </button>
+                            </div>
+                            <div v-if="form.errors.api_key" class="invalid-feedback">
+                              {{ form.errors.api_key }}
+                            </div>
+                          </div>
+                          <!-- Client Secret -->
+                          <div class="mb-2">
+                            <label for="client_secret" class="form-label">Client Secret</label>
+                            <div class="input-group">
+                              <input 
+                                v-model="form.client_secret" 
+                                :type="showSecret ? 'text' : 'password'"
+                                id="client_secret"
+                                class="form-control font-monospace"
+                                :class="{ 'is-invalid': form.errors.client_secret }"
+                                placeholder="Auto-generated client secret"
+                                readonly
+                              >
+                              <button 
+                                type="button" 
+                                class="btn btn-outline-secondary"
+                                @click="showSecret = !showSecret"
+                                title="Toggle visibility"
+                              >
+                                <i :class="showSecret ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                              </button>
+                              <button 
+                                type="button" 
+                                class="btn btn-outline-secondary"
+                                @click="generateClientSecret"
+                                title="Generate new Client Secret"
+                              >
+                                <i class="bi bi-arrow-clockwise"></i>
+                              </button>
+                            </div>
+                            <div v-if="form.errors.client_secret" class="invalid-feedback">
+                              {{ form.errors.client_secret }}
+                            </div>
+                          </div>
+                          
+                          <div class="alert alert-warning mt-2">
+                            <small>
+                              <i class="bi bi-exclamation-triangle me-1"></i>
+                              <strong>Warning:</strong> Regenerating credentials will invalidate existing API access.
+                            </small>
+                          </div>
+                        </div>
+
+                        <!-- Approval Actions -->
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Approval Notes</label>
+                          <textarea 
+                            v-model="form.approval_notes" 
+                            class="form-control"
+                            rows="3"
+                            placeholder="Add notes about your approval decision..."
+                          ></textarea>
+                        </div>
+
+                        <!-- API Access Permissions Section -->
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">
+                            <i class="bi bi-database me-1"></i>
+                            API Access Permissions
+                          </label>
+                          <p class="text-muted small mb-3">
+                            Configure which data fields this application's API can access. This includes individual data, institutional information, staff details, site information, and program data.
+                          </p>
+                          
+                          <div class="accordion" id="apiAccessAccordion">
+                            <div v-for="(table, tableName) in apiAccessTables" :key="tableName" class="accordion-item">
+                              <h2 class="accordion-header" :id="`api-heading-${tableName}`">
+                                <button 
+                                  class="accordion-button collapsed" 
+                                  type="button" 
+                                  data-bs-toggle="collapse" 
+                                  :data-bs-target="`#api-collapse-${tableName}`" 
+                                  :aria-expanded="false" 
+                                  :aria-controls="`api-collapse-${tableName}`"
+                                >
+                                  <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                                    <span>
+                                      <strong>{{ table.label }}</strong>
+                                      <span v-if="table.description" class="text-muted ms-2">{{ table.description }}</span>
+                                    </span>
+                                    <span class="badge bg-secondary me-2">{{ getApiTablePermissionCount(tableName) }} fields</span>
+                                  </div>
+                                </button>
+                              </h2>
+                              <div 
+                                :id="`api-collapse-${tableName}`" 
+                                class="accordion-collapse collapse" 
+                                :aria-labelledby="`api-heading-${tableName}`" 
+                                data-bs-parent="#apiAccessAccordion"
+                              >
+                                <div class="accordion-body">
+                                  <div class="row mb-3">
+                                    <div class="col-auto">
+                                      <button 
+                                        type="button" 
+                                        class="btn btn-sm btn-outline-info"
+                                        @click="selectAllApiTableColumns(tableName)"
+                                      >
+                                        <i class="bi bi-eye me-1"></i>
+                                        All Read
+                                      </button>
+                                    </div>
+                                    <div class="col-auto">
+                                      <button 
+                                        type="button" 
+                                        class="btn btn-sm btn-outline-warning"
+                                        @click="setAllApiTableColumnsWrite(tableName)"
+                                      >
+                                        <i class="bi bi-pencil me-1"></i>
+                                        All Write
+                                      </button>
+                                    </div>
+                                    <div class="col-auto">
+                                      <button 
+                                        type="button" 
+                                        class="btn btn-sm btn-outline-success"
+                                        @click="setAllApiTableColumnsReadWrite(tableName)"
+                                      >
+                                        <i class="bi bi-check-all me-1"></i>
+                                        All Read & Write
+                                      </button>
+                                    </div>
+                                    <div class="col-auto">
+                                      <button 
+                                        type="button" 
+                                        class="btn btn-sm btn-outline-secondary"
+                                        @click="clearAllApiTableColumns(tableName)"
+                                      >
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Clear All
+                                      </button>
+                                    </div>
+                                  </div>
+                                  
+                                  <div class="row">
+                                    <div 
+                                      v-for="(column, columnName) in table.columns" 
+                                      :key="columnName" 
+                                      class="col-md-6 col-lg-4 mb-3"
+                                    >
+                                      <div class="card h-100 border">
+                                        <div class="card-body p-3">
+                                          <div class="d-flex align-items-start justify-content-between mb-2">
+                                            <div class="flex-grow-1">
+                                              <h6 class="card-subtitle mb-1 text-primary">
+                                                {{ column.label }}
+                                                <span v-if="column.sensitive" class="badge bg-warning ms-1" title="Sensitive Information">
+                                                  <i class="bi bi-exclamation-triangle"></i>
+                                                </span>
+                                                <span v-if="column.pii" class="badge bg-danger ms-1" title="Personally Identifiable Information">
+                                                  PII
+                                                </span>
+                                              </h6>
+                                              <p class="card-text small text-muted mb-2">{{ column.description }}</p>
+                                              <small class="text-muted">{{ tableName }}.{{ columnName }}</small>
+                                            </div>
+                                          </div>
+                                          
+                                          <div class="mb-2">
+                                            <label class="form-label small">Display Name</label>
+                                            <input 
+                                              v-model="apiAccessPermissions[`${table.name}.${column.name}`].display_name"
+                                              type="text"
+                                              class="form-control form-control-sm"
+                                              placeholder="Field display name"
+                                            >
+                                          </div>
+                                          
+                                          <div class="mb-2">
+                                            <label class="form-label small">Access Level</label>
+                                            <select 
+                                              v-model="apiAccessPermissions[`${table.name}.${column.name}`].access_level"
+                                              class="form-select form-select-sm"
+                                              :class="{
+                                                'border-success': apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'read_write',
+                                                'border-info': apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'read',
+                                                'border-warning': apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'write'
+                                              }"
+                                            >
+                                              <option value="none">No Access</option>
+                                              <option value="read">Read</option>
+                                              <option value="write">Write</option>
+                                              <option value="read_write">Read and Write</option>
+                                            </select>
+                                            <div v-if="apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'read_write'" class="small text-success mt-1">
+                                              <i class="bi bi-check-all me-1"></i>Full access (read and write)
+                                            </div>
+                                            <div v-else-if="apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'read'" class="small text-info mt-1">
+                                              <i class="bi bi-eye me-1"></i>Read access only
+                                            </div>
+                                            <div v-else-if="apiAccessPermissions[`${table.name}.${column.name}`].access_level === 'write'" class="small text-warning mt-1">
+                                              <i class="bi bi-pencil me-1"></i>Write access only
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="d-flex gap-2">
@@ -580,174 +917,6 @@
           </div>
         </div>
 
-        <!-- Application Manager Controls -->
-        <div v-if="canManageApplication" class="card mb-3">
-          <div class="card-header bg-warning text-dark">
-            <h6 class="card-title mb-0">
-              <i class="bi bi-gear me-2"></i>
-              Application Manager Controls
-            </h6>
-          </div>
-          <div class="card-body">
-            
-            <!-- Application Status -->
-            <div class="mb-3">
-              <label for="application_status" class="form-label fw-bold">
-                <i class="bi bi-flag me-1"></i>
-                Application Status
-              </label>
-              <select 
-                v-model="approverForm.status" 
-                id="application_status"
-                class="form-select"
-                :class="{ 'is-invalid': approverForm.errors.status }"
-              >
-                <option value="draft">Draft</option>
-                <option value="submitted">Submitted</option>
-                <option value="under_review">Under Review</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="suspended">Suspended</option>
-              </select>
-              <div v-if="approverForm.errors.status" class="invalid-feedback">
-                {{ approverForm.errors.status }}
-              </div>
-              <small class="form-text text-muted">
-                Current application status in the workflow
-              </small>
-            </div>
-
-            <!-- API Credentials Section -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">
-                <i class="bi bi-key me-1"></i>
-                API Credentials
-              </label>
-              
-              <!-- Client ID -->
-              <div class="mb-2">
-                <label for="client_id" class="form-label">Client ID</label>
-                <div class="input-group">
-                  <input 
-                    v-model="approverForm.client_id" 
-                    type="text"
-                    id="client_id"
-                    class="form-control font-monospace"
-                    :class="{ 'is-invalid': approverForm.errors.client_id }"
-                    placeholder="Auto-generated client ID"
-                    readonly
-                  >
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-secondary"
-                    @click="generateClientId"
-                    title="Generate new Client ID"
-                  >
-                    <i class="bi bi-arrow-clockwise"></i>
-                  </button>
-                </div>
-                <div v-if="approverForm.errors.client_id" class="invalid-feedback">
-                  {{ approverForm.errors.client_id }}
-                </div>
-              </div>
-
-              <!-- Client Secret -->
-              <div class="mb-2">
-                <label for="client_secret" class="form-label">Client Secret</label>
-                <div class="input-group">
-                  <input 
-                    v-model="approverForm.client_secret" 
-                    :type="showSecret ? 'text' : 'password'"
-                    id="client_secret"
-                    class="form-control font-monospace"
-                    :class="{ 'is-invalid': approverForm.errors.client_secret }"
-                    placeholder="Auto-generated client secret"
-                    readonly
-                  >
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-secondary"
-                    @click="showSecret = !showSecret"
-                    title="Toggle visibility"
-                  >
-                    <i :class="showSecret ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-                  </button>
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-secondary"
-                    @click="generateClientSecret"
-                    title="Generate new Client Secret"
-                  >
-                    <i class="bi bi-arrow-clockwise"></i>
-                  </button>
-                </div>
-                <div v-if="approverForm.errors.client_secret" class="invalid-feedback">
-                  {{ approverForm.errors.client_secret }}
-                </div>
-              </div>
-
-              <!-- API Key -->
-              <div class="mb-2">
-                <label for="api_key" class="form-label">API Key</label>
-                <div class="input-group">
-                  <input 
-                    v-model="approverForm.api_key" 
-                    type="text"
-                    id="api_key"
-                    class="form-control font-monospace"
-                    :class="{ 'is-invalid': approverForm.errors.api_key }"
-                    placeholder="Auto-generated API key"
-                    readonly
-                  >
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-secondary"
-                    @click="generateApiKey"
-                    title="Generate new API Key"
-                  >
-                    <i class="bi bi-arrow-clockwise"></i>
-                  </button>
-                </div>
-                <div v-if="approverForm.errors.api_key" class="invalid-feedback">
-                  {{ approverForm.errors.api_key }}
-                </div>
-              </div>
-
-              <div class="alert alert-warning mt-2">
-                <small>
-                  <i class="bi bi-exclamation-triangle me-1"></i>
-                  <strong>Warning:</strong> Regenerating credentials will invalidate existing API access.
-                </small>
-              </div>
-            </div>
-
-            <!-- Approval Actions -->
-            <div class="mb-3">
-              <label class="form-label fw-bold">Approval Notes</label>
-              <textarea 
-                v-model="approverForm.approval_notes" 
-                class="form-control"
-                rows="3"
-                placeholder="Add notes about your approval decision..."
-              ></textarea>
-            </div>
-
-            <div class="d-grid gap-2">
-              <button 
-                type="button" 
-                class="btn btn-warning text-dark"
-                @click="saveApproverChanges"
-                :disabled="approverForm.processing"
-              >
-                <span v-if="approverForm.processing" class="spinner-border spinner-border-sm me-2"></span>
-                <i class="bi bi-floppy me-2"></i>
-                Save Manager Changes
-              </button>
-            </div>
-
-          </div>
-        </div>
-
         <!-- Regular Status Display -->
         <div class="card">
           <div class="card-body">
@@ -853,6 +1022,10 @@ export default {
       default: () => ({ user: { roles: [] } })
     },
     availableDataTables: {
+      type: Object,
+      default: () => ({})
+    },
+    apiAccessTables: {
       type: Object,
       default: () => ({})
     }
@@ -964,7 +1137,12 @@ export default {
       comments: props.application.comments,
       stra_provided: props.application.stra_provided,
       pia_provided: props.application.pia_provided,
-      data_permissions: []
+      data_permissions: [],
+      // Add manager fields
+      client_id: props.application.client_id || '',
+      client_secret: props.application.client_secret || '',
+      api_key: props.application.api_key || '',
+      approval_notes: props.application.approval_notes || ''
     });
 
     // Security approval form
@@ -979,16 +1157,13 @@ export default {
       privacy_approval_notes: props.application.privacy_approval_notes || '',
     });
 
-    // Application manager form
-    const approverForm = useForm({
-      status: props.application.status || 'draft',
-      client_id: props.application.client_id || '',
-      client_secret: props.application.client_secret || '',
-      api_key: props.application.api_key || '',
-    });
+        // Remove approverForm, add fields to main form
 
     // Data permissions management
     const dataPermissions = ref({});
+
+    // API access permissions management
+    const apiAccessPermissions = ref({});
 
     // Initialize data permissions
     function initializeDataPermissions() {
@@ -1002,7 +1177,7 @@ export default {
             table_name: table.name,
             column_name: column.name,
             display_name: column.default_display_name || '',
-            has_access: false
+            access_level: 'none'
           };
         });
       });
@@ -1012,7 +1187,14 @@ export default {
         props.application.data_permissions.forEach(permission => {
           const key = `${permission.table_name}.${permission.column_name}`;
           if (permissions[key]) {
-            permissions[key].has_access = permission.can_read || permission.can_write;
+            // Map existing permission data to access level
+            if (permission.is_required) {
+              permissions[key].access_level = 'required';
+            } else if (permission.can_read || permission.can_write) {
+              permissions[key].access_level = 'optional';
+            } else {
+              permissions[key].access_level = 'none';
+            }
             permissions[key].display_name = permission.display_name || permissions[key].display_name;
           }
         });
@@ -1021,20 +1203,78 @@ export default {
       dataPermissions.value = permissions;
     }
 
-    // Get count of permissions for a table
+    // Initialize API access permissions
+    function initializeApiAccessPermissions() {
+      const permissions = {};
+      
+      // Initialize all available API access permissions
+      Object.values(props.apiAccessTables).forEach(table => {
+        Object.values(table.columns).forEach(column => {
+          const key = `${table.name}.${column.name}`;
+          permissions[key] = {
+            table_name: table.name,
+            column_name: column.name,
+            display_name: column.default_display_name || '',
+            access_level: 'none'
+          };
+        });
+      });
+
+      // Set existing permissions (same data source as data permissions)
+      if (props.application.data_permissions) {
+        props.application.data_permissions.forEach(permission => {
+          const key = `${permission.table_name}.${permission.column_name}`;
+          if (permissions[key]) {
+            // Map existing permission data to access level
+            if (permission.can_read && permission.can_write) {
+              permissions[key].access_level = 'read_write';
+            } else if (permission.can_read) {
+              permissions[key].access_level = 'read';
+            } else if (permission.can_write) {
+              permissions[key].access_level = 'write';
+            } else {
+              permissions[key].access_level = 'none';
+            }
+            permissions[key].display_name = permission.display_name || permissions[key].display_name;
+          }
+        });
+      }
+
+      apiAccessPermissions.value = permissions;
+    }
+
+    // Get count of permissions for a table (required + optional)
     function getTablePermissionCount(tableName) {
       return Object.values(dataPermissions.value)
         .filter(permission => 
           permission.table_name === tableName && 
-          permission.has_access
+          permission.access_level !== 'none'
         ).length;
     }
 
-    // Select all columns for a table
+    // Get count of API access permissions for a table (required + optional)
+    function getApiTablePermissionCount(tableName) {
+      return Object.values(apiAccessPermissions.value)
+        .filter(permission => 
+          permission.table_name === tableName && 
+          permission.access_level !== 'none'
+        ).length;
+    }
+
+    // Select all columns for a table as optional
     function selectAllTableColumns(tableName) {
       Object.keys(dataPermissions.value).forEach(key => {
         if (dataPermissions.value[key].table_name === tableName) {
-          dataPermissions.value[key].has_access = true;
+          dataPermissions.value[key].access_level = 'optional';
+        }
+      });
+    }
+
+    // Select all API access columns for a table as read access
+    function selectAllApiTableColumns(tableName) {
+      Object.keys(apiAccessPermissions.value).forEach(key => {
+        if (apiAccessPermissions.value[key].table_name === tableName) {
+          apiAccessPermissions.value[key].access_level = 'read';
         }
       });
     }
@@ -1043,28 +1283,92 @@ export default {
     function clearAllTableColumns(tableName) {
       Object.keys(dataPermissions.value).forEach(key => {
         if (dataPermissions.value[key].table_name === tableName) {
-          dataPermissions.value[key].has_access = false;
+          dataPermissions.value[key].access_level = 'none';
+        }
+      });
+    }
+
+    // Clear all API access columns for a table
+    function clearAllApiTableColumns(tableName) {
+      Object.keys(apiAccessPermissions.value).forEach(key => {
+        if (apiAccessPermissions.value[key].table_name === tableName) {
+          apiAccessPermissions.value[key].access_level = 'none';
+        }
+      });
+    }
+
+    // Set all API access columns for a table to write access
+    function setAllApiTableColumnsWrite(tableName) {
+      Object.keys(apiAccessPermissions.value).forEach(key => {
+        if (apiAccessPermissions.value[key].table_name === tableName) {
+          apiAccessPermissions.value[key].access_level = 'write';
+        }
+      });
+    }
+
+    // Set all API access columns for a table to read and write access
+    function setAllApiTableColumnsReadWrite(tableName) {
+      Object.keys(apiAccessPermissions.value).forEach(key => {
+        if (apiAccessPermissions.value[key].table_name === tableName) {
+          apiAccessPermissions.value[key].access_level = 'read_write';
         }
       });
     }
 
     // Initialize data permissions on component mount
     initializeDataPermissions();
+    initializeApiAccessPermissions();
 
     function submit() {
-      // Prepare data permissions for submission
-      const permissions = Object.values(dataPermissions.value)
-        .filter(permission => permission.has_access)
+      // Prepare data permissions for submission (from Data Access Permissions section)
+      const dataPermissionsArray = Object.values(dataPermissions.value)
+        .filter(permission => permission.access_level !== 'none')
         .map(permission => ({
           table_name: permission.table_name,
           column_name: permission.column_name,
           display_name: permission.display_name,
-          can_read: true,  // Always true if has_access is true
-          can_write: false // Default to false for now, can be made configurable later
+          can_read: permission.access_level === 'required' || permission.access_level === 'optional',
+          can_write: false, // Data permissions are typically read-only
+          is_required: permission.access_level === 'required'
         }));
+
+      // Prepare API access permissions for submission (from API Access Permissions section)
+      const apiPermissionsArray = Object.values(apiAccessPermissions.value)
+        .filter(permission => permission.access_level !== 'none')
+        .map(permission => ({
+          table_name: permission.table_name,
+          column_name: permission.column_name,
+          display_name: permission.display_name,
+          can_read: permission.access_level === 'read' || permission.access_level === 'read_write',
+          can_write: permission.access_level === 'write' || permission.access_level === 'read_write',
+          // Don't include is_required for API permissions - this distinguishes them from data permissions
+        }));
+
+      // Combine both permission types
+      const allPermissions = [...dataPermissionsArray, ...apiPermissionsArray];
       
-      form.data_permissions = permissions;
-      form.put(`/admin/applications/${props.application.id}`);
+      form.data_permissions = allPermissions;
+      form.put(`/admin/applications/${props.application.id}`, {
+        onSuccess: () => {
+          // Flash message will be handled by the backend redirect
+          console.log('Application updated successfully');
+        },
+        onError: (errors) => {
+          // Handle validation errors - they'll be displayed in the form
+          console.error('Validation errors:', errors);
+          
+          // Show a general error message if there are server errors
+          if (errors.message) {
+            alert('Error: ' + errors.message);
+          } else if (Object.keys(errors).length > 0) {
+            alert('Please check the form for validation errors and try again.');
+          }
+        },
+        onFinish: () => {
+          // Optional: Could add loading state management here
+          console.log('Form submission finished');
+        }
+      });
     }
 
     function saveSecurityApproval() {
@@ -1101,28 +1405,17 @@ export default {
       });
     }
 
-    function saveApproverChanges() {
-      approverForm.put(`/admin/applications/${props.application.id}/manager-update`, {
-        onSuccess: () => {
-          // Handle success - could show a toast notification
-        },
-        onError: () => {
-          // Handle error
-        }
-      });
-    }
-
     // Generate functions for API credentials
     function generateClientId() {
-      approverForm.client_id = 'client_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+      form.client_id = 'client_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
     }
 
     function generateClientSecret() {
-      approverForm.client_secret = 'secret_' + Math.random().toString(36).substr(2, 32) + Date.now().toString(36);
+      form.client_secret = 'secret_' + Math.random().toString(36).substr(2, 32) + Date.now().toString(36);
     }
 
     function generateApiKey() {
-      approverForm.api_key = 'key_' + Math.random().toString(36).substr(2, 24) + Date.now().toString(36);
+      form.api_key = 'key_' + Math.random().toString(36).substr(2, 24) + Date.now().toString(36);
     }
 
     function getSecurityApprovalBadgeColor(status) {
@@ -1175,12 +1468,11 @@ export default {
       form,
       securityForm,
       privacyForm,
-      approverForm,
       dataPermissions,
+      apiAccessPermissions,
       submit,
       saveSecurityApproval,
       savePrivacyApproval,
-      saveApproverChanges,
       generateClientId,
       generateClientSecret,
       generateApiKey,
@@ -1190,14 +1482,23 @@ export default {
       formatDate,
       copyToClipboard,
       getTablePermissionCount,
+      getApiTablePermissionCount,
       selectAllTableColumns,
-      clearAllTableColumns
+      selectAllApiTableColumns,
+      setAllApiTableColumnsWrite,
+      setAllApiTableColumnsReadWrite,
+      clearAllTableColumns,
+      clearAllApiTableColumns
     };
   }
 }
 </script>
 
 <style scoped>
+hr {
+  margin: 3rem 0;
+}
+
 .font-monospace {
   font-family: 'Courier New', monospace;
 }

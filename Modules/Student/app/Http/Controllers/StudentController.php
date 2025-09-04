@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Individual;
 use App\Models\Application;
 use App\Models\ApplicationDataPermission;
+use App\Models\ApplicationIndividualPermission;
+use App\Models\ApplicationApiPermission;
 use App\Events\IndividualCreated;
 use App\Events\IndividualUpdated;
 use App\Models\IndividualAddress;
@@ -16,11 +18,11 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Modules\Student\Http\Requests\StoreIndividualRequest;
 use Modules\Student\Http\Requests\UpdateIndividualRequest;
 use Modules\Student\Http\Requests\StoreIndividualMultiStepRequest;
 use Modules\Student\Http\Requests\UpdateIndividualMultiStepRequest;
-use Auth;
 
 class StudentController extends Controller
 {
@@ -35,7 +37,7 @@ class StudentController extends Controller
             ->whereIn('status', ['active', 'offline'])
             ->where('security_approval_status', 'approved')
             ->where('privacy_approval_status', 'approved')
-            ->with('dataPermissions')
+            ->with(['individualPermissions', 'apiPermissions'])
             ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
             ->orderBy('name', 'asc')
             ->select([
@@ -55,9 +57,13 @@ class StudentController extends Controller
             ])
             ->get()
             ->map(function ($app) {
+                // Only use individual permissions for display (NOT API permissions)
+                // This matches what we use for token generation
+                $individualPermissions = $app->individualPermissions;
+                
                 // Group data permissions by table for better display
                 $permissionGroups = [];
-                foreach ($app->dataPermissions as $permission) {
+                foreach ($individualPermissions as $permission) {
                     $tableName = $permission->table_name;
                     if (!isset($permissionGroups[$tableName])) {
                         $permissionGroups[$tableName] = [
@@ -71,6 +77,7 @@ class StudentController extends Controller
                         'display_name' => $permission->display_name,
                         'can_read' => $permission->can_read,
                         'can_write' => $permission->can_write,
+                        'is_required' => $permission->is_required ?? false,
                     ];
                 }
 
@@ -88,13 +95,403 @@ class StudentController extends Controller
                     'data_permission_groups' => array_values($permissionGroups),
                     'profile_complete' => $this->checkProfileCompleteness($app),
                     'missing_data_message' => $this->getMissingDataMessage($app),
+                    'has_permissions' => $individualPermissions->count() > 0,
                 ];
             });
+
+        // Get user's profile data for modal forms
+        $individual = Individual::where('user_guid', Auth::user()->guid)->first();
+        $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
+            "employments" => $individual->employments, "identities" => $individual->identities] : null;
 
         return Inertia::render('Student::Dashboard', [
             'applications' => $applications,
             'user' => auth()->user()->only(['name', 'email']),
+            'profileData' => $profileData,
         ]);
+    }
+
+    /**
+     * Launch application with profile data
+     */
+    public function launchApplication(Request $request, $appId)
+    {
+        try {
+            \Log::info("LaunchApplication called for app: $appId", [
+                'user_id' => Auth::id(),
+                'share_profile' => $request->input('share_profile'),
+                'has_profile_data' => $request->has('profile_data')
+            ]);
+            
+            $app = Application::findOrFail($appId);
+            $user = Auth::user();
+            
+            // Get individual profile using the same method as index
+            $individual = Individual::where('user_guid', $user->guid)->first();
+            
+            // If no individual profile exists, we can still launch the application
+            // The user will provide data directly to the application
+            if (!$individual) {
+                \Log::info("No individual profile found for user: " . Auth::id() . ", launching without profile data");
+            }
+            
+            $shareProfile = $request->input('share_profile', false);
+            $profileData = $request->input('profile_data', []);
+            
+            \Log::info("Processing launch request", [
+                'share_profile' => $shareProfile,
+                'profile_data_available' => !empty($profileData),
+                'has_individual_profile' => !is_null($individual)
+            ]);
+            
+            // Prepare individual data for token based on user choice
+            $individualData = null;
+            if ($shareProfile && $individual) {
+                // Include available profile data based on permissions
+                $individualData = $this->prepareIndividualDataForToken($app); // Working directly with the Individual model
+                \Log::info("Including profile data in token", ['fields_count' => count($individualData)]);
+            } else {
+                // Send empty individual parameter
+                $individualData = [];
+                \Log::info("Sending empty individual parameter");
+            }
+            
+            // Create a token with the individual data
+            $token = $this->createApplicationToken($app, $user, $individualData);
+            
+            // Store token temporarily in session for gateway to retrieve
+            session(['app_launch_token_' . $appId => $token]);
+            session(['app_launch_user_' . $appId => $user->id]);
+            
+            // Generate launch URL
+            $launchUrl = "/gateway/$appId";
+            
+            \Log::info("Application launch successful", [
+                'app_id' => $appId,
+                'launch_url' => $launchUrl,
+                'shared_profile' => $shareProfile,
+                'token_created' => !empty($token)
+            ]);
+            
+            // Return success response - frontend will handle redirect
+            return back()->with([
+                'launch_url' => $launchUrl,
+                'success' => 'Application launched successfully!'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error("Application launch failed", [
+                'app_id' => $appId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors([
+                'message' => 'Failed to launch application: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Prepare individual data for token based on application permissions
+     */
+    private function prepareIndividualDataForToken($application)
+    {
+        $tokenData = [];
+        $user = Auth::user();
+        
+        // Get the individual with all relationships loaded
+        $individual = Individual::where('user_guid', $user->guid)
+            ->with(['addresses', 'employments', 'identities'])
+            ->first();
+        
+        if (!$individual) {
+            \Log::warning("No individual found for token preparation", ['user_guid' => $user->guid]);
+            return $tokenData;
+        }
+        
+        // Get all individual permissions for this application (NOT API permissions)
+        $individualPermissions = $application->individualPermissions;
+        
+        \Log::info("Preparing token data", [
+            'app_id' => $application->id,
+            'individual_permissions_count' => $individualPermissions->count(),
+            'individual_id' => $individual->id
+        ]);
+        
+        // Process each individual permission and get data from the appropriate table
+        foreach ($individualPermissions as $permission) {
+            if (!$permission->can_read) {
+                continue;
+            }
+            
+            $value = null;
+            $tableName = $permission->table_name;
+            $columnName = $permission->column_name;
+            
+            // Get value based on table name
+            switch ($tableName) {
+                case 'individuals':
+                    // Check if the column actually exists on the model
+                    if (in_array($columnName, (new Individual())->getFillable())) {
+                        $value = $individual->{$columnName} ?? null;
+                    } else {
+                        \Log::warning("Column does not exist in individuals table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id ?? 'unknown'
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_addresses':
+                    // Check if the column exists on the address model
+                    if (in_array($columnName, (new IndividualAddress())->getFillable())) {
+                        // Get primary address or first address
+                        $primaryAddress = $individual->addresses->where('is_primary', true)->first() 
+                                       ?? $individual->addresses->first();
+                        if ($primaryAddress) {
+                            $value = $primaryAddress->{$columnName} ?? null;
+                        } else {
+                            // No address record exists - set default based on field type
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_addresses table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id ?? 'unknown'
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_employments':
+                    // Check if the column exists on the employment model
+                    if (in_array($columnName, (new IndividualEmployment())->getFillable())) {
+                        // Get current employment or first employment
+                        $currentEmployment = $individual->employments->where('is_current', true)->first()
+                                          ?? $individual->employments->first();
+                        if ($currentEmployment) {
+                            $value = $currentEmployment->{$columnName} ?? null;
+                        } else {
+                            // No employment record exists - set default based on field type
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_employments table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id ?? 'unknown'
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_identities':
+                    // Check if the column exists on the identity model
+                    if (in_array($columnName, (new IndividualIdentity())->getFillable())) {
+                        // Get first identity
+                        $identity = $individual->identities->first();
+                        if ($identity) {
+                            $value = $identity->{$columnName} ?? null;
+                        } else {
+                            // No identity record exists - set default based on field type
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_identities table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id ?? 'unknown'
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                default:
+                    \Log::warning("Unknown table name in permission", [
+                        'table_name' => $tableName,
+                        'column_name' => $columnName,
+                        'permission_id' => $permission->id ?? 'unknown'
+                    ]);
+                    continue 2;
+            }
+            
+            // Include ALL fields that the application requests, regardless of null values
+            // This ensures the application gets complete data structure for all 11 fields
+            $tokenData[$columnName] = $value;
+            
+            \Log::debug("Processing permission", [
+                'table_name' => $tableName,
+                'column_name' => $columnName,
+                'can_read' => $permission->can_read,
+                'value' => $value,
+                'value_type' => gettype($value),
+                'has_related_record' => $this->hasRelatedRecord($individual, $tableName)
+            ]);
+        }
+        
+        \Log::info("Token data prepared", [
+            'app_id' => $application->id,
+            'app_name' => $application->name,
+            'token_data_keys' => array_keys($tokenData),
+            'token_data_count' => count($tokenData),
+            'token_data' => $tokenData  // Log actual data for debugging
+        ]);
+        
+        return $tokenData;
+    }
+
+    /**
+     * Create application launch token
+     */
+    private function createApplicationToken($application, $user, $individualData)
+    {
+        $tokenData = [
+            'user_guid' => $user->guid,
+            'user_email' => $user->email,
+            'user_name' => $user->name,
+            'individual' => $individualData,
+            'issued_at' => time(),
+            'expires_at' => time() + (60 * 15), // 15 minutes expiry
+        ];
+        
+        // In a real implementation, you would create a JWT token here
+        // For now, we'll just return the data as is
+        return base64_encode(json_encode($tokenData));
+    }
+
+    /**
+     * Get required fields for an application based on its permissions
+     */
+    private function getRequiredFieldsForApplication($application)
+    {
+        $requiredFields = [];
+        
+        // Load individual permissions (Required/Optional system)
+        $individualPermissions = $application->individualPermissions;
+        
+        foreach ($individualPermissions as $permission) {
+            if ($permission->is_required) {
+                $requiredFields[] = $permission->field_name;
+            }
+        }
+        
+        return $requiredFields;
+    }
+
+    /**
+     * Update individual profile from form data
+     */
+    private function updateIndividualFromFormData($individual, $formData)
+    {
+        // Update basic individual fields - use actual database field names
+        $individualFields = [
+            'first_name', 'last_name', 'middle_name', 'preferred_name',
+            'date_of_birth', 'gender', 'preferred_pronouns', 'phone_number', 
+            'email_address', 'alternate_phone_number', 'disability_status',
+            'accommodation_needs', 'social_insurance_number', 'government_issued_id',
+            'provincial_education_number', 'status', 'verification_status'
+        ];
+        
+        foreach ($individualFields as $field) {
+            if (array_key_exists($field, $formData)) {
+                $individual->{$field} = $formData[$field];
+            }
+        }
+        
+        $individual->save();
+        
+        // Update address if provided - use actual database field names
+        $addressFields = [
+            'address_type', 'address_line1', 'address_line2', 'city', 
+            'province', 'postal_code', 'country', 'is_primary', 'is_active'
+        ];
+        
+        $hasAddressData = false;
+        $addressData = [];
+        foreach ($addressFields as $field) {
+            if (array_key_exists($field, $formData)) {
+                $addressData[$field] = $formData[$field];
+                $hasAddressData = true;
+            }
+        }
+        
+        if ($hasAddressData) {
+            $individual->currentAddress()->updateOrCreate(
+                ['individual_id' => $individual->id, 'is_primary' => true],
+                $addressData
+            );
+        }
+        
+        // Update employment if provided - use actual database field names
+        $employmentFields = [
+            'employment_status', 'is_looking_for_work', 'job_title', 'employer_name',
+            'employer_industry', 'employment_start_date', 'employment_end_date',
+            'work_hours_per_week', 'monthly_income', 'is_job_related_to_program',
+            'previous_job_title', 'previous_employer_name', 'previous_employment_start_date',
+            'previous_employment_end_date', 'reason_for_leaving', 'career_interest_area',
+            'desired_job_title', 'career_readiness_level', 'has_career_plan',
+            'is_receiving_employment_insurance', 'is_participating_in_work_study_program',
+            'barriers_to_employment', 'is_current'
+        ];
+        
+        $hasEmploymentData = false;
+        $employmentData = [];
+        foreach ($employmentFields as $field) {
+            if (array_key_exists($field, $formData)) {
+                $employmentData[$field] = $formData[$field];
+                $hasEmploymentData = true;
+            }
+        }
+        
+        if ($hasEmploymentData) {
+            $individual->currentEmployment()->updateOrCreate(
+                ['individual_id' => $individual->id, 'is_current' => true],
+                $employmentData
+            );
+        }
+        
+        // Update identity if provided - use actual database field names
+        $identityFields = [
+            'citizenship_status', 'country_of_birth', 'language_spoken_at_home',
+            'years_in_country', 'refugee_status', 'immigration_status',
+            'indigenous_status', 'indigenous_group', 'band_affiliation',
+            'indigenous_status_card_number', 'is_registered_with_band',
+            'on_reserve_resident', 'racial_identity', 'is_visible_minority',
+            'receives_indigenous_support_services', 'receives_minority_support_services'
+        ];
+        
+        $hasIdentityData = false;
+        $identityData = [];
+        foreach ($identityFields as $field) {
+            if (array_key_exists($field, $formData)) {
+                $identityData[$field] = $formData[$field];
+                $hasIdentityData = true;
+            }
+        }
+        
+        if ($hasIdentityData) {
+            $individual->identity()->updateOrCreate(
+                ['individual_id' => $individual->id],
+                $identityData
+            );
+        }
+    }
+
+    /**
+     * Generate application launch URL with form data token
+     */
+    private function generateApplicationLaunchUrl($application, $formData)
+    {
+        // This would typically involve creating a JWT token with the form data
+        // and redirecting through the gateway with the token
+        
+        // For now, we'll use the existing gateway route
+        // In a real implementation, you'd want to:
+        // 1. Create a JWT token with the form data
+        // 2. Store it temporarily (cache/database)
+        // 3. Pass the token to the gateway route
+        
+        return url("/gateway/{$application->id}");
     }
 
     /**
@@ -242,7 +639,7 @@ class StudentController extends Controller
     public function edit(Request $request)
     {
         $individual = Individual::where('user_guid', Auth::user()->guid)
-            ->with(['addresses', 'employments', 'identities'])
+            ->with(['currentAddress', 'currentEmployment', 'identity'])
             ->first();
 
         $this->authorize('update', $individual);
@@ -250,8 +647,11 @@ class StudentController extends Controller
         // Get all active countries for the form
         $countries = Country::getActiveCountries();
 
+        $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
+            "employments" => $individual->employments, "identities" => $individual->identities] : null;
+
         return Inertia::render('Student::Profile/EditMultiStep', [
-            'individual' => $individual,
+            'individual' => $profileData,
             'countries' => $countries,
         ]);
     }
@@ -261,7 +661,9 @@ class StudentController extends Controller
      */
     public function update(UpdateIndividualMultiStepRequest $request)
     {
-        $individual = Individual::where('user_guid', Auth::user()->guid)->first();
+        $individual = Individual::with(['addresses', 'employments', 'identities'])
+            ->where('user_guid', Auth::user()->guid)
+            ->first();
 
         $this->authorize('update', $individual);
 
@@ -557,5 +959,49 @@ class StudentController extends Controller
     private function formatFieldName(string $fieldName): string
     {
         return ucwords(str_replace('_', ' ', $fieldName));
+    }
+
+    /**
+     * Get default value for a field when related record doesn't exist
+     */
+    private function getDefaultValueForField(string $columnName)
+    {
+        // Boolean fields that should default to false when no record exists
+        $booleanFields = [
+            'is_receiving_employment_insurance',
+            'is_participating_in_work_study_program', 
+            'is_looking_for_work',
+            'is_job_related_to_program',
+            'has_career_plan',
+            'is_current',
+            'latest_version',
+            'is_primary'
+        ];
+        
+        if (in_array($columnName, $booleanFields)) {
+            return false;
+        }
+        
+        // For other fields, return null (which means they won't be included unless required)
+        return null;
+    }
+
+    /**
+     * Check if individual has a related record for the given table
+     */
+    private function hasRelatedRecord($individual, string $tableName): bool
+    {
+        switch ($tableName) {
+            case 'individuals':
+                return true; // Individual record always exists if we got this far
+            case 'individual_addresses':
+                return $individual->addresses->count() > 0;
+            case 'individual_employments':
+                return $individual->employments->count() > 0;
+            case 'individual_identities':
+                return $individual->identities->count() > 0;
+            default:
+                return false;
+        }
     }
 }

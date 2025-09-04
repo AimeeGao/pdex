@@ -13,6 +13,10 @@ Route::prefix('student')->group(function () {
             ->middleware('student_profile')
             ->name('dashboard');
         
+        // Application launch route
+        Route::post('launch-application/{application}', [StudentController::class, 'launchApplication'])
+            ->name('launch.application');
+        
         // Profile management routes (no profile check to avoid infinite redirects)
         Route::get('profile', [StudentController::class, 'profile'])->name('profile.index');
         Route::get('profile/create', [StudentController::class, 'create'])->name('profile.create');

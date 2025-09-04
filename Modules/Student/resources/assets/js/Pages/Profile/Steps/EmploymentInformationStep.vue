@@ -380,9 +380,47 @@
 </template>
 
 <script setup>
+import { reactive, watchEffect } from 'vue'
+
 const props = defineProps({
   form: Object,
   errors: Object
+})
+
+const emit = defineEmits(['update:form'])
+
+// Helper function to update a field
+const updateField = (field, value) => {
+  const updatedForm = { ...props.form, [field]: value }
+  emit('update:form', updatedForm)
+}
+
+// Create a reactive proxy object that syncs with props and emits changes
+const form = reactive(new Proxy({}, {
+  get(target, property) {
+    return props.form?.[property] ?? (typeof props.form?.[property] === 'boolean' ? false : '')
+  },
+  set(target, property, value) {
+    updateField(property, value)
+    return true
+  },
+  has(target, property) {
+    return property in (props.form || {})
+  },
+  ownKeys(target) {
+    return Object.keys(props.form || {})
+  }
+}))
+
+// Watch for prop changes and sync them to our reactive object
+watchEffect(() => {
+  // This ensures the proxy stays in sync with prop changes
+  if (props.form) {
+    Object.keys(props.form).forEach(key => {
+      // Trigger reactivity by accessing the property
+      form[key]
+    })
+  }
 })
 
 // Helper function to check for errors in multiple formats

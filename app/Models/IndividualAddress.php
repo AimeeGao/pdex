@@ -13,6 +13,7 @@ class IndividualAddress extends Model
         'individual_id',
         'user_id',
         'version_number',
+        'address_type',
         'address_line1',
         'address_line2',
         'city',
@@ -20,6 +21,7 @@ class IndividualAddress extends Model
         'postal_code',
         'country',
         'is_primary',
+        'is_active',
         'latest_version',
     ];
 

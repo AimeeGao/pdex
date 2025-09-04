@@ -41,6 +41,9 @@ class Application extends Model
         'comments',
         'stra_provided',
         'pia_provided',
+        'client_id',
+        'client_secret',
+        'approval_notes',
     ];
 
     protected $casts = [
@@ -154,19 +157,35 @@ class Application extends Model
     }
 
     /**
-     * Get the data permissions for this application
+     * Get the individual data permissions for this application
      */
-    public function dataPermissions()
+    public function individualPermissions()
     {
-        return $this->hasMany(ApplicationDataPermission::class);
+        return $this->hasMany(ApplicationIndividualPermission::class);
     }
 
     /**
-     * Check if application has access to a specific data column
+     * Get the API access permissions for this application
      */
-    public function hasDataAccess(string $tableName, string $columnName, string $accessType = 'read'): bool
+    public function apiPermissions()
     {
-        return ApplicationDataPermission::where('application_id', $this->id)
+        return $this->hasMany(ApplicationApiPermission::class);
+    }
+
+    /**
+     * Legacy method - redirects to individual permissions for backward compatibility
+     */
+    public function dataPermissions()
+    {
+        return $this->hasMany(ApplicationIndividualPermission::class);
+    }
+
+    /**
+     * Check if application has access to a specific individual data column
+     */
+    public function hasIndividualDataAccess(string $tableName, string $columnName, string $accessType = 'read'): bool
+    {
+        return ApplicationIndividualPermission::where('application_id', $this->id)
             ->where('table_name', $tableName)
             ->where('column_name', $columnName)
             ->where($accessType === 'write' ? 'can_write' : 'can_read', true)
@@ -174,10 +193,54 @@ class Application extends Model
     }
 
     /**
-     * Get all accessible columns for a table
+     * Check if application has API access to a specific data column
+     */
+    public function hasApiAccess(string $tableName, string $columnName, string $accessType = 'read'): bool
+    {
+        return ApplicationApiPermission::where('application_id', $this->id)
+            ->where('table_name', $tableName)
+            ->where('column_name', $columnName)
+            ->where($accessType === 'write' ? 'can_write' : 'can_read', true)
+            ->exists();
+    }
+
+    /**
+     * Legacy method - redirects to individual data access for backward compatibility
+     */
+    public function hasDataAccess(string $tableName, string $columnName, string $accessType = 'read'): bool
+    {
+        return $this->hasIndividualDataAccess($tableName, $columnName, $accessType);
+    }
+
+    /**
+     * Get all accessible individual data columns for a table
+     */
+    public function getAccessibleIndividualColumns(string $tableName, string $accessType = 'read'): array
+    {
+        return ApplicationIndividualPermission::where('application_id', $this->id)
+            ->where('table_name', $tableName)
+            ->where($accessType === 'write' ? 'can_write' : 'can_read', true)
+            ->pluck('column_name')
+            ->toArray();
+    }
+
+    /**
+     * Get all accessible API columns for a table
+     */
+    public function getAccessibleApiColumns(string $tableName, string $accessType = 'read'): array
+    {
+        return ApplicationApiPermission::where('application_id', $this->id)
+            ->where('table_name', $tableName)
+            ->where($accessType === 'write' ? 'can_write' : 'can_read', true)
+            ->pluck('column_name')
+            ->toArray();
+    }
+
+    /**
+     * Legacy method - redirects to individual columns for backward compatibility
      */
     public function getAccessibleColumns(string $tableName, string $accessType = 'read'): array
     {
-        return ApplicationDataPermission::getAccessibleColumns($this->id, $tableName, $accessType);
+        return $this->getAccessibleIndividualColumns($tableName, $accessType);
     }
 }

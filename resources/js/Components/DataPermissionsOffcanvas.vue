@@ -35,7 +35,7 @@
             <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
             <div class="small">
               <strong>Data Access Summary:</strong><br>
-              This application can access the following data categories when you use it. 
+              This application needs the following data categories when you use it. 
               All data access is subject to your consent and privacy controls.
             </div>
           </div>
@@ -90,18 +90,18 @@
                     </div>
                     <div class="text-end">
                       <span 
-                        v-if="permission.can_read" 
-                        class="badge bg-success bg-opacity-10 text-success me-1"
+                        v-if="permission.is_required" 
+                        class="badge bg-danger bg-opacity-10 text-danger"
                         style="font-size: 0.65rem;"
                       >
-                        <i class="bi bi-eye me-1"></i>Read
+                        <i class="bi bi-asterisk me-1"></i>Required
                       </span>
                       <span 
-                        v-if="permission.can_write" 
-                        class="badge bg-warning bg-opacity-10 text-warning"
+                        v-else
+                        class="badge bg-secondary bg-opacity-10 text-secondary"
                         style="font-size: 0.65rem;"
                       >
-                        <i class="bi bi-pencil me-1"></i>Write
+                        <i class="bi bi-plus me-1"></i>Optional
                       </span>
                     </div>
                   </div>

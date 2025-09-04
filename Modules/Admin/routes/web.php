@@ -38,7 +38,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
         Route::patch('applications/{application}/security-approval', [ApplicationController::class, 'securityApproval'])->name('applications.security-approval');
         Route::patch('applications/{application}/privacy-approval', [ApplicationController::class, 'privacyApproval'])->name('applications.privacy-approval');
-        Route::patch('applications/{application}/manager-update', [ApplicationController::class, 'managerUpdate'])->name('applications.manager-update');
+        // Route::patch('applications/{application}/manager-update', [ApplicationController::class, 'managerUpdate'])->name('applications.manager-update');
         Route::patch('applications/toggle-status/{application}', [ApplicationController::class, 'toggleStatus'])->name('applications.toggle-status');
         Route::patch('applications/restore/{id}', [ApplicationController::class, 'restore'])->name('applications.restore');
         Route::delete('applications/force-delete/{id}', [ApplicationController::class, 'forceDelete'])->name('applications.force-delete');
