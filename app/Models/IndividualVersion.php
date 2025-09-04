@@ -12,19 +12,19 @@ class IndividualVersion extends Model
     protected $fillable = [
         'individual_id',
         'version_number',
-        'individual_data',
-        'individual_address',
-        'individual_employment',
-        'individual_identity',
+        'individual_general',
+        'individual_addresses',
+        'individual_employments',
+        'individual_identities',
         'created_by',
         'notes',
     ];
 
     protected $casts = [
-        'individual_data' => 'array',
-        'individual_address' => 'array',
-        'individual_employment' => 'array',
-        'individual_identity' => 'array',
+        'individual_general' => 'array',
+        'individual_addresses' => 'array',
+        'individual_employments' => 'array',
+        'individual_identities' => 'array',
     ];
 
     // Relationships
@@ -57,10 +57,10 @@ class IndividualVersion extends Model
             return static::create([
                 'individual_id' => $individual->id,
                 'version_number' => $nextVersion,
-                'individual_data' => $individual->toArray(),
-                'individual_address' => $individual->addresses ? $individual->addresses->toArray() : null,
-                'individual_employment' => $individual->employments ? $individual->employments->toArray() : null,
-                'individual_identity' => $individual->identities ? $individual->identities->toArray() : null,
+                'individual_general' => $individual->toArray(),
+                'individual_addresses' => $individual->addresses ? $individual->addresses->toArray() : null,
+                'individual_employments' => $individual->employments ? $individual->employments->toArray() : null,
+                'individual_identities' => $individual->identities ? $individual->identities->toArray() : null,
                 'created_by' => $createdBy ?: auth()->user()?->guid,
                 'notes' => $notes ?: 'Profile updated',
             ]);
@@ -83,7 +83,7 @@ class IndividualVersion extends Model
             return $maxVersion ? $maxVersion + 1 : 1;
         } catch (\Exception $e) {
             // If there's a database error (like missing table), return version 1
-            \Illuminate\Support\Facades\Log::warning('Could not get version number, using default', [
+            \Log::warning('Could not get version number, using default', [
                 'error' => $e->getMessage(),
                 'individual_id' => $individualId
             ]);
@@ -108,10 +108,10 @@ class IndividualVersion extends Model
         static::createVersion($individual, "Restored to version {$this->version_number}");
         
         // Update individual with this version's data
-        $individualData = $this->individual_data;
-        $employmentData = $this->individual_employment;
-        $addressData = $this->individual_address;
-        $identityData = $this->individual_identity;
+        $individualData = $this->individual_general;
+        $employmentData = $this->individual_employments;
+        $addressData = $this->individual_addresses;
+        $identityData = $this->individual_identities;
 
         // Unset unnecessary fields
         unset($individualData['id'], $individualData['created_at'], $individualData['updated_at']);

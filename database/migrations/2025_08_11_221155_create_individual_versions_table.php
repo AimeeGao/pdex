@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('individual_id')->index();
             $table->integer('version_number')->default(1);
-            $table->json('individual_data'); // Store the complete individual data as JSON
-            $table->json('individual_data'); // Store the complete individual data as JSON
-            $table->json('individual_data'); // Store the complete individual data as JSON
-            $table->json('individual_address'); // Store the complete individual address as JSON
-            $table->json('individual_employment'); // Store the complete individual employment as JSON
-            $table->json('individual_identity'); // Store the complete individual identity as JSON
+            $table->json('individual_general'); // Store the complete individual data as JSON
+            $table->json('individual_addresses'); // Store the complete individual addresses as JSON
+            $table->json('individual_employments'); // Store the complete individual employment as JSON
+            $table->json('individual_identities'); // Store the complete individual identity as JSON
             $table->string('created_by')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
