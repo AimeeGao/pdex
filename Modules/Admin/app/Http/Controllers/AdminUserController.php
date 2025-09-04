@@ -26,9 +26,9 @@ class AdminUserController extends Controller
         $adminRoles = [Role::SUPER_ADMIN, Role::APPLICATION_MANAGER, Role::SECURITY_OFFICER, Role::PRIVACY_OFFICER, Role::ADMIN_GUEST];
 
         // Start building the query
-        $query = User::where('identity_provider', 'idir')
-            ->where('name', 'ilike', '%' . env('MINISTRY_SHORT_NAME', 'psfs') . '%')
-            ->with(['roles:id,name,display_name'])
+        // $query = User::where('identity_provider', 'idir')
+        //     ->where('name', 'ilike', '%' . env('MINISTRY_SHORT_NAME', 'psfs') . '%')
+        $query = User::with(['roles:id,name,display_name'])
             ->withTrashed()
             ->orderBy('name');
 
