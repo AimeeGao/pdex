@@ -27,12 +27,27 @@
                 <table class="table table-bordered mb-0">
         <thead class="table-light">
           <tr>
-            <th>Name</th>
-            <th>Contact</th>
+            <th @click="sortBy('name')" class="sortable-header" :class="getSortClass('name')">
+              Name
+              <i :class="getSortIcon('name')"></i>
+            </th>
+            <th @click="sortBy('contact_name')" class="sortable-header" :class="getSortClass('contact_name')">
+              Contact
+              <i :class="getSortIcon('contact_name')"></i>
+            </th>
             <th>IDPs Enabled</th>
-            <th>Security Approval</th>
-            <th>Privacy Approval</th>
-            <th>Status</th>
+            <th @click="sortBy('security_approval_status')" class="sortable-header" :class="getSortClass('security_approval_status')">
+              Security Approval
+              <i :class="getSortIcon('security_approval_status')"></i>
+            </th>
+            <th @click="sortBy('privacy_approval_status')" class="sortable-header" :class="getSortClass('privacy_approval_status')">
+              Privacy Approval
+              <i :class="getSortIcon('privacy_approval_status')"></i>
+            </th>
+            <th @click="sortBy('status')" class="sortable-header" :class="getSortClass('status')">
+              Status
+              <i :class="getSortIcon('status')"></i>
+            </th>
             <th>STRA/PIA</th>
             <th>Actions</th>
           </tr>
@@ -209,6 +224,10 @@ export default {
     userCanCreate: {
       type: Boolean,
       default: false
+    },
+    filters: {
+      type: Object,
+      default: () => ({})
     }
   },
   setup(props) {
@@ -352,6 +371,35 @@ export default {
       return new Date(dateString).toLocaleDateString();
     }
 
+    function sortBy(field) {
+      const currentSort = props.filters.sort;
+      const currentDirection = props.filters.direction;
+      
+      let newDirection = 'asc';
+      if (currentSort === field && currentDirection === 'asc') {
+        newDirection = 'desc';
+      }
+      
+      router.get('/admin/applications', {
+        sort: field,
+        direction: newDirection
+      }, {
+        preserveState: true,
+        replace: true
+      });
+    }
+
+    function getSortClass(field) {
+      return props.filters.sort === field ? 'sort-active' : '';
+    }
+
+    function getSortIcon(field) {
+      if (props.filters.sort !== field) {
+        return 'bi bi-arrow-down-up text-muted';
+      }
+      return props.filters.direction === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+    }
+
     return {
       showModal,
       selectedApp,
@@ -372,8 +420,40 @@ export default {
       getApprovalBadgeColor,
       getStatusBadgeColor,
       getNextStatus,
-      formatDate
+      formatDate,
+      sortBy,
+      getSortClass,
+      getSortIcon
     };
   }
 }
 </script>
+
+<style scoped>
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 2rem !important;
+}
+
+.sortable-header:hover {
+  background-color: #e9ecef;
+}
+
+.sortable-header i {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+}
+
+.sort-active {
+  background-color: #dee2e6;
+}
+
+.sort-active i {
+  color: #0d6efd !important;
+}
+</style>

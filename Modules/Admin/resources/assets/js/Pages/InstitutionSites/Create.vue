@@ -65,10 +65,14 @@
                                         <input type="tel" class="form-control" 
                                                :class="{ 'is-invalid': errors.primary_phone }"
                                                v-model="form.primary_phone" 
+                                               placeholder="(555) 123-4567"
+                                               pattern="^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$"
+                                               title="Please enter a valid North American phone number (e.g., (555) 123-4567)"
                                                maxlength="20" required>
                                         <div class="invalid-feedback" v-if="errors.primary_phone">
                                             {{ errors.primary_phone }}
                                         </div>
+                                        <div class="form-text">Format: (555) 123-4567</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Primary Email *</label>
@@ -115,10 +119,14 @@
                                         <input type="tel" class="form-control" 
                                                :class="{ 'is-invalid': errors.contact_phone }"
                                                v-model="form.contact_phone" 
+                                               placeholder="(555) 123-4567"
+                                               pattern="^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$"
+                                               title="Please enter a valid North American phone number (e.g., (555) 123-4567)"
                                                maxlength="20" required>
                                         <div class="invalid-feedback" v-if="errors.contact_phone">
                                             {{ errors.contact_phone }}
                                         </div>
+                                        <div class="form-text">Format: (555) 123-4567</div>
                                     </div>
                                 </div>
                             </div>
@@ -177,10 +185,14 @@
                                         <input type="text" class="form-control" 
                                                :class="{ 'is-invalid': errors.postal_code }"
                                                v-model="form.postal_code" 
+                                               placeholder="A1A 1A1"
+                                               pattern="^[A-Za-z]\d[A-Za-z][\s\-]?\d[A-Za-z]\d$"
+                                               title="Please enter a valid Canadian postal code (e.g., A1A 1A1)"
                                                maxlength="10" required>
                                         <div class="invalid-feedback" v-if="errors.postal_code">
                                             {{ errors.postal_code }}
                                         </div>
+                                        <div class="form-text">Format: A1A 1A1</div>
                                     </div>
                                     <div class="col-md-12">
                                         <label class="form-label">Country *</label>
@@ -258,7 +270,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Established Date</label>
-                                        <input type="date" class="form-control" 
+                                        <input type="date" class="form-control" format="yyyy-MM-dd"
                                                :class="{ 'is-invalid': errors.established_date }"
                                                v-model="form.established_date">
                                         <div class="invalid-feedback" v-if="errors.established_date">

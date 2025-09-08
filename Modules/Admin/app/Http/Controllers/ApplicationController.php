@@ -29,21 +29,57 @@ class ApplicationController extends Controller
         $this->authorizeResource(Application::class, 'application');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $applications = Application::with([
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        
+        // Define allowed sort fields to prevent SQL injection
+        $allowedSortFields = [
+            'name',
+            'contact_name',
+            'contact_email',
+            'security_approval_status', 
+            'privacy_approval_status',
+            'status',
+            'created_at'
+        ];
+        
+        // Validate sort field
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+        }
+        
+        // Validate sort direction
+        if (!in_array(strtolower($sortDirection), ['asc', 'desc'])) {
+            $sortDirection = 'desc';
+        }
+        
+        $query = Application::with([
                 'securityApprover:id,name,email',
                 'privacyApprover:id,name,email'
             ])
-            ->withTrashed() // Include soft deleted records
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->withTrashed(); // Include soft deleted records
+            
+        // Handle contact sorting (combine contact_name and contact_email)
+        if ($sortField === 'contact_name' || $sortField === 'contact_email') {
+            $query->orderBy('contact_name', $sortDirection)
+                  ->orderBy('contact_email', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+        
+        $applications = $query->get();
 
         $userCanCreate = Auth::user()->can('create', Application::class);
 
         return Inertia::render('Admin::Applications', [
             'applications' => $applications,
             'userCanCreate' => $userCanCreate,
+            'filters' => [
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+            ],
         ]);
     }
 

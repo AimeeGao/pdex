@@ -93,7 +93,12 @@ class InstitutionSiteController extends Controller
 
         $validated = $request->validate([
             'operating_name' => 'required|string|max:255',
-            'primary_phone' => 'required|string|max:20',
+            'primary_phone' => [
+                'required',
+                'string',
+                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                'max:20'
+            ],
             'primary_email' => 'required|email|max:255',
             'website' => 'nullable|url|max:255',
             'regulating_body' => 'required|string|max:255',
@@ -103,18 +108,32 @@ class InstitutionSiteController extends Controller
             'contact_first_name' => 'required|string|max:100',
             'contact_last_name' => 'required|string|max:100',
             'contact_email' => 'required|email|max:255',
-            'contact_phone' => 'required|string|max:20',
+            'contact_phone' => [
+                'required',
+                'string',
+                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                'max:20'
+            ],
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:100',
             'province_state' => 'required|string|max:100',
             'country' => 'required|string|max:100',
-            'postal_code' => 'required|string|max:10',
+            'postal_code' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z]\d[A-Za-z][\s\-]?\d[A-Za-z]\d$/',
+                'max:10'
+            ],
             'public' => 'boolean',
             'active_status' => 'boolean',
             'standing_status' => 'nullable|string|in:' . implode(',', InstitutionSite::getStandingStatuses()),
             'economic_region' => 'nullable|string|in:' . implode(',', InstitutionSite::getEconomicRegions()),
             'notes' => 'nullable|string',
+        ], [
+            'primary_phone.regex' => 'Primary phone must be a valid North American phone number (e.g., (555) 123-4567).',
+            'contact_phone.regex' => 'Contact phone must be a valid North American phone number (e.g., (555) 123-4567).',
+            'postal_code.regex' => 'Postal code must be a valid Canadian postal code (e.g., A1A 1A1).',
         ]);
 
         // Add institution GUID
@@ -192,7 +211,13 @@ class InstitutionSiteController extends Controller
 
         $validated = $request->validate([
             'operating_name' => 'sometimes|required|string|max:255',
-            'primary_phone' => 'sometimes|required|string|max:20',
+            'primary_phone' => [
+                'sometimes',
+                'required',
+                'string',
+                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                'max:20'
+            ],
             'primary_email' => 'sometimes|required|email|max:255',
             'website' => 'nullable|url|max:255',
             'regulating_body' => 'sometimes|required|string|max:255',
@@ -202,18 +227,34 @@ class InstitutionSiteController extends Controller
             'contact_first_name' => 'sometimes|required|string|max:100',
             'contact_last_name' => 'sometimes|required|string|max:100',
             'contact_email' => 'sometimes|required|email|max:255',
-            'contact_phone' => 'sometimes|required|string|max:20',
+            'contact_phone' => [
+                'sometimes',
+                'required',
+                'string',
+                'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/',
+                'max:20'
+            ],
             'address_line_1' => 'sometimes|required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'sometimes|required|string|max:100',
             'province_state' => 'sometimes|required|string|max:100',
             'country' => 'sometimes|required|string|max:100',
-            'postal_code' => 'sometimes|required|string|max:10',
+            'postal_code' => [
+                'sometimes',
+                'required',
+                'string',
+                'regex:/^[A-Za-z]\d[A-Za-z][\s\-]?\d[A-Za-z]\d$/',
+                'max:10'
+            ],
             'public' => 'boolean',
             'active_status' => 'boolean',
             'standing_status' => 'nullable|string|in:' . implode(',', InstitutionSite::getStandingStatuses()),
             'economic_region' => 'nullable|string|in:' . implode(',', InstitutionSite::getEconomicRegions()),
             'notes' => 'nullable|string',
+        ], [
+            'primary_phone.regex' => 'Primary phone must be a valid North American phone number (e.g., (555) 123-4567).',
+            'contact_phone.regex' => 'Contact phone must be a valid North American phone number (e.g., (555) 123-4567).',
+            'postal_code.regex' => 'Postal code must be a valid Canadian postal code (e.g., A1A 1A1).',
         ]);
 
         $site->update($validated);

@@ -163,11 +163,15 @@
                                             :class="{ 'is-invalid': form.errors.contact_phone }"
                                             id="contact_phone" 
                                             v-model="form.contact_phone" 
+                                            placeholder="(555) 123-4567"
+                                            pattern="^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$"
+                                            title="Please enter a valid North American phone number (e.g., (555) 123-4567)"
                                             required
                                         >
                                         <div v-if="form.errors.contact_phone" class="invalid-feedback">
                                             {{ form.errors.contact_phone }}
                                         </div>
+                                        <div class="form-text">Format: (555) 123-4567</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="primary_phone" class="form-label">Primary Phone</label>
@@ -177,10 +181,14 @@
                                             :class="{ 'is-invalid': form.errors.primary_phone }"
                                             id="primary_phone" 
                                             v-model="form.primary_phone"
+                                            placeholder="(555) 123-4567"
+                                            pattern="^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$"
+                                            title="Please enter a valid North American phone number (e.g., (555) 123-4567)"
                                         >
                                         <div v-if="form.errors.primary_phone" class="invalid-feedback">
                                             {{ form.errors.primary_phone }}
                                         </div>
+                                        <div class="form-text">Format: (555) 123-4567</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="primary_email" class="form-label">Primary Email</label>
@@ -269,11 +277,15 @@
                                             :class="{ 'is-invalid': form.errors.postal_code }"
                                             id="postal_code" 
                                             v-model="form.postal_code" 
+                                            placeholder="A1A 1A1"
+                                            pattern="^[A-Za-z]\d[A-Za-z][\s\-]?\d[A-Za-z]\d$"
+                                            title="Please enter a valid Canadian postal code (e.g., A1A 1A1)"
                                             required
                                         >
                                         <div v-if="form.errors.postal_code" class="invalid-feedback">
                                             {{ form.errors.postal_code }}
                                         </div>
+                                        <div class="form-text">Format: A1A 1A1</div>
                                     </div>
                                     <div class="col-md-12">
                                         <label for="country" class="form-label">Country *</label>
@@ -366,7 +378,7 @@
                                     <div class="col-md-6">
                                         <label for="established_date" class="form-label">Established Date</label>
                                         <input 
-                                            type="date" 
+                                            type="date" format="yyyy-MM-dd"
                                             class="form-control" 
                                             :class="{ 'is-invalid': form.errors.established_date }"
                                             id="established_date" 
@@ -454,6 +466,22 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import Authenticated from '../../Layouts/Authenticated.vue'
 
+// Helper function to format date for HTML date input (YYYY-MM-DD)
+function formatDateForInput(dateString) {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        
+        // Format as YYYY-MM-DD for HTML date input
+        return date.toISOString().split('T')[0];
+    } catch (error) {
+        console.warn('Date formatting error:', error);
+        return '';
+    }
+}
+
 export default {
     name: 'InstitutionSitesEdit',
     components: {
@@ -493,7 +521,7 @@ export default {
             other_regulating_body: props.site.other_regulating_body || '',
             economic_region: props.site.economic_region || '',
             standing_status: props.site.standing_status || '',
-            established_date: props.site.established_date || '',
+            established_date: props.site.established_date ? formatDateForInput(props.site.established_date) : '',
             info_sharing_agreement: props.site.info_sharing_agreement,
             notes: props.site.notes || ''
         });

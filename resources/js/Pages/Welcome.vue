@@ -267,7 +267,7 @@
             <ul class="list-unstyled">
               <li><a href="https://www2.gov.bc.ca/" class="text-white text-decoration-none hover-link" target="_blank">BC Government</a></li>
               <li><a href="https://www2.gov.bc.ca/gov/content/education-training" class="text-white text-decoration-none hover-link" target="_blank">Education & Training</a></li>
-              <li><a href="https://www2.gov.bc.ca/gov/content/governments/about-the-bc-government/privacy" class="text-white text-decoration-none hover-link" target="_blank">Privacy Policy</a></li>
+              <li><a href="https://www2.gov.bc.ca/gov/content/home/privacy" class="text-white text-decoration-none hover-link" target="_blank">Privacy Policy</a></li>
             </ul>
           </div>
         </div>
