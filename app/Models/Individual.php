@@ -69,6 +69,11 @@ class Individual extends Model
         return $this->hasOne(IndividualIdentity::class);
     }
 
+    public function permissionSelections()
+    {
+        return $this->hasMany(IndividualApplicationPermissionSelection::class);
+    }
+
     protected $casts = [
     'date_of_birth' => 'date',
     'disability_status' => 'boolean',

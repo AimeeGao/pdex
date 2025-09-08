@@ -243,27 +243,56 @@
 
             <!-- Required Fields List -->
             <div v-if="getRequiredFields(selectedApp).length > 0" class="mb-4">
-              <h6 class="text-danger mb-3">
-                <i class="bi bi-exclamation-triangle me-1"></i>
-                Required Information
-              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-danger mb-0">
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Required Information
+                </h6>
+                <div>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-primary me-2" 
+                    @click="selectAllRequired"
+                  >
+                    Select All
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary" 
+                    @click="deselectAllRequired"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+              </div>
               <div class="list-group list-group-flush border rounded">
                 <div 
-                  v-for="field in getRequiredFields(selectedApp)" 
-                  :key="`required-${field}`"
+                  v-for="permission in getRequiredPermissions(selectedApp)" 
+                  :key="`required-${permission.permission_id}`"
                   class="list-group-item d-flex justify-content-between align-items-center"
                 >
-                  <div class="d-flex align-items-center">
+                  <div class="d-flex align-items-center flex-grow-1">
                     <i class="bi bi-asterisk text-danger me-2 small"></i>
-                    <span>{{ getFieldLabel(field) }}</span>
+                    <span>{{ permission.display_name || getFieldLabel(permission.column_name) }}</span>
                   </div>
-                  <div class="d-flex align-items-center">
-                    <span v-if="hasProfileValue(field)" class="badge bg-success">
+                  <div class="d-flex align-items-center gap-2">
+                    <span v-if="hasProfileValue(permission.column_name)" class="badge bg-success">
                       <i class="bi bi-check2 me-1"></i>Available
                     </span>
                     <span v-else class="badge bg-warning">
                       <i class="bi bi-exclamation-triangle me-1"></i>Missing
                     </span>
+                    <div class="form-check">
+                      <input
+                        :id="`required-${permission.permission_id}`"
+                        v-model="permissionSelections[permission.permission_id]"
+                        class="form-check-input"
+                        type="checkbox"
+                      >
+                      <label class="form-check-label" :for="`required-${permission.permission_id}`">
+                        Share
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -271,27 +300,56 @@
 
             <!-- Optional Fields List -->
             <div v-if="getOptionalFields(selectedApp).length > 0" class="mb-4">
-              <h6 class="text-primary mb-3">
-                <i class="bi bi-plus-circle me-1"></i>
-                Optional Information
-              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary mb-0">
+                  <i class="bi bi-plus-circle me-1"></i>
+                  Optional Information
+                </h6>
+                <div>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-primary me-2" 
+                    @click="selectAllOptional"
+                  >
+                    Select All
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary" 
+                    @click="deselectAllOptional"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+              </div>
               <div class="list-group list-group-flush border rounded">
                 <div 
-                  v-for="field in getOptionalFields(selectedApp)" 
-                  :key="`optional-${field}`"
+                  v-for="permission in getOptionalPermissions(selectedApp)" 
+                  :key="`optional-${permission.permission_id}`"
                   class="list-group-item d-flex justify-content-between align-items-center"
                 >
-                  <div class="d-flex align-items-center">
+                  <div class="d-flex align-items-center flex-grow-1">
                     <i class="bi bi-plus text-primary me-2 small"></i>
-                    <span>{{ getFieldLabel(field) }}</span>
+                    <span>{{ permission.display_name || getFieldLabel(permission.column_name) }}</span>
                   </div>
-                  <div class="d-flex align-items-center">
-                    <span v-if="hasProfileValue(field)" class="badge bg-success">
+                  <div class="d-flex align-items-center gap-2">
+                    <span v-if="hasProfileValue(permission.column_name)" class="badge bg-success">
                       <i class="bi bi-check2 me-1"></i>Available
                     </span>
                     <span v-else class="badge bg-secondary">
                       <i class="bi bi-dash me-1"></i>Not Set
                     </span>
+                    <div class="form-check">
+                      <input
+                        :id="`optional-${permission.permission_id}`"
+                        v-model="permissionSelections[permission.permission_id]"
+                        class="form-check-input"
+                        type="checkbox"
+                      >
+                      <label class="form-check-label" :for="`optional-${permission.permission_id}`">
+                        Share
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -308,34 +366,6 @@
                     <i class="bi bi-person-gear me-1"></i>
                     Update Profile First
                   </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Share Profile Option -->
-            <div class="card border-primary border-opacity-25 mb-4">
-              <div class="card-body">
-                <div class="form-check">
-                  <input
-                    id="shareProfileCheck"
-                    v-model="shareProfile"
-                    class="form-check-input"
-                    type="checkbox"
-                  >
-                  <label class="form-check-label fw-medium" for="shareProfileCheck">
-                    <i class="bi bi-share me-1"></i>
-                    Share my PDEX profile information with {{ selectedApp.name }}
-                  </label>
-                </div>
-                <div class="form-text mt-2">
-                  <div v-if="shareProfile" class="text-success">
-                    <i class="bi bi-check-circle me-1"></i>
-                    Your available profile data will be shared to pre-fill application fields.
-                  </div>
-                  <div v-else class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    You will need to provide all required information directly to the application.
-                  </div>
                 </div>
               </div>
             </div>
@@ -411,19 +441,17 @@ const props = defineProps({
 // Reactive state
 const selectedApp = ref(null)
 const showModal = ref(false)
-const shareProfile = ref(true) // Default to sharing profile
+const permissionSelections = ref({})
 
 // Form state using Inertia's useForm
 const form = useForm({
-  share_profile: true,
-  profile_data: null
+  permission_selections: {}
 })
 
 // Watch for changes to help debug
 watch(selectedApp, (newApp) => {
   if (newApp) {
     console.log('Selected app changed:', newApp)
-    console.log('App permissions:', newApp.application_individual_permissions)
     console.log('App data_permission_groups:', newApp.data_permission_groups)
     
     // Debug the computed fields
@@ -455,13 +483,28 @@ const redirectToApp = (appId) => {
 }
 
 const prepareFormData = (app) => {
-  // Reset form data and default to sharing profile
-  shareProfile.value = true
-  form.share_profile = true
-  form.profile_data = props.profileData
+  // Initialize permission selections based on app permissions
+  const selections = {}
+  
+  if (app.data_permission_groups) {
+    app.data_permission_groups.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.permission_id) {
+          // Use existing selection if available, otherwise default to required status
+          selections[permission.permission_id] = permission.is_selected !== undefined 
+            ? permission.is_selected 
+            : permission.is_required
+        }
+      })
+    })
+  }
+  
+  permissionSelections.value = selections
+  form.permission_selections = selections
   
   // Debug: log the app data and what fields we're getting
   console.log('App data:', app)
+  console.log('Permission selections initialized:', selections)
   console.log('Required fields:', getRequiredFields(app))
   console.log('Optional fields:', getOptionalFields(app))
   console.log('Profile data:', props.profileData)
@@ -470,7 +513,7 @@ const prepareFormData = (app) => {
 const closeModal = () => {
   showModal.value = false
   selectedApp.value = null
-  shareProfile.value = true
+  permissionSelections.value = {}
   form.reset()
   form.clearErrors()
 }
@@ -480,11 +523,101 @@ const canSubmit = () => {
   return !form.processing
 }
 
-// Watch for shareProfile changes and update form
-watch(shareProfile, (newValue) => {
-  form.share_profile = newValue
-  form.profile_data = newValue ? props.profileData : null
-})
+// Watch for permission selection changes and update form
+watch(permissionSelections, (newSelections) => {
+  form.permission_selections = newSelections
+}, { deep: true })
+
+const selectAllPermissions = () => {
+  if (!selectedApp.value || !selectedApp.value.data_permission_groups) return
+  
+  const selections = {}
+  selectedApp.value.data_permission_groups.forEach(group => {
+    group.permissions.forEach(permission => {
+      if (permission.permission_id) {
+        selections[permission.permission_id] = true
+      }
+    })
+  })
+  
+  permissionSelections.value = selections
+}
+
+const deselectAllPermissions = () => {
+  if (!selectedApp.value || !selectedApp.value.data_permission_groups) return
+  
+  const selections = {}
+  selectedApp.value.data_permission_groups.forEach(group => {
+    group.permissions.forEach(permission => {
+      if (permission.permission_id) {
+        // Allow deselecting all permissions - even required ones
+        selections[permission.permission_id] = false
+      }
+    })
+  })
+  
+  permissionSelections.value = selections
+}
+
+const selectAllRequired = () => {
+  if (!selectedApp.value) return
+  
+  const requiredPermissions = getRequiredPermissions(selectedApp.value)
+  const selections = { ...permissionSelections.value }
+  
+  requiredPermissions.forEach(permission => {
+    if (permission.permission_id) {
+      selections[permission.permission_id] = true
+    }
+  })
+  
+  permissionSelections.value = selections
+}
+
+const deselectAllRequired = () => {
+  if (!selectedApp.value) return
+  
+  const requiredPermissions = getRequiredPermissions(selectedApp.value)
+  const selections = { ...permissionSelections.value }
+  
+  requiredPermissions.forEach(permission => {
+    if (permission.permission_id) {
+      selections[permission.permission_id] = false
+    }
+  })
+  
+  permissionSelections.value = selections
+}
+
+const selectAllOptional = () => {
+  if (!selectedApp.value) return
+  
+  const optionalPermissions = getOptionalPermissions(selectedApp.value)
+  const selections = { ...permissionSelections.value }
+  
+  optionalPermissions.forEach(permission => {
+    if (permission.permission_id) {
+      selections[permission.permission_id] = true
+    }
+  })
+  
+  permissionSelections.value = selections
+}
+
+const deselectAllOptional = () => {
+  if (!selectedApp.value) return
+  
+  const optionalPermissions = getOptionalPermissions(selectedApp.value)
+  const selections = { ...permissionSelections.value }
+  
+  optionalPermissions.forEach(permission => {
+    if (permission.permission_id) {
+      selections[permission.permission_id] = false
+    }
+  })
+  
+  permissionSelections.value = selections
+}
 
 const hasProfileValue = (field) => {
   if (!props.profileData) return false
@@ -625,6 +758,22 @@ const getRequiredFields = (app) => {
   return requiredFields
 }
 
+const getRequiredPermissions = (app) => {
+  const requiredPermissions = []
+  
+  if (app.data_permission_groups) {
+    app.data_permission_groups.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.is_required === true) {
+          requiredPermissions.push(permission)
+        }
+      })
+    })
+  }
+  
+  return requiredPermissions
+}
+
 const getOptionalFields = (app) => {
   const optionalFields = []
   
@@ -641,6 +790,22 @@ const getOptionalFields = (app) => {
   return optionalFields
 }
 
+const getOptionalPermissions = (app) => {
+  const optionalPermissions = []
+  
+  if (app.data_permission_groups) {
+    app.data_permission_groups.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.is_required === false && permission.can_read) {
+          optionalPermissions.push(permission)
+        }
+      })
+    })
+  }
+  
+  return optionalPermissions
+}
+
 const getFieldLabel = (field) => {
   // Convert snake_case to Title Case
   return field.replace(/_/g, ' ')
@@ -651,12 +816,11 @@ const launchApplication = async () => {
   if (!canSubmit()) return
   
   console.log('Launching application:', selectedApp.value.id)
-  console.log('Share profile:', shareProfile.value)
+  console.log('Permission selections:', permissionSelections.value)
   console.log('Profile data available:', props.profileData)
   
   // Update form data before submission
-  form.share_profile = shareProfile.value
-  form.profile_data = shareProfile.value ? props.profileData : null
+  form.permission_selections = permissionSelections.value
   
   // Submit form using Inertia
   form.post(`/student/launch-application/${selectedApp.value.id}`, {

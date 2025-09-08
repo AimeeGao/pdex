@@ -8,6 +8,7 @@ use App\Models\Application;
 use App\Models\ApplicationDataPermission;
 use App\Models\ApplicationIndividualPermission;
 use App\Models\ApplicationApiPermission;
+use App\Models\IndividualApplicationPermissionSelection;
 use App\Events\IndividualCreated;
 use App\Events\IndividualUpdated;
 use App\Models\IndividualAddress;
@@ -104,6 +105,34 @@ class StudentController extends Controller
         $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
             "employments" => $individual->employments, "identities" => $individual->identities] : null;
 
+        // Add permission selections to each application
+        $applications = $applications->map(function ($app) use ($individual) {
+            if ($individual && $app['has_permissions']) {
+                // Get existing permission selections for this user and application
+                $existingSelections = IndividualApplicationPermissionSelection::getSelectionsForUserAndApplication(
+                    $individual->id, 
+                    $app['id']
+                );
+
+                // Update permission groups to include selection status
+                $app['data_permission_groups'] = collect($app['data_permission_groups'])->map(function ($group) use ($existingSelections, $app) {
+                    // Get the application object to access its permissions
+                    $application = Application::with('individualPermissions')->find($app['id']);
+                    
+                    $group['permissions'] = collect($group['permissions'])->map(function ($permission) use ($existingSelections, $application, $group) {
+                        $permissionId = $this->getPermissionIdFromApplication($application, $group['table_name'], $permission['column_name']);
+                        $permission['is_selected'] = isset($existingSelections[$permissionId]) 
+                            ? $existingSelections[$permissionId]->is_selected 
+                            : $permission['is_required']; // Default to required status
+                        $permission['permission_id'] = $permissionId;
+                        return $permission;
+                    })->toArray();
+                    return $group;
+                })->toArray();
+            }
+            return $app;
+        });
+
         return Inertia::render('Student::Dashboard', [
             'applications' => $applications,
             'user' => auth()->user()->only(['name', 'email']),
@@ -119,8 +148,7 @@ class StudentController extends Controller
         try {
             \Log::info("LaunchApplication called for app: $appId", [
                 'user_id' => Auth::id(),
-                'share_profile' => $request->input('share_profile'),
-                'has_profile_data' => $request->has('profile_data')
+                'has_permission_selections' => $request->has('permission_selections')
             ]);
             
             $app = Application::findOrFail($appId);
@@ -135,20 +163,23 @@ class StudentController extends Controller
                 \Log::info("No individual profile found for user: " . Auth::id() . ", launching without profile data");
             }
             
-            $shareProfile = $request->input('share_profile', false);
-            $profileData = $request->input('profile_data', []);
+            $permissionSelections = $request->input('permission_selections', []);
             
             \Log::info("Processing launch request", [
-                'share_profile' => $shareProfile,
-                'profile_data_available' => !empty($profileData),
+                'permission_selections_count' => count($permissionSelections),
                 'has_individual_profile' => !is_null($individual)
             ]);
             
-            // Prepare individual data for token based on user choice
+            // Save permission selections if individual exists
+            if ($individual && !empty($permissionSelections)) {
+                $this->savePermissionSelections($individual->id, $appId, $permissionSelections);
+            }
+            
+            // Prepare individual data for token based on user's permission selections
             $individualData = null;
-            if ($shareProfile && $individual) {
-                // Include available profile data based on permissions
-                $individualData = $this->prepareIndividualDataForToken($app); // Working directly with the Individual model
+            if ($individual) {
+                // Include available profile data based on user's permission selections
+                $individualData = $this->prepareIndividualDataForTokenWithSelections($app, $individual, $permissionSelections);
                 \Log::info("Including profile data in token", ['fields_count' => count($individualData)]);
             } else {
                 // Send empty individual parameter
@@ -169,7 +200,6 @@ class StudentController extends Controller
             \Log::info("Application launch successful", [
                 'app_id' => $appId,
                 'launch_url' => $launchUrl,
-                'shared_profile' => $shareProfile,
                 'token_created' => !empty($token)
             ]);
             
@@ -1003,5 +1033,168 @@ class StudentController extends Controller
             default:
                 return false;
         }
+    }
+
+    /**
+     * Get permission ID from application's individual permissions by table name and column name
+     */
+    private function getPermissionIdFromApplication($application, $tableName, $columnName)
+    {
+        $permission = $application->individualPermissions
+            ->where('table_name', $tableName)
+            ->where('column_name', $columnName)
+            ->first();
+        
+        return $permission ? $permission->id : null;
+    }
+
+    /**
+     * Save permission selections for a user and application
+     */
+    private function savePermissionSelections($individualId, $applicationId, array $permissionSelections)
+    {
+        IndividualApplicationPermissionSelection::updateSelections($individualId, $applicationId, $permissionSelections);
+        
+        \Log::info("Saved permission selections", [
+            'individual_id' => $individualId,
+            'application_id' => $applicationId,
+            'selections_count' => count($permissionSelections)
+        ]);
+    }
+
+    /**
+     * Prepare individual data for token based on user's permission selections
+     */
+    private function prepareIndividualDataForTokenWithSelections($application, $individual, array $permissionSelections)
+    {
+        $tokenData = [];
+        
+        // Get all individual permissions for this application
+        $individualPermissions = $application->individualPermissions;
+        
+        \Log::info("Preparing token data with selections", [
+            'app_id' => $application->id,
+            'individual_permissions_count' => $individualPermissions->count(),
+            'permission_selections_count' => count($permissionSelections),
+            'individual_id' => $individual->id
+        ]);
+        
+        // Process each individual permission and get data based on user selections
+        foreach ($individualPermissions as $permission) {
+            if (!$permission->can_read) {
+                continue;
+            }
+            
+            $permissionId = $permission->id;
+            $isSelected = isset($permissionSelections[$permissionId]) ? (bool)$permissionSelections[$permissionId] : false;
+            
+            // If permission is not selected, set value to null
+            if (!$isSelected) {
+                $tokenData[$permission->column_name] = null;
+                \Log::debug("Permission not selected, setting to null", [
+                    'permission_id' => $permissionId,
+                    'column_name' => $permission->column_name
+                ]);
+                continue;
+            }
+            
+            $value = null;
+            $tableName = $permission->table_name;
+            $columnName = $permission->column_name;
+            
+            // Get value based on table name (same logic as before)
+            switch ($tableName) {
+                case 'individuals':
+                    if (in_array($columnName, (new Individual())->getFillable())) {
+                        $value = $individual->{$columnName} ?? null;
+                    } else {
+                        \Log::warning("Column does not exist in individuals table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_addresses':
+                    if (in_array($columnName, (new IndividualAddress())->getFillable())) {
+                        $primaryAddress = $individual->addresses->where('is_primary', true)->first() 
+                                       ?? $individual->addresses->first();
+                        if ($primaryAddress) {
+                            $value = $primaryAddress->{$columnName} ?? null;
+                        } else {
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_addresses table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_employments':
+                    if (in_array($columnName, (new IndividualEmployment())->getFillable())) {
+                        $currentEmployment = $individual->employments->where('is_current', true)->first()
+                                          ?? $individual->employments->first();
+                        if ($currentEmployment) {
+                            $value = $currentEmployment->{$columnName} ?? null;
+                        } else {
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_employments table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                case 'individual_identities':
+                    if (in_array($columnName, (new IndividualIdentity())->getFillable())) {
+                        $identity = $individual->identities->first();
+                        if ($identity) {
+                            $value = $identity->{$columnName} ?? null;
+                        } else {
+                            $value = $this->getDefaultValueForField($columnName);
+                        }
+                    } else {
+                        \Log::warning("Column does not exist in individual_identities table", [
+                            'column_name' => $columnName,
+                            'permission_id' => $permission->id
+                        ]);
+                        continue 2;
+                    }
+                    break;
+                    
+                default:
+                    \Log::warning("Unknown table name in permission", [
+                        'table_name' => $tableName,
+                        'column_name' => $columnName,
+                        'permission_id' => $permission->id
+                    ]);
+                    continue 2;
+            }
+            
+            $tokenData[$columnName] = $value;
+            
+            \Log::debug("Processing selected permission", [
+                'table_name' => $tableName,
+                'column_name' => $columnName,
+                'value' => $value,
+                'is_selected' => $isSelected
+            ]);
+        }
+        
+        \Log::info("Token data prepared with selections", [
+            'app_id' => $application->id,
+            'app_name' => $application->name,
+            'token_data_keys' => array_keys($tokenData),
+            'token_data_count' => count($tokenData)
+        ]);
+        
+        return $tokenData;
     }
 }
