@@ -299,7 +299,7 @@ class InstitutionRelationshipController extends Controller
 
         $validated = $request->validate([
             'relationship_type' => 'sometimes|required|string|in:' . implode(',', array_keys(InstitutionRelationship::getRelationshipTypes())),
-            'relationship_reason' => 'sometimes|required|string|in:' . implode(',', InstitutionRelationship::getRelationshipReasons()),
+            'relationship_reason' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'effective_date' => 'nullable|date',

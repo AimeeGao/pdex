@@ -75,17 +75,37 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">Relationship Reason *</label>
-                                        <select class="form-select" 
-                                                :class="{ 'is-invalid': errors.relationship_reason }"
-                                                v-model="form.relationship_reason" required>
-                                            <option value="">Select Reason</option>
-                                            <option v-for="(label, value) in relationshipReasons" 
-                                                    :key="value" 
-                                                    :value="value">
-                                                {{ label }}
-                                            </option>
-                                        </select>
+                                        <label class="form-label">Relationship Reason</label>
+                                        <div v-if="useCustomReason">
+                                            <input type="text" class="form-control" 
+                                                   :class="{ 'is-invalid': errors.relationship_reason }"
+                                                   v-model="form.relationship_reason" 
+                                                   placeholder="Enter custom reason..."
+                                                   maxlength="255">
+                                            <div class="form-text">
+                                                <button type="button" class="btn btn-link btn-sm p-0" @click="toggleReasonType">
+                                                    Choose from predefined options
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div v-else>
+                                            <select class="form-select" 
+                                                    :class="{ 'is-invalid': errors.relationship_reason }"
+                                                    v-model="form.relationship_reason">
+                                                <option value="">Select Reason</option>
+                                                <option v-for="(label, value) in relationshipReasons" 
+                                                        :key="value" 
+                                                        :value="value">
+                                                    {{ label }}
+                                                </option>
+                                                <option value="custom">Other (Custom)</option>
+                                            </select>
+                                            <div class="form-text">
+                                                <button type="button" class="btn btn-link btn-sm p-0" @click="toggleReasonType">
+                                                    Enter custom reason
+                                                </button>
+                                            </div>
+                                        </div>
                                         <div class="invalid-feedback" v-if="errors.relationship_reason">
                                             {{ errors.relationship_reason }}
                                         </div>
@@ -214,7 +234,23 @@
 <script>
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import Authenticated from '../../Layouts/Authenticated.vue'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+
+// Helper function to format date for HTML date input (YYYY-MM-DD)
+function formatDateForInput(dateString) {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        
+        // Format as YYYY-MM-DD for HTML date input
+        return date.toISOString().split('T')[0];
+    } catch (error) {
+        console.warn('Date formatting error:', error);
+        return '';
+    }
+}
 
 export default {
     name: 'InstitutionRelationshipsEdit',
@@ -259,6 +295,10 @@ export default {
             }
         });
 
+        // Check if the current relationship reason is a custom one (not in predefined list)
+        const isCustomReason = !Object.keys(props.relationshipReasons).includes(props.relationship.relationship_reason);
+        const useCustomReason = ref(isCustomReason);
+
         const form = useForm({
             related_institution_guid: relatedInstitutionGuid.value,
             relationship_type: props.relationship.relationship_type || '',
@@ -266,8 +306,8 @@ export default {
             description: props.relationship.description || '',
             notes: props.relationship.notes || '',
             is_active: Boolean(props.relationship.is_active),
-            effective_date: props.relationship.effective_date || '',
-            expiry_date: props.relationship.expiry_date || '',
+            effective_date: props.relationship.effective_date ? formatDateForInput(props.relationship.effective_date) : '',
+            expiry_date: props.relationship.expiry_date ? formatDateForInput(props.relationship.expiry_date) : '',
         });
 
         const formatDate = (dateString) => {
@@ -279,9 +319,27 @@ export default {
             });
         };
 
+        const toggleReasonType = () => {
+            useCustomReason.value = !useCustomReason.value;
+            if (!useCustomReason.value) {
+                // Switching to dropdown, clear the field
+                form.relationship_reason = '';
+            }
+        };
+
+        // Watch for "custom" selection in dropdown
+        watch(() => form.relationship_reason, (newValue) => {
+            if (newValue === 'custom') {
+                useCustomReason.value = true;
+                form.relationship_reason = '';
+            }
+        });
+
         return { 
             form,
-            formatDate
+            formatDate,
+            useCustomReason,
+            toggleReasonType
         };
     },
     computed: {
