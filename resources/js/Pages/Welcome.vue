@@ -243,7 +243,6 @@
             <ul class="list-unstyled">
               <li><a href="/login" class="text-white text-decoration-none hover-link">Login</a></li>
               <li><a href="#about" class="text-white text-decoration-none hover-link">About</a></li>
-              <li><a href="#contact" class="text-white text-decoration-none hover-link">Contact</a></li>
             </ul>
           </div>
           <div class="col-lg-3">
