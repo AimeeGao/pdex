@@ -101,12 +101,15 @@ class StoreIndividualMultiStepRequest extends FormRequest
             'identity.refugee_status' => 'boolean',
             'identity.immigration_status' => 'nullable|string|max:255',
             'identity.indigenous_status' => 'boolean',
-            'identity.indigenous_group' => 'nullable|string|max:255|required_if:identity.indigenous_status,true',
+            'identity.indigenous_group' => 'nullable|array',
+            'identity.indigenous_group.*' => 'string|max:255',
             'identity.band_affiliation' => 'nullable|string|max:255',
             'identity.indigenous_status_card_number' => 'nullable|string|max:255',
             'identity.is_registered_with_band' => 'boolean',
             'identity.on_reserve_resident' => 'boolean',
-            'identity.racial_identity' => 'nullable|string|max:255',
+            'identity.racial_identity' => 'nullable|array',
+            'identity.racial_identity.*' => 'string|max:255',
+            'identity.racial_identity_other_text' => 'nullable|string|max:200',
             'identity.is_visible_minority' => 'boolean',
             'identity.receives_indigenous_support_services' => 'boolean',
             'identity.receives_minority_support_services' => 'boolean',
@@ -163,6 +166,13 @@ class StoreIndividualMultiStepRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        // Clean SIN: remove dashes and store only digits
+        if ($this->has('social_insurance_number') && $this->social_insurance_number) {
+            $this->merge([
+                'social_insurance_number' => preg_replace('/[^0-9]/', '', $this->social_insurance_number)
+            ]);
+        }
+
         // Ensure boolean fields are properly cast
         if (!$this->has('disability_status')) {
             $this->merge(['disability_status' => false]);
@@ -195,7 +205,10 @@ class StoreIndividualMultiStepRequest extends FormRequest
         if (!isset($identity['receives_minority_support_services'])) {
             $identity['receives_minority_support_services'] = false;
         }
-        $this->merge(['identity' => $identity]);
+        // Only merge if we have identity data to avoid overwriting with empty array
+        if (!empty($identity)) {
+            $this->merge(['identity' => $identity]);
+        }
 
         // Set employment boolean fields
         $employment = $this->input('current_employment', []);

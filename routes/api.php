@@ -83,3 +83,45 @@ Route::prefix('oauth')->group(function () {
     Route::post('/introspect', [OAuthController::class, 'introspect'])->middleware('auth:sanctum');
     Route::post('/revoke', [OAuthController::class, 'revoke']);
 });
+
+// Protected API endpoints using OAuth token validation
+Route::middleware(['oauth.token'])->prefix('v1')->group(function () {
+    
+    // Application management endpoints
+    Route::prefix('applications')->group(function () {
+        Route::post('/register', [\App\Http\Controllers\Api\ApplicationController::class, 'registerApp'])
+            ->name('api.v1.applications.register');
+        Route::get('/', [\App\Http\Controllers\Api\ApplicationController::class, 'index'])
+            ->name('api.v1.applications.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\ApplicationController::class, 'show'])
+            ->name('api.v1.applications.show');
+    });
+
+    // Test endpoint to verify OAuth authentication
+    Route::get('/test', function (Request $request) {
+        return response()->json([
+            'message' => 'OAuth authentication successful',
+            'timestamp' => now()->toISOString(),
+            'token_data' => $request->input('token_data'),
+        ]);
+    })->name('api.v1.test');
+
+    // Students endpoints
+    Route::prefix('students')->group(function () {
+        Route::get('/', function (Request $request) {
+            return response()->json([
+                'message' => 'Students endpoint - OAuth authenticated',
+                'data' => [],
+                'token_claims' => $request->input('token_data')
+            ]);
+        })->name('api.v1.students.index');
+    });
+
+    // Institutions endpoints  
+    Route::prefix('institutions')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\InstitutionController::class, 'index'])
+            ->name('api.v1.institutions.index');
+        Route::get('/{id}', [\App\Http\Controllers\Api\InstitutionController::class, 'show'])
+            ->name('api.v1.institutions.show');
+    });
+});

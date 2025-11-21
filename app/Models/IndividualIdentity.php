@@ -23,6 +23,7 @@ class IndividualIdentity extends Model
         'is_registered_with_band',
         'on_reserve_resident',
         'racial_identity',
+        'racial_identity_other_text',
         'is_visible_minority',
         'years_in_country',
         'refugee_status',
@@ -30,6 +31,16 @@ class IndividualIdentity extends Model
         'receives_indigenous_support_services',
         'receives_minority_support_services',
         'latest_version',
+    ];
+
+    protected $casts = [
+        'racial_identity' => 'array',
+        'indigenous_group' => 'array',
+        'indigenous_status' => 'boolean',
+        'is_registered_with_band' => 'boolean',
+        'on_reserve_resident' => 'boolean',
+        'is_visible_minority' => 'boolean',
+        'latest_version' => 'boolean',
     ];
 
     public function individual()

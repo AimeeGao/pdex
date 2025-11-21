@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'oauth' => [
+        'token_endpoint' => env('APP_API_TOKEN_ENDPOINT'),
+        'client_id' => env('APP_API_CLIENT_ID'),
+        'client_secret' => env('APP_API_CLIENT_SECRET'),
+        'audience' => env('APP_API_AUDIENCE'),
+    ],
+
 ];

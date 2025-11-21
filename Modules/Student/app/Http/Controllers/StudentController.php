@@ -486,7 +486,8 @@ class StudentController extends Controller
             'years_in_country', 'refugee_status', 'immigration_status',
             'indigenous_status', 'indigenous_group', 'band_affiliation',
             'indigenous_status_card_number', 'is_registered_with_band',
-            'on_reserve_resident', 'racial_identity', 'is_visible_minority',
+            'on_reserve_resident', 'racial_identity', 'racial_identity_other_text',
+            'is_visible_minority',
             'receives_indigenous_support_services', 'receives_minority_support_services'
         ];
         
@@ -529,16 +530,26 @@ class StudentController extends Controller
      */
     public function profile()
     {
-        $individual = Individual::where('user_guid', Auth::user()->guid)->first();
+        // $individual = Individual::where('user_guid', Auth::user()->guid)->first();
 
-        // If no profile exists, redirect to create one
-        if (!$individual) {
-            return redirect()->route('student.profile.create')
-                ->with('info', 'Please create your profile to get started.');
-        }
+        // // If no profile exists, redirect to create one
+        // if (!$individual) {
+        //     return redirect()->route('student.profile.create')
+        //         ->with('info', 'Please create your profile to get started.');
+        // }
 
-        return Inertia::render('Student::Profile/Index', [
+        // return Inertia::render('Student::Profile/Index', [
+        //     'individual' => $individual,
+        // ]);
+        $individual = Individual::where('user_guid', Auth::user()->guid)
+            ->with(['identity'])
+            ->first();
+
+        $this->authorize('update', $individual);
+
+        return Inertia::render('Student::Profile/EditMini', [
             'individual' => $individual,
+            'identity' => $individual->identity,
         ]);
     }
     /**
@@ -559,7 +570,7 @@ class StudentController extends Controller
             'identity' => (new IndividualIdentity())->getFillable(),
         ];
 
-        return Inertia::render('Student::Profile/CreateMultiStep', [
+        return Inertia::render('Student::Profile/CreateMini', [
             'countries' => $countries,
             'individual' => $individual,
         ]);
@@ -666,25 +677,25 @@ class StudentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Request $request)
-    {
-        $individual = Individual::where('user_guid', Auth::user()->guid)
-            ->with(['currentAddress', 'currentEmployment', 'identity'])
-            ->first();
+    // public function edit(Request $request)
+    // {
+    //     $individual = Individual::where('user_guid', Auth::user()->guid)
+    //         ->with(['currentAddress', 'currentEmployment', 'identity'])
+    //         ->first();
 
-        $this->authorize('update', $individual);
+    //     $this->authorize('update', $individual);
 
-        // Get all active countries for the form
-        $countries = Country::getActiveCountries();
+    //     // Get all active countries for the form
+    //     $countries = Country::getActiveCountries();
 
-        $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
-            "employments" => $individual->employments, "identities" => $individual->identities] : null;
+    //     $profileData = $individual ? ["general" => $individual, "addresses" => $individual->addresses, 
+    //         "employments" => $individual->employments, "identities" => $individual->identities] : null;
 
-        return Inertia::render('Student::Profile/EditMultiStep', [
-            'individual' => $profileData,
-            'countries' => $countries,
-        ]);
-    }
+    //     return Inertia::render('Student::Profile/EditMultiStep', [
+    //         'individual' => $profileData,
+    //         'countries' => $countries,
+    //     ]);
+    // }
 
     /**
      * Update the specified resource in storage.
