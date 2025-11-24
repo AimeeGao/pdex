@@ -549,7 +549,7 @@ class StudentController extends Controller
 
         return Inertia::render('Student::Profile/EditMini', [
             'individual' => $individual,
-            'identity' => $individual->identity,
+            'identity' => $individual->identity ?? [],
         ]);
     }
     /**
@@ -779,16 +779,26 @@ class StudentController extends Controller
             }
 
             // Update or create identity record
-            if ($identity && !empty(array_filter($identity))) {
+            if ($identity) {
+                \Log::info('Updating identity record', [
+                    'identity_data' => $identity,
+                ]);
                 $existingIdentity = $individual->identities()->first();
                 if ($existingIdentity) {
+                    \Log::info('Updating existing identity record', [
+                        'identity_id' => $existingIdentity->id,
+                        'racial_identity' => $identity['racial_identity'] ?? null,
+                        'racial_identity_other_text' => $identity['racial_identity_other_text'] ?? null,
+                    ]);
                     $existingIdentity->update($identity);
                 } else {
+                    \Log::info('Creating new identity record');
                     $identity['individual_id'] = $individual->id;
                     $identity['user_id'] = auth()->user()->id;
                     IndividualIdentity::create($identity);
                 }
             }
+
 
             // Fire the IndividualUpdated event
             IndividualUpdated::dispatch($individual, $originalData, auth()->user());
