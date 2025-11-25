@@ -73,7 +73,7 @@ jobs:
           az aks get-credentials --resource-group ${{ env.AZ_RG }} --name ${{ env.AKS_NAME }}
           
           # Update the image tag in the deployment file
-          sed -i "s|acrpdexdev.azurecr.io/pdex:latest-dev|${{ env.ACR_NAME }}.azurecr.io/pdex:${{ github.sha }}|g" azure/apache/k8s-dev-deployment.yaml
+          sed -i "s|acrpdexdev.azurecr.io/pdex:latest-dev|${{ env.ACR_NAME }}.azurecr.io/pdex:${{ github.sha }}|g" azure/k8s-dev-deployment.yaml
           
           # Apply the deployment
           kubectl apply -f azure/k8s-dev-deployment.yaml
