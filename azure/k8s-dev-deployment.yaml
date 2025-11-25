@@ -37,9 +37,6 @@ spec:
           protocol: TCP
         - containerPort: 8443
           protocol: TCP
-        volumeMounts:
-        - name: site-data-volume
-          mountPath: /var/site_data
         resources:
           limits:
             cpu: 1000m
