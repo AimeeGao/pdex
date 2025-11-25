@@ -12,30 +12,40 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // First, convert existing string values to JSON format
-        DB::statement("
-            UPDATE individual_identities 
-            SET racial_identity = CASE 
-                WHEN racial_identity IS NOT NULL AND racial_identity != '' 
-                THEN '[\"' || racial_identity || '\"]'
-                ELSE NULL 
-            END
-            WHERE racial_identity IS NOT NULL
-        ");
+        $driver = DB::connection()->getDriverName();
         
-        DB::statement("
-            UPDATE individual_identities 
-            SET indigenous_group = CASE 
-                WHEN indigenous_group IS NOT NULL AND indigenous_group != '' 
-                THEN '[\"' || indigenous_group || '\"]'
-                ELSE NULL 
-            END
-            WHERE indigenous_group IS NOT NULL
-        ");
-        
-        // Now alter the column types using USING clause for PostgreSQL
-        DB::statement('ALTER TABLE individual_identities ALTER COLUMN racial_identity TYPE json USING racial_identity::json');
-        DB::statement('ALTER TABLE individual_identities ALTER COLUMN indigenous_group TYPE json USING indigenous_group::json');
+        if ($driver === 'sqlite') {
+            // SQLite doesn't have ALTER COLUMN, so we need to recreate the table
+            Schema::table('individual_identities', function (Blueprint $table) {
+                $table->json('racial_identity')->nullable()->change();
+                $table->json('indigenous_group')->nullable()->change();
+            });
+        } else {
+            // PostgreSQL: First, convert existing string values to JSON format
+            DB::statement("
+                UPDATE individual_identities 
+                SET racial_identity = CASE 
+                    WHEN racial_identity IS NOT NULL AND racial_identity != '' 
+                    THEN '[\"' || racial_identity || '\"]'
+                    ELSE NULL 
+                END
+                WHERE racial_identity IS NOT NULL
+            ");
+            
+            DB::statement("
+                UPDATE individual_identities 
+                SET indigenous_group = CASE 
+                    WHEN indigenous_group IS NOT NULL AND indigenous_group != '' 
+                    THEN '[\"' || indigenous_group || '\"]'
+                    ELSE NULL 
+                END
+                WHERE indigenous_group IS NOT NULL
+            ");
+            
+            // Now alter the column types using USING clause for PostgreSQL
+            DB::statement('ALTER TABLE individual_identities ALTER COLUMN racial_identity TYPE json USING racial_identity::json');
+            DB::statement('ALTER TABLE individual_identities ALTER COLUMN indigenous_group TYPE json USING indigenous_group::json');
+        }
     }
 
     /**
@@ -43,23 +53,33 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Convert arrays back to single values (take first element) using PostgreSQL syntax
-        DB::statement("
-            UPDATE individual_identities 
-            SET racial_identity = racial_identity->>0
-            WHERE racial_identity IS NOT NULL 
-            AND jsonb_typeof(racial_identity::jsonb) = 'array'
-        ");
+        $driver = DB::connection()->getDriverName();
         
-        DB::statement("
-            UPDATE individual_identities 
-            SET indigenous_group = indigenous_group->>0
-            WHERE indigenous_group IS NOT NULL 
-            AND jsonb_typeof(indigenous_group::jsonb) = 'array'
-        ");
-        
-        // Change back to string using USING clause
-        DB::statement('ALTER TABLE individual_identities ALTER COLUMN racial_identity TYPE varchar(255) USING racial_identity::text');
-        DB::statement('ALTER TABLE individual_identities ALTER COLUMN indigenous_group TYPE varchar(255) USING indigenous_group::text');
+        if ($driver === 'sqlite') {
+            // SQLite: Just change back to text
+            Schema::table('individual_identities', function (Blueprint $table) {
+                $table->string('racial_identity', 255)->nullable()->change();
+                $table->string('indigenous_group', 255)->nullable()->change();
+            });
+        } else {
+            // PostgreSQL: Convert arrays back to single values (take first element)
+            DB::statement("
+                UPDATE individual_identities 
+                SET racial_identity = racial_identity->>0
+                WHERE racial_identity IS NOT NULL 
+                AND jsonb_typeof(racial_identity::jsonb) = 'array'
+            ");
+            
+            DB::statement("
+                UPDATE individual_identities 
+                SET indigenous_group = indigenous_group->>0
+                WHERE indigenous_group IS NOT NULL 
+                AND jsonb_typeof(indigenous_group::jsonb) = 'array'
+            ");
+            
+            // Change back to string using USING clause
+            DB::statement('ALTER TABLE individual_identities ALTER COLUMN racial_identity TYPE varchar(255) USING racial_identity::text');
+            DB::statement('ALTER TABLE individual_identities ALTER COLUMN indigenous_group TYPE varchar(255) USING indigenous_group::text');
+        }
     }
 };
