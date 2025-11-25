@@ -28,10 +28,6 @@ spec:
           {{- end }}
     spec:
       serviceAccountName: pdex-sa-dev
-      volumes:
-        - name: site-data-volume
-          configMap:
-            name: subpath-env
       containers:
       - name: pdex
         image: acrpdexdev.azurecr.io/pdex:latest-dev
