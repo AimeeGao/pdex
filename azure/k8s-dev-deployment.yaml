@@ -28,7 +28,7 @@ spec:
           {{- end  }}
 
     spec:
-      serviceAccountName: pdex-sa-dev
+      serviceAccountName: fe0394-vault
       containers:
       - name: pdex
         image: acrpdexdev.azurecr.io/pdex:latest-dev
