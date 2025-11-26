@@ -17,7 +17,7 @@ spec:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/agent-inject-token: 'true'
         vault.hashicorp.com/agent-pre-populate-only: 'true'
-        vault.hashicorp.com/auth-path: 'auth/k8s-silver'
+        vault.hashicorp.com/auth-path: 'auth/k8s-gold'
         vault.hashicorp.com/namespace: 'platform-services'
         vault.hashicorp.com/role: 'fe0394-nonprod'
         vault.hashicorp.com/agent-inject-secret-secrets.env: 'fe0394-nonprod/secrets.env'
