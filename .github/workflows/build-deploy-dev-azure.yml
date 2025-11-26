@@ -73,14 +73,30 @@ jobs:
         run: |
           az aks get-credentials --resource-group ${{ env.AZ_RG }} --name ${{ env.AKS_NAME }}
           
+          # Ensure Vault Agent Injector is installed
+          if ! kubectl get namespace vault-system &> /dev/null; then
+            echo "Installing Vault Agent Injector..."
+            kubectl create namespace vault-system
+            helm repo add hashicorp https://helm.releases.hashicorp.com
+            helm repo update
+            helm install vault hashicorp/vault \
+              --set "global.externalVaultAddr=https://vault.developer.gov.bc.ca" \
+              --set "injector.enabled=true" \
+              --set "injector.externalVaultAddr=https://vault.developer.gov.bc.ca" \
+              --set "server.enabled=false" \
+              --namespace vault-system
+            
+            # Wait for injector to be ready
+            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=vault-agent-injector -n vault-system --timeout=120s
+          else
+            echo "Vault Agent Injector already installed"
+          fi
+          
           # Update the image tag in the deployment file
           sed -i "s|acrpdexdev.azurecr.io/pdex:latest-dev|${{ env.ACR_NAME }}.azurecr.io/pdex:${{ github.sha }}|g" azure/k8s-dev-deployment.yaml
           
           # Apply the deployment
           kubectl apply -f azure/k8s-dev-deployment.yaml
-          
-          # Wait for rollout to complete
-          kubectl rollout status deployment/pdex-app-dev -n default --timeout=5m
           
           # Wait for rollout to complete
           kubectl rollout status deployment/pdex-app-dev -n default --timeout=5m
