@@ -20,6 +20,7 @@ spec:
       tolerations:
       - key: "CriticalAddonsOnly"
         operator: "Exists"
+      serviceAccountName: pdex-sa-dev
       containers:
       - name: pdex
         image: "${DEV_ECR}:${TAG}"
@@ -56,7 +57,7 @@ spec:
         - name: pdex-secrets
           mountPath: /vault/secrets
           readOnly: true
-          
+
       volumes:
         - name: pdex-secrets
           csi:
@@ -77,6 +78,11 @@ spec:
       - objectName: "${DEV_SECRETS_ECR}"
         objectType: "secretsmanager"
         objectAlias: "secrets.env"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pdex-sa-dev
 ---
 apiVersion: v1
 kind: Service
