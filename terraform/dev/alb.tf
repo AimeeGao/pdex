@@ -20,30 +20,30 @@ resource "aws_security_group" "alb_sg" {
 
 
 
-resource "aws_alb_target_group" "cer" {
-  name                 = "cer-target-group"
-  port                 = 80
-  protocol             = "HTTP"
-  vpc_id               = data.aws_vpc.main.id
-  target_type          = "ip"
-  deregistration_delay = 30
+# resource "aws_alb_target_group" "cer" {
+#   name                 = "cer-target-group"
+#   port                 = 80
+#   protocol             = "HTTP"
+#   vpc_id               = data.aws_vpc.main.id
+#   target_type          = "ip"
+#   deregistration_delay = 30
 
-  health_check {
-    healthy_threshold   = "5"
-    interval            = "30"
-    protocol            = "HTTP"
-    matcher             = "200"
-    timeout             = "5"
-    path                = "/index.html"
-    unhealthy_threshold = "2"
-  }
+#   health_check {
+#     healthy_threshold   = "5"
+#     interval            = "30"
+#     protocol            = "HTTP"
+#     matcher             = "200"
+#     timeout             = "5"
+#     path                = "/index.html"
+#     unhealthy_threshold = "2"
+#   }
     
-  lifecycle {
-    create_before_destroy = true
-  }
+#   lifecycle {
+#     create_before_destroy = true
+#   }
 
-  tags = var.common_tags
-}
+#   tags = var.common_tags
+# }
 
 resource "aws_lb" "default_alb" {
   name               = "default"
