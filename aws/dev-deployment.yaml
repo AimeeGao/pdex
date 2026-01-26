@@ -5,7 +5,16 @@ metadata:
   labels:
     app: pdex
 spec:
-  replicas: 1
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    type: "Resource"
+    resource: 
+      name: "cpu"
+      target: 
+        type: "Utilization"
+        averageUtilization: 60
+      
   selector:
     matchLabels:
       app: pdex
