@@ -1,5 +1,5 @@
 # WAF Web ACL for CloudFront - Allow Canada traffic only
-
+# THIS SHOULD BE USED ONLY ON DEV AND TESTING ENVIRONMENTS
 resource "aws_wafv2_web_acl" "pdex_cloudfront" {
   count    = var.cloudfront ? 1 : 0
   provider = aws.us-east-1  # WAF for CloudFront must be in us-east-1
