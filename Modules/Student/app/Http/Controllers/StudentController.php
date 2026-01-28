@@ -574,7 +574,9 @@ class StudentController extends Controller
             'countries' => $countries,
             'individual' => $individual,
         ]);
-    }    /**
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreIndividualMultiStepRequest $request)
