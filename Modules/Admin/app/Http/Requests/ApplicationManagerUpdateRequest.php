@@ -24,7 +24,6 @@ class ApplicationManagerUpdateRequest extends FormRequest
             'client_id' => 'nullable|string|max:255',
             'client_secret' => 'nullable|string|max:255',
             'api_key' => 'nullable|string|max:255',
-            'profile_integration_ready' => 'boolean',
     ];
     }
 
