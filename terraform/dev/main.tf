@@ -13,9 +13,9 @@ locals {
   # ]
   app_subnet_names = concat(
     [for az in local.availability_zones : "${local.environment}-App-${az}"],
-    [
-      "BCGOV-LZA-extended-app-ca-central-1a",
-      "BCGOV-LZA-extended-app-ca-central-1b",
-    ]
+    # [
+    #   "BCGOV-LZA-extended-app-ca-central-1a",
+    #   "BCGOV-LZA-extended-app-ca-central-1b",
+    # ]
   )
 }
