@@ -204,7 +204,7 @@ spec:
     kind: Deployment
     name: pdex-app-dev
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 20
   metrics:
   - type: Resource
     resource:
