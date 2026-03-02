@@ -11,11 +11,10 @@ class WelcomeController extends Controller
     /**
      * Display the public welcome page.
      */
-    public function index(): Response
+    public function index(): Response | RedirectResponse
     {
         // force redirect to /login page and skip welcome page for now since we don't have public content yet
-        // App\Http\Controllers\WelcomeController::index(): Return value must be of type Inertia\Response, Illuminate\Http\RedirectResponse returned
-        return Inertia::location(route('login'));
+        return redirect()->route('login');
 
         return Inertia::render('Welcome', [
             'stats' => [
