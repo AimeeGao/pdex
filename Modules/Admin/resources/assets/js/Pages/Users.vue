@@ -346,10 +346,10 @@ export default {
 
     const getUserGuid = (user) => {
       switch (user.identity_provider) {
-        case 'bceid': return user.bceid_business_guid
         case 'idir':  return user.idir_user_guid
         case 'bcsc':  return user.bcsc_user_guid
-        default:      return user.idir_user_guid || user.bceid_business_guid || user.bcsc_user_guid
+        case 'bceid': return user.bceid_user_guid
+        default:      return user.guid
       }
     }
 
