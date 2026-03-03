@@ -78,6 +78,9 @@
               <tr style="border-bottom: 2px solid #dee2e6; background-color: white;">
                 <th>Name</th>
                 <th>Email</th>
+                <th>Organization</th>
+                <th>Identity Provider</th>
+                <th>GUID</th>
                 <th>Roles</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -96,6 +99,16 @@
                   </div>
                 </td>
                 <td>{{ user.email }}</td>
+                <td>{{ user.organization || '—' }}</td>
+                <td>
+                  <span v-if="user.identity_provider" class="badge" :class="getIdpBadgeClass(user.identity_provider)">
+                    {{ user.identity_provider.toUpperCase() }}
+                  </span>
+                  <span v-else class="text-muted small">—</span>
+                </td>
+                <td>
+                  <span class="font-monospace small text-muted" style="word-break: break-all;">{{ getUserGuid(user) || '—' }}</span>
+                </td>
                 <td>
                   <div class="d-flex flex-wrap gap-1">
                     <span
@@ -331,6 +344,24 @@ export default {
       })
     }
 
+    const getUserGuid = (user) => {
+      switch (user.identity_provider) {
+        case 'bceid': return user.bceid_business_guid
+        case 'idir':  return user.idir_user_guid
+        case 'bcsc':  return user.bcsc_user_guid
+        default:      return user.idir_user_guid || user.bceid_business_guid || user.bcsc_user_guid
+      }
+    }
+
+    const getIdpBadgeClass = (idp) => {
+      const classes = {
+        'bceid': 'bg-warning text-dark',
+        'idir':  'bg-primary',
+        'bcsc':  'bg-success',
+      }
+      return classes[idp] || 'bg-secondary'
+    }
+
     const getRoleBadgeClass = (role) => {
       const classes = {
         'Super Admin': 'bg-danger',
@@ -507,6 +538,8 @@ export default {
       selectedRoles,
       availableRoles,
       isRestrictedUser,
+      getUserGuid,
+      getIdpBadgeClass,
       canManageUsers,
       filteredUsers,
       filterUsers,
