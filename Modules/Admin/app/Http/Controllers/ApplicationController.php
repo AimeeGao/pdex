@@ -277,7 +277,7 @@ class ApplicationController extends Controller
             $data['security_approval_status']
         );
 
-        return redirect()->route('admin.applications.edit', $application)
+        return redirect()->back()
             ->with('success', 'Security approval updated successfully.');
     }
 
@@ -302,7 +302,7 @@ class ApplicationController extends Controller
             $data['privacy_approval_status']
         );
 
-        return redirect()->route('admin.applications.edit', $application)
+        return redirect()->back()
             ->with('success', 'Privacy approval updated successfully.');
     }
 
