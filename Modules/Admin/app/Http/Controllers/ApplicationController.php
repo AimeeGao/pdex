@@ -307,6 +307,45 @@ class ApplicationController extends Controller
     }
 
     /**
+     * Reject both security and privacy approvals for an application.
+     */
+    public function reject(Request $request, Application $application)
+    {
+        $this->authorize('reject', $application);
+
+        $data = $request->validate([
+            'rejection_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $notes = $data['rejection_notes'] ?? null;
+        $userId = auth()->id();
+        $now = now();
+
+        $updates = [];
+
+        if ($application->security_approval_status !== 'approved' || !$application->isFinallyApproved()) {
+            $prevSecurity = $application->security_approval_status;
+            $updates['security_approval_status'] = 'rejected';
+            $updates['security_approval_notes'] = $notes;
+            $updates['security_approved_at'] = $now;
+            $updates['security_approved_by'] = $userId;
+        }
+
+        if ($application->privacy_approval_status !== 'approved' || !$application->isFinallyApproved()) {
+            $prevPrivacy = $application->privacy_approval_status;
+            $updates['privacy_approval_status'] = 'rejected';
+            $updates['privacy_approval_notes'] = $notes;
+            $updates['privacy_approved_at'] = $now;
+            $updates['privacy_approved_by'] = $userId;
+        }
+
+        $application->update($updates);
+
+        return redirect()->back()
+            ->with('success', 'Application rejected successfully.');
+    }
+
+    /**
      * Handle manager update for an application.
      */
     public function managerUpdate(Request $request, Application $application)

@@ -311,11 +311,10 @@ export default {
           onSuccess: closeModal,
         });
       } else {
-        // Reject — apply to security
-        endpoint = `/admin/applications/${selectedApp.value.guid}/security-approval`;
+        // Reject — both security and privacy
+        const endpoint = `/admin/applications/${selectedApp.value.guid}/reject`;
         approvalForm.transform(() => ({
-          security_approval_status: approvalForm.approval_status,
-          security_approval_notes: approvalForm.approval_notes,
+          rejection_notes: approvalForm.approval_notes,
         })).patch(endpoint, {
           onSuccess: closeModal,
         });
