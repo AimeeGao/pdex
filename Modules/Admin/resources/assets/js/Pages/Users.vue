@@ -12,7 +12,7 @@
             <div class="card-body">
 
     <!-- Search and Filter Controls -->
-    <div class="row mb-4">
+    <form class="row mb-4" @submit.prevent="filterUsers">
       <div class="col-md-4">
         <input
           v-model="searchQuery"
@@ -44,9 +44,8 @@
       </div>
       <div class="col-md-2">
         <button 
-          type="button" 
+          type="submit" 
           class="btn btn-primary w-100" 
-          @click="filterUsers"
           :disabled="loading"
         >
           <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -54,7 +53,7 @@
           Filter
         </button>
       </div>
-    </div>
+    </form>
 
     <!-- Users Table -->
     <div class="card">

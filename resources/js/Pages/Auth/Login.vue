@@ -179,12 +179,12 @@ export default {
                                     Register for BCeID
                                 </a>
                             </div>
-                            <div class="col-md-4">
+                            <!-- <div class="col-md-4">
                                 <a href="#" class="link-primary small text-decoration-none">
                                     <i class="bi bi-info-circle me-1"></i>
                                     About PDEX
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
