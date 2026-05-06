@@ -1219,7 +1219,8 @@ class StudentController extends Controller
             'app_id' => $application->id,
             'app_name' => $application->name,
             'token_data_keys' => array_keys($tokenData),
-            'token_data_count' => count($tokenData)
+            'token_data_count' => count($tokenData),
+            'token_data' => $tokenData
         ]);
         
         return $tokenData;
