@@ -24,6 +24,7 @@ use Modules\Student\Http\Requests\StoreIndividualRequest;
 use Modules\Student\Http\Requests\UpdateIndividualRequest;
 use Modules\Student\Http\Requests\StoreIndividualMultiStepRequest;
 use Modules\Student\Http\Requests\UpdateIndividualMultiStepRequest;
+use Firebase\JWT\JWT;
 
 class StudentController extends Controller
 {
@@ -389,8 +390,10 @@ class StudentController extends Controller
         ];
         
         // In a real implementation, you would create a JWT token here
+        //use Firebase\JWT\JWT; to encode the token with a secret key
+        return JWT::encode($tokenData, $application->client_secret, 'HS256');
         // For now, we'll just return the data as is
-        return base64_encode(json_encode($tokenData));
+        // return base64_encode(json_encode($tokenData));
     }
 
     /**
