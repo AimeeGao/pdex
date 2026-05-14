@@ -352,7 +352,7 @@ class StudentController extends Controller
             
             // Include ALL fields that the application requests, regardless of null values
             // This ensures the application gets complete data structure for all 11 fields
-            $tokenData[$columnName] = $value;
+            $tokenData[$columnName] = $this->normalizeDatetimeValue($value);
             
             \Log::debug("Processing permission", [
                 'table_name' => $tableName,
@@ -1047,6 +1047,18 @@ class StudentController extends Controller
     }
 
     /**
+     * Strip the time portion from ISO 8601 datetime strings (e.g. 1966-07-08T00:00:00.000000Z → 1966-07-08).
+     * Non-datetime values are returned unchanged.
+     */
+    private function normalizeDatetimeValue($value)
+    {
+        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}T/', $value)) {
+            return substr($value, 0, 10);
+        }
+        return $value;
+    }
+
+    /**
      * Check if individual has a related record for the given table
      */
     private function hasRelatedRecord($individual, string $tableName): bool
@@ -1208,7 +1220,7 @@ class StudentController extends Controller
                     continue 2;
             }
             
-            $tokenData[$columnName] = $value;
+            $tokenData[$columnName] = $this->normalizeDatetimeValue($value);
             
             \Log::debug("Processing selected permission", [
                 'table_name' => $tableName,
