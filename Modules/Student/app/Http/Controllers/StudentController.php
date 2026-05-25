@@ -1049,10 +1049,18 @@ class StudentController extends Controller
     /**
      * Strip the time portion from ISO 8601 datetime strings (e.g. 1966-07-08T00:00:00.000000Z → 1966-07-08).
      * Non-datetime values are returned unchanged.
+     * Also handles cases where time portion is present but not in ISO format (e.g. 1966-07-08T00:00:00 → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds but not in ISO format (e.g. 1966-07-08T00:00:00.000 → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds and timezone but not in ISO format (e.g. 1966-07-08T00:00:00.000Z → 1966-07-08).
+     * Also handles cases where time portion is present with milliseconds and timezone in ISO format (e.g. 1966-07-08T00:00:00.000Z → 1966-07-08).
+     * Also handles cases where time portion is present after a space instead of T (e.g. 1966-07-08 00:00:00 → 1966-07-08).
      */
     private function normalizeDatetimeValue($value)
     {
-        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}T/', $value)) {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}[T ]/', $value)) {
             return substr($value, 0, 10);
         }
         return $value;
@@ -1225,7 +1233,8 @@ class StudentController extends Controller
             \Log::debug("Processing selected permission", [
                 'table_name' => $tableName,
                 'column_name' => $columnName,
-                'value' => $value,
+                'raw_value' => $value,
+                'normalized_value' => $tokenData[$columnName],
                 'is_selected' => $isSelected
             ]);
         }
