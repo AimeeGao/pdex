@@ -4,18 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\Concerns\HandlesApiResourcePermissions;
-use App\Models\Institution;
-use App\Models\Application;
+use App\Models\InstitutionStaff;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class InstitutionController extends Controller
+class InstitutionStaffController extends Controller
 {
     use HandlesApiResourcePermissions;
 
+    private const TABLE = 'institution_staff';
+
     /**
-     * Get all institutions with permission filtering
+     * Get all institution staff with permission filtering
      */
     public function index(Request $request): JsonResponse
     {
@@ -30,43 +31,49 @@ class InstitutionController extends Controller
                 ], 403);
             }
 
-            // Check if this app has permission to read institutions data
-            if (!$this->hasPermission($registeredApp->id, 'institutions', 'read')) {
+            if (!$this->hasPermission($registeredApp->id, self::TABLE, 'read')) {
                 return response()->json([
                     'error' => 'Forbidden',
-                    'message' => 'Insufficient permissions to access institutions data'
+                    'message' => 'Insufficient permissions to access institution staff data'
                 ], 403);
             }
 
-            $allowedFields = $this->getAllowedFields($registeredApp->id, 'institutions');
-            
-            $institutions = Institution::select($allowedFields)->get();
+            $allowedFields = $this->getAllowedFields($registeredApp->id, self::TABLE);
+
+            $query = InstitutionStaff::select($allowedFields);
+
+            // Optionally filter by parent institution
+            if ($institutionGuid = $request->query('institution_guid')) {
+                $query->where('institution_guid', $institutionGuid);
+            }
+
+            $staff = $query->get();
 
             return response()->json([
-                'data' => $institutions,
+                'data' => $staff,
                 'meta' => [
-                    'count' => $institutions->count(),
+                    'count' => $staff->count(),
                     'registered_app' => $registeredApp->name,
                     'allowed_fields' => $allowedFields,
-                    'permissions' => $this->getAppPermissions($registeredApp->id, 'institutions')
+                    'permissions' => $this->getAppPermissions($registeredApp->id, self::TABLE)
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('API Institutions index error', [
+            Log::error('API Institution staff index error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'error' => 'Internal Server Error',
-                'message' => 'An error occurred while fetching institutions'
+                'message' => 'An error occurred while fetching institution staff'
             ], 500);
         }
     }
 
     /**
-     * Get a specific institution by ID
+     * Get a specific institution staff member by GUID
      */
     public function show(Request $request, $id): JsonResponse
     {
@@ -81,45 +88,45 @@ class InstitutionController extends Controller
                 ], 403);
             }
 
-            if (!$this->hasPermission($registeredApp->id, 'institutions', 'read')) {
+            if (!$this->hasPermission($registeredApp->id, self::TABLE, 'read')) {
                 return response()->json([
                     'error' => 'Forbidden',
-                    'message' => 'Insufficient permissions to access institution data'
+                    'message' => 'Insufficient permissions to access institution staff data'
                 ], 403);
             }
 
-            $allowedFields = $this->getAllowedFields($registeredApp->id, 'institutions');
-            
-            $institution = Institution::select($allowedFields)
-                ->where('guid', $id)
+            $allowedFields = $this->getAllowedFields($registeredApp->id, self::TABLE);
+
+            $staff = InstitutionStaff::select($allowedFields)
+                ->where('institution_guid', $id)
                 ->first();
 
-            if (!$institution) {
+            if (!$staff) {
                 return response()->json([
                     'error' => 'Not Found',
-                    'message' => 'Institution not found'
+                    'message' => 'Institution staff member not found'
                 ], 404);
             }
 
             return response()->json([
-                'data' => $institution,
+                'data' => $staff,
                 'meta' => [
                     'registered_app' => $registeredApp->name,
                     'allowed_fields' => $allowedFields,
-                    'permissions' => $this->getAppPermissions($registeredApp->id, 'institutions')
+                    'permissions' => $this->getAppPermissions($registeredApp->id, self::TABLE)
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('API Institution show error', [
-                'id' => $id,
+            Log::error('API Institution staff show error', [
+                'institution_guid' => $id,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'error' => 'Internal Server Error',
-                'message' => 'An error occurred while fetching the institution'
+                'message' => 'An error occurred while fetching the institution staff member'
             ], 500);
         }
     }

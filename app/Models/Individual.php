@@ -5,11 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasDynamicProfileColumns;
 use Illuminate\Support\Str;
 
 class Individual extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasDynamicProfileColumns;
+
+    /** The student profile form tab backed by this model. */
+    protected string $profileFieldTab = 'general';
 
     protected $fillable = [
         'guid',

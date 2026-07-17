@@ -4,18 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\Concerns\HandlesApiResourcePermissions;
-use App\Models\Institution;
-use App\Models\Application;
+use App\Models\InstitutionRelationship;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class InstitutionController extends Controller
+class InstitutionRelationshipController extends Controller
 {
     use HandlesApiResourcePermissions;
 
+    private const TABLE = 'institution_relationships';
+
     /**
-     * Get all institutions with permission filtering
+     * Get all institution relationships with permission filtering
      */
     public function index(Request $request): JsonResponse
     {
@@ -30,43 +31,52 @@ class InstitutionController extends Controller
                 ], 403);
             }
 
-            // Check if this app has permission to read institutions data
-            if (!$this->hasPermission($registeredApp->id, 'institutions', 'read')) {
+            if (!$this->hasPermission($registeredApp->id, self::TABLE, 'read')) {
                 return response()->json([
                     'error' => 'Forbidden',
-                    'message' => 'Insufficient permissions to access institutions data'
+                    'message' => 'Insufficient permissions to access institution relationships data'
                 ], 403);
             }
 
-            $allowedFields = $this->getAllowedFields($registeredApp->id, 'institutions');
-            
-            $institutions = Institution::select($allowedFields)->get();
+            $allowedFields = $this->getAllowedFields($registeredApp->id, self::TABLE);
+
+            $query = InstitutionRelationship::select($allowedFields);
+
+            // Optionally filter to relationships involving a specific institution (either side)
+            if ($institutionGuid = $request->query('institution_guid')) {
+                $query->where(function ($q) use ($institutionGuid) {
+                    $q->where('institution_a_guid', $institutionGuid)
+                        ->orWhere('institution_b_guid', $institutionGuid);
+                });
+            }
+
+            $relationships = $query->get();
 
             return response()->json([
-                'data' => $institutions,
+                'data' => $relationships,
                 'meta' => [
-                    'count' => $institutions->count(),
+                    'count' => $relationships->count(),
                     'registered_app' => $registeredApp->name,
                     'allowed_fields' => $allowedFields,
-                    'permissions' => $this->getAppPermissions($registeredApp->id, 'institutions')
+                    'permissions' => $this->getAppPermissions($registeredApp->id, self::TABLE)
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('API Institutions index error', [
+            Log::error('API Institution relationships index error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'error' => 'Internal Server Error',
-                'message' => 'An error occurred while fetching institutions'
+                'message' => 'An error occurred while fetching institution relationships'
             ], 500);
         }
     }
 
     /**
-     * Get a specific institution by ID
+     * Get a specific institution relationship by ID
      */
     public function show(Request $request, $id): JsonResponse
     {
@@ -81,45 +91,46 @@ class InstitutionController extends Controller
                 ], 403);
             }
 
-            if (!$this->hasPermission($registeredApp->id, 'institutions', 'read')) {
+            if (!$this->hasPermission($registeredApp->id, self::TABLE, 'read')) {
                 return response()->json([
                     'error' => 'Forbidden',
-                    'message' => 'Insufficient permissions to access institution data'
+                    'message' => 'Insufficient permissions to access institution relationship data'
                 ], 403);
             }
 
-            $allowedFields = $this->getAllowedFields($registeredApp->id, 'institutions');
-            
-            $institution = Institution::select($allowedFields)
-                ->where('guid', $id)
+            $allowedFields = $this->getAllowedFields($registeredApp->id, self::TABLE);
+
+            $relationship = InstitutionRelationship::select($allowedFields)
+                ->where('institution_a_guid', $id)
+                ->orWhere('institution_b_guid', $id)
                 ->first();
 
-            if (!$institution) {
+            if (!$relationship) {
                 return response()->json([
                     'error' => 'Not Found',
-                    'message' => 'Institution not found'
+                    'message' => 'Institution relationship not found'
                 ], 404);
             }
 
             return response()->json([
-                'data' => $institution,
+                'data' => $relationship,
                 'meta' => [
                     'registered_app' => $registeredApp->name,
                     'allowed_fields' => $allowedFields,
-                    'permissions' => $this->getAppPermissions($registeredApp->id, 'institutions')
+                    'permissions' => $this->getAppPermissions($registeredApp->id, self::TABLE)
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('API Institution show error', [
-                'id' => $id,
+            Log::error('API Institution relationship show error', [
+                'institution_guid' => $id,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'error' => 'Internal Server Error',
-                'message' => 'An error occurred while fetching the institution'
+                'message' => 'An error occurred while fetching the institution relationship'
             ], 500);
         }
     }

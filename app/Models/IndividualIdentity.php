@@ -4,10 +4,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasVersionTracking;
+use App\Traits\HasDynamicProfileColumns;
 
 class IndividualIdentity extends Model
 {
-    use HasFactory, HasVersionTracking;
+    use HasFactory, HasVersionTracking, HasDynamicProfileColumns;
+
+    /** The student profile form tab backed by this model. */
+    protected string $profileFieldTab = 'identity';
 
     protected $fillable = [
         'individual_id',

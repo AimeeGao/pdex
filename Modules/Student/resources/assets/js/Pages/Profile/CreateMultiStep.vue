@@ -84,6 +84,7 @@
                   :form="form"
                   :errors="form.errors"
                   :countries="countries"
+                  :config="formConfig"
                 />
 
                 <!-- Step 2: Address Information -->
@@ -94,6 +95,7 @@
                   :use-different-mailing="form.use_different_mailing_address"
                   :countries="countries"
                   :errors="form.errors"
+                  :config="formConfig"
                   @update:current-address="form.current_address = $event"
                   @update:mailing-address="form.mailing_address = $event"
                   @update:use-different-mailing="form.use_different_mailing_address = $event"
@@ -104,6 +106,7 @@
                   v-if="currentStep === 3"
                   :form="form.current_employment"
                   :errors="form.errors"
+                  :config="formConfig"
                 />
 
                 <!-- Step 4: Identity Information -->
@@ -111,6 +114,7 @@
                   v-if="currentStep === 4"
                   :form="form.identity"
                   :errors="form.errors"
+                  :config="formConfig"
                 />
               </div>
 
@@ -179,6 +183,10 @@ const props = defineProps({
   countries: {
     type: Array,
     default: () => []
+  },
+  formConfig: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -197,6 +205,7 @@ const form = useForm({
   alternate_phone_number: '',
   date_of_birth: '',
   gender: '',
+  sex: '',
   preferred_pronouns: '',
   disability_status: false,
   accommodation_needs: '',
