@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Log;
 
 class OAuthTokenService
 {
-    private string $tokenEndpoint;
-    private string $clientId;
-    private string $clientSecret;
-    private string $audience;
+    private ?string $tokenEndpoint;
+    private ?string $clientId;
+    private ?string $clientSecret;
+    private ?string $audience;
 
     public function __construct()
     {
@@ -36,6 +36,10 @@ class OAuthTokenService
         }
 
         try {
+            if (empty($this->tokenEndpoint)) {
+                throw new Exception('OAuth token endpoint is not configured (APP_API_TOKEN_ENDPOINT)');
+            }
+
             $response = Http::asForm()->post($this->tokenEndpoint, [
                 'grant_type' => 'client_credentials',
                 'client_id' => $this->clientId,
@@ -155,8 +159,8 @@ class OAuthTokenService
                 return null;
             }
 
-            // Check audience
-            if (isset($payload['aud'])) {
+            // Check audience (only when an expected audience is configured)
+            if ($this->audience && isset($payload['aud'])) {
                 $audiences = is_array($payload['aud']) ? $payload['aud'] : [$payload['aud']];
                 if (!in_array($this->audience, $audiences)) {
                     Log::warning('Token audience mismatch', [
