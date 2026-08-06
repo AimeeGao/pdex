@@ -8,6 +8,12 @@ use Illuminate\Database\Seeder;
 
 class ProfileFormFieldSeeder extends Seeder
 {
+    private array $profileAnswerOptions = [
+        ['value' => 'yes', 'label' => 'Yes'],
+        ['value' => 'no', 'label' => 'No'],
+        ['value' => 'unknown', 'label' => 'Prefer not to answer'],
+    ];
+
     /**
      * Seed the student profile form field definitions.
      *
@@ -92,8 +98,8 @@ class ProfileFormFieldSeeder extends Seeder
             ['tab' => 'general', 'section' => 'Identity Numbers', 'field_id' => 'government_issued_id', 'label' => 'Government ID Number', 'type' => 'text', 'required' => false, 'placeholder' => "Driver's License, Health Card, etc.", 'multi_select' => false, 'help_text' => null],
 
             // Accessibility & Accommodation
-            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'disability_status', 'label' => 'I have a disability or accessibility needs', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of accommodation needs field'],
-            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'accommodation_needs', 'label' => 'Accommodation Needs', 'type' => 'textarea', 'required' => false, 'placeholder' => 'Please describe any accommodations you require', 'multi_select' => false, 'help_text' => 'Shown only when disability status is checked'],
+            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'disability_status', 'label' => 'I have a disability or accessibility needs', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of accommodation needs field', 'options' => $this->profileAnswerOptions],
+            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'accommodation_needs', 'label' => 'Accommodation Needs', 'type' => 'textarea', 'required' => false, 'placeholder' => 'Please describe any accommodations you require', 'multi_select' => false, 'help_text' => 'Shown only when disability status is Yes'],
         ];
     }
 
@@ -226,10 +232,10 @@ class ProfileFormFieldSeeder extends Seeder
                 ['value' => 'other', 'label' => 'Other'],
                 ['value' => 'prefer_not_to_say', 'label' => 'Prefer not to say'],
             ]],
-            ['tab' => 'identity', 'section' => 'Racial & Diversity Information', 'field_id' => 'is_visible_minority', 'label' => 'I identify as a visible minority', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => 'Racial & Diversity Information', 'field_id' => 'is_visible_minority', 'label' => 'I identify as a visible minority', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null, 'options' => $this->profileAnswerOptions],
 
             // Indigenous Identity
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_status', 'label' => 'I identify as Indigenous', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of Indigenous group and band fields'],
+            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_status', 'label' => 'I identify as Indigenous', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of Indigenous group and band fields', 'options' => $this->profileAnswerOptions],
             ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_group', 'label' => 'Indigenous Group', 'type' => 'select', 'required' => false, 'placeholder' => 'Select Group', 'multi_select' => false, 'help_text' => 'Shown when Indigenous status is checked', 'options' => [
                 ['value' => 'first_nations', 'label' => 'First Nations'],
                 ['value' => 'metis', 'label' => 'Métis'],
