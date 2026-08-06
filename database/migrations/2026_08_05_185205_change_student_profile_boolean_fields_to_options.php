@@ -93,7 +93,7 @@ return new class extends Migration
             return;
         }
 
-        // Rollback will lose the new answer detail because the old schema only supports booleans. 
+        // Rollback will lose the new answer detail because the old schema only supports booleans.
         // Only yes can be migrated as true, everything else will be false.
         $temporaryColumn = "{$column}_boolean_answer";
 

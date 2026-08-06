@@ -172,10 +172,8 @@ class StoreIndividualMultiStepRequest extends FormRequest
             
             // Set default boolean values only if not present
             $identity['refugee_status'] = $identity['refugee_status'] ?? false;
-            // $identity['indigenous_status'] = $identity['indigenous_status'] ?? false;
             $identity['is_registered_with_band'] = $identity['is_registered_with_band'] ?? false;
             $identity['on_reserve_resident'] = $identity['on_reserve_resident'] ?? false;
-            // $identity['is_visible_minority'] = $identity['is_visible_minority'] ?? false;
             $identity['receives_indigenous_support_services'] = $identity['receives_indigenous_support_services'] ?? false;
             $identity['receives_minority_support_services'] = $identity['receives_minority_support_services'] ?? false;
             
