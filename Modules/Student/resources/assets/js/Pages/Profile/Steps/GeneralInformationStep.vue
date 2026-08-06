@@ -261,20 +261,26 @@
         </h6>
         <div class="row">
           <div v-if="cfg.isActive('disability_status')" class="col-md-6 mb-3">
-            <div class="form-check">
-              <input
-                id="disability_status"
-                v-model="form.disability_status"
-                class="form-check-input"
-                type="checkbox"
-              />
-              <label class="form-check-label" for="disability_status">
-                {{ cfg.label('disability_status', 'I have a disability or accessibility needs') }}
-              </label>
+            <label for="disability_status" class="form-label">
+              {{ cfg.label('disability_status', 'Disability Status') }}
+              <span v-if="cfg.isRequired('disability_status')" class="text-danger">*</span>
+            </label>
+            <select
+              id="disability_status"
+              v-model="form.disability_status"
+              class="form-select"
+              :class="{ 'is-invalid': hasFieldError('disability_status') }"
+              :required="cfg.isRequired('disability_status')"
+            >
+              <option value="">{{ cfg.placeholder('disability_status', 'Select an answer') }}</option>
+              <option v-for="opt in cfg.options('disability_status')" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <div v-if="hasFieldError('disability_status')" class="invalid-feedback">
+              {{ getFieldError('disability_status') }}
             </div>
           </div>
         </div>
-        <div v-if="form.disability_status && cfg.isActive('accommodation_needs')" class="row">
+        <div v-if="form.disability_status === 'yes' && cfg.isActive('accommodation_needs')" class="row">
           <div class="col-md-12 mb-3">
             <label for="accommodation_needs" class="form-label">{{ cfg.label('accommodation_needs', 'Accommodation Needs') }}</label>
             <textarea
