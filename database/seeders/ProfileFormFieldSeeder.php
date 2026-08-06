@@ -8,6 +8,15 @@ use Illuminate\Database\Seeder;
 
 class ProfileFormFieldSeeder extends Seeder
 {
+    private const PREFER_NOT_TO_ANSWER_LABEL = 'Prefer not to answer';
+    private const INDIGENOUS_IDENTITY_SECTION = 'Indigenous Identity';
+
+    private array $profileAnswerOptions = [
+        ['value' => 'yes', 'label' => 'Yes'],
+        ['value' => 'no', 'label' => 'No'],
+        ['value' => 'unknown', 'label' => self::PREFER_NOT_TO_ANSWER_LABEL],
+    ];
+
     /**
      * Seed the student profile form field definitions.
      *
@@ -71,13 +80,13 @@ class ProfileFormFieldSeeder extends Seeder
                 ['value' => 'man', 'label' => 'Man/Boy'],
                 ['value' => 'woman', 'label' => 'Woman/Girl'],
                 ['value' => 'non-binary', 'label' => 'Non-binary'],
-                ['value' => 'unknown', 'label' => 'Prefer not to answer'],
+                ['value' => 'unknown', 'label' => self::PREFER_NOT_TO_ANSWER_LABEL],
             ]],
             ['tab' => 'general', 'section' => 'Personal Details', 'field_id' => 'sex', 'label' => 'Sex', 'type' => 'select', 'required' => false, 'placeholder' => 'Select Sex', 'multi_select' => false, 'help_text' => null, 'options' => [
                 ['value' => 'male', 'label' => 'Male'],
                 ['value' => 'female', 'label' => 'Female'],
                 ['value' => 'indeterminate', 'label' => 'Indeterminate'],
-                ['value' => 'unknown', 'label' => 'Prefer not to answer'],
+                ['value' => 'unknown', 'label' => self::PREFER_NOT_TO_ANSWER_LABEL],
             ]],
             ['tab' => 'general', 'section' => 'Personal Details', 'field_id' => 'preferred_pronouns', 'label' => 'Preferred Pronouns', 'type' => 'text', 'required' => false, 'placeholder' => 'e.g., he/him, she/her, they/them', 'multi_select' => false, 'help_text' => null],
 
@@ -92,8 +101,8 @@ class ProfileFormFieldSeeder extends Seeder
             ['tab' => 'general', 'section' => 'Identity Numbers', 'field_id' => 'government_issued_id', 'label' => 'Government ID Number', 'type' => 'text', 'required' => false, 'placeholder' => "Driver's License, Health Card, etc.", 'multi_select' => false, 'help_text' => null],
 
             // Accessibility & Accommodation
-            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'disability_status', 'label' => 'I have a disability or accessibility needs', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of accommodation needs field'],
-            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'accommodation_needs', 'label' => 'Accommodation Needs', 'type' => 'textarea', 'required' => false, 'placeholder' => 'Please describe any accommodations you require', 'multi_select' => false, 'help_text' => 'Shown only when disability status is checked'],
+            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'disability_status', 'label' => 'I have a disability or accessibility needs', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of accommodation needs field', 'options' => $this->profileAnswerOptions],
+            ['tab' => 'general', 'section' => 'Accessibility & Accommodation', 'field_id' => 'accommodation_needs', 'label' => 'Accommodation Needs', 'type' => 'textarea', 'required' => false, 'placeholder' => 'Please describe any accommodations you require', 'multi_select' => false, 'help_text' => 'Shown only when disability status is Yes'],
         ];
     }
 
@@ -226,21 +235,21 @@ class ProfileFormFieldSeeder extends Seeder
                 ['value' => 'other', 'label' => 'Other'],
                 ['value' => 'prefer_not_to_say', 'label' => 'Prefer not to say'],
             ]],
-            ['tab' => 'identity', 'section' => 'Racial & Diversity Information', 'field_id' => 'is_visible_minority', 'label' => 'I identify as a visible minority', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => 'Racial & Diversity Information', 'field_id' => 'is_visible_minority', 'label' => 'I identify as a visible minority', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null, 'options' => $this->profileAnswerOptions],
 
             // Indigenous Identity
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_status', 'label' => 'I identify as Indigenous', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of Indigenous group and band fields'],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_group', 'label' => 'Indigenous Group', 'type' => 'select', 'required' => false, 'placeholder' => 'Select Group', 'multi_select' => false, 'help_text' => 'Shown when Indigenous status is checked', 'options' => [
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'indigenous_status', 'label' => 'I identify as Indigenous', 'type' => 'select', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => 'Controls visibility of Indigenous group and band fields', 'options' => $this->profileAnswerOptions],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'indigenous_group', 'label' => 'Indigenous Group', 'type' => 'select', 'required' => false, 'placeholder' => 'Select Group', 'multi_select' => false, 'help_text' => 'Shown when Indigenous status is checked', 'options' => [
                 ['value' => 'first_nations', 'label' => 'First Nations'],
                 ['value' => 'metis', 'label' => 'Métis'],
                 ['value' => 'inuit', 'label' => 'Inuit'],
                 ['value' => 'other', 'label' => 'Other'],
             ]],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'band_affiliation', 'label' => 'Band/Nation Affiliation', 'type' => 'text', 'required' => false, 'placeholder' => 'Enter band or nation name', 'multi_select' => false, 'help_text' => 'Shown when Indigenous status is checked'],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'indigenous_status_card_number', 'label' => 'Status Card Number', 'type' => 'text', 'required' => false, 'placeholder' => 'Status card number (if applicable)', 'multi_select' => false, 'help_text' => null],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'is_registered_with_band', 'label' => 'Registered with band/nation', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'on_reserve_resident', 'label' => 'Currently living on reserve', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
-            ['tab' => 'identity', 'section' => 'Indigenous Identity', 'field_id' => 'receives_indigenous_support_services', 'label' => 'Receiving Indigenous support services', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'band_affiliation', 'label' => 'Band/Nation Affiliation', 'type' => 'text', 'required' => false, 'placeholder' => 'Enter band or nation name', 'multi_select' => false, 'help_text' => 'Shown when Indigenous status is checked'],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'indigenous_status_card_number', 'label' => 'Status Card Number', 'type' => 'text', 'required' => false, 'placeholder' => 'Status card number (if applicable)', 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'is_registered_with_band', 'label' => 'Registered with band/nation', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'on_reserve_resident', 'label' => 'Currently living on reserve', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
+            ['tab' => 'identity', 'section' => self::INDIGENOUS_IDENTITY_SECTION, 'field_id' => 'receives_indigenous_support_services', 'label' => 'Receiving Indigenous support services', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],
 
             // Support Services
             ['tab' => 'identity', 'section' => 'Support Services', 'field_id' => 'receives_minority_support_services', 'label' => 'Receiving minority support services', 'type' => 'checkbox', 'required' => false, 'placeholder' => null, 'multi_select' => false, 'help_text' => null],

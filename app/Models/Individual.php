@@ -46,7 +46,7 @@ class Individual extends Model
     
     protected $casts = [
     'date_of_birth' => 'date',
-    'disability_status' => 'boolean',
+    // 'disability_status' => 'boolean',
     'emergency_contact' => 'array',
     'metadata' => 'array',
     'email_verified_at' => 'timestamp',

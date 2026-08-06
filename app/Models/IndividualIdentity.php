@@ -40,10 +40,10 @@ class IndividualIdentity extends Model
     protected $casts = [
         'racial_identity' => 'array',
         'indigenous_group' => 'array',
-        'indigenous_status' => 'boolean',
+        // 'indigenous_status' => 'boolean',
         'is_registered_with_band' => 'boolean',
         'on_reserve_resident' => 'boolean',
-        'is_visible_minority' => 'boolean',
+        // 'is_visible_minority' => 'boolean',
         'latest_version' => 'boolean',
     ];
 

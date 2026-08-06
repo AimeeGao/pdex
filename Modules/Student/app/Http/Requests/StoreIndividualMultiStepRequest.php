@@ -43,6 +43,9 @@ class StoreIndividualMultiStepRequest extends FormRequest
         $rules['date_of_birth'] = ['nullable', 'date', 'before:today'];
         $rules['gender'] = ['nullable', 'string', 'in:man,woman,non-binary,unknown'];
         $rules['sex'] = ['nullable', 'string', 'in:male,female,indeterminate,unknown'];
+        $rules['disability_status'] = ['nullable', 'string', 'in:yes,no,unknown'];
+        $rules['identity.indigenous_status'] = ['nullable', 'string', 'in:yes,no,unknown'];
+        $rules['identity.is_visible_minority'] = ['nullable', 'string', 'in:yes,no,unknown'];
 
         return $rules;
     }
@@ -155,9 +158,9 @@ class StoreIndividualMultiStepRequest extends FormRequest
         }
 
         // Ensure boolean fields are properly cast
-        if (!$this->has('disability_status')) {
-            $this->merge(['disability_status' => false]);
-        }
+        // if (!$this->has('disability_status')) {
+        //     $this->merge(['disability_status' => false]);
+        // }
 
         if (!$this->has('use_different_mailing_address')) {
             $this->merge(['use_different_mailing_address' => false]);
@@ -169,10 +172,8 @@ class StoreIndividualMultiStepRequest extends FormRequest
             
             // Set default boolean values only if not present
             $identity['refugee_status'] = $identity['refugee_status'] ?? false;
-            $identity['indigenous_status'] = $identity['indigenous_status'] ?? false;
             $identity['is_registered_with_band'] = $identity['is_registered_with_band'] ?? false;
             $identity['on_reserve_resident'] = $identity['on_reserve_resident'] ?? false;
-            $identity['is_visible_minority'] = $identity['is_visible_minority'] ?? false;
             $identity['receives_indigenous_support_services'] = $identity['receives_indigenous_support_services'] ?? false;
             $identity['receives_minority_support_services'] = $identity['receives_minority_support_services'] ?? false;
             

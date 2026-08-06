@@ -207,7 +207,7 @@ const form = useForm({
   gender: '',
   sex: '',
   preferred_pronouns: '',
-  disability_status: false,
+  disability_status: '',
   accommodation_needs: '',
 
   // Address Information
@@ -263,14 +263,14 @@ const form = useForm({
     years_in_country: '',
     refugee_status: false,
     immigration_status: '',
-    indigenous_status: false,
+    indigenous_status: '',
     indigenous_group: '',
     band_affiliation: '',
     indigenous_status_card_number: '',
     is_registered_with_band: false,
     on_reserve_resident: false,
     racial_identity: '',
-    is_visible_minority: false,
+    is_visible_minority: '',
     receives_indigenous_support_services: false,
     receives_minority_support_services: false
   }
