@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\ApplicationIndividualPermission;
 use App\Models\ProfileFormField;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,8 +37,15 @@ class ProfileFormFieldController extends Controller
                 ->orderBy('sort_order')
                 ->get();
 
+            $permissionLabels = ApplicationIndividualPermission::where('application_id', $registeredApp->id)
+                ->whereIn('column_name', $fields->pluck('field_id'))
+                ->pluck('display_name', 'column_name');
+
+            Log::info('Permission Labels', [
+                'permission_labels' => $permissionLabels,
+            ]);
             return response()->json([
-                'data' => $fields->map(fn (ProfileFormField $field) => $this->transformField($field))->values(),
+                'data' => $fields->map(fn (ProfileFormField $field) => $this->transformField($field, $permissionLabels[$field->field_id] ?? null))->values(),
                 'meta' => [
                     'count' => $fields->count(),
                     'registered_app' => $registeredApp->name,
@@ -82,8 +90,12 @@ class ProfileFormFieldController extends Controller
                 ], 404);
             }
 
+            $permissionLabel = ApplicationIndividualPermission::where('application_id', $registeredApp->id)
+                ->where('column_name', $profileField->field_id)
+                ->value('display_name');
+
             return response()->json([
-                'data' => $this->transformField($profileField),
+                'data' => $this->transformField($profileField, $permissionLabel),
                 'meta' => [
                     'registered_app' => $registeredApp->name,
                 ],
@@ -169,13 +181,14 @@ class ProfileFormFieldController extends Controller
     /**
      * Transform a field into the API response shape (definition + options).
      */
-    private function transformField(ProfileFormField $field): array
+    private function transformField(ProfileFormField $field, ?string $permissionLabel = null): array
     {
         return [
             'field_id' => $field->field_id,
             'tab' => $field->tab,
             'section' => $field->section,
             'label' => $field->label,
+            'permission_label' => $permissionLabel,
             'type' => $field->type,
             'required' => (bool) $field->required,
             'placeholder' => $field->placeholder,
