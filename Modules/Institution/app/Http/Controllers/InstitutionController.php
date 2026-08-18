@@ -7,10 +7,13 @@ use App\Models\User;
 use App\Models\Application;
 use App\Models\ApplicationDataPermission;
 use App\Models\Institution;
+use App\Models\InstitutionSite;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Institution\Http\Requests\InstitutionStoreRequest;
 
 class InstitutionController extends Controller
 {
@@ -172,11 +175,138 @@ class InstitutionController extends Controller
     }
 
     /**
+     * Display the current BCeID user's associated institution profile.
+     */
+    public function showInstitutionProfile(): Response|RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        $institution = $user->institution();
+
+        if (!$institution) {
+            return redirect()->route('institution.institutions.create');
+        }
+
+        return Inertia::render('Institution::Show', [
+            'institution' => $institution->load('sites'),
+        ]);
+    }
+
+    /**
+     * Show the form for a BCeID user to submit a new institution.
+     */
+    public function create(): Response|RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        if ($user->institution()) {
+            return redirect()->route('institution.institutions.profile')
+                ->with('error', 'An institution already exists for your BCeID account.');
+        }
+
+        return Inertia::render('Institution::Create', [
+            'institutionTypes' => Institution::getInstitutionTypes(),
+            'regulatingBodies' => InstitutionSite::getRegulatingBodies(),
+            'standingStatuses' => InstitutionSite::getStandingStatuses(),
+            'economicRegions' => InstitutionSite::getEconomicRegions(),
+            'businessGuid' => $user->bceid_business_guid,
+        ]);
+    }
+
+    /**
+     * Store an institution from the BCeID portal.
+     */
+    public function store(InstitutionStoreRequest $request): RedirectResponse
+    {
+        $this->authorize('accessPortal', Institution::class);
+
+        $user = auth()->user();
+
+        if (!$user->bceid_business_guid) {
+            return redirect()->route('institution.dashboard')
+                ->with('error', 'Invalid BCeID business GUID.');
+        }
+
+        if ($user->institution()) {
+            return redirect()->route('institution.institutions.profile')
+                ->with('error', 'An institution already exists for your BCeID business.');
+        }
+
+        DB::transaction(function () use ($request, $user) {
+            $this->createSubmittedInstitutionWithSites($request->validated(), $user);
+        });
+
+        return redirect()->route('institution.institutions.profile')
+            ->with('success', 'Institution submitted successfully.');
+    }
+
+    /**
      * Get user-friendly label for database table names
      */
     private function getTableLabel(string $tableName): string
     {
         $availableTables = ApplicationDataPermission::getAvailableTables();
         return $availableTables[$tableName]['label'] ?? ucfirst(str_replace('_', ' ', $tableName));
+    }
+
+    /**
+     * Create the inactive institution (In Review) and sites for a BCeID portal submission.
+     */
+    private function createSubmittedInstitutionWithSites(array $validated, User $user): Institution
+    {
+        $institution = Institution::create([
+            'legal_operating_name' => $validated['legal_operating_name'],
+            'institution_type' => $validated['institution_type'],
+            'dli' => $validated['dli'] ?? null,
+            'bceid_business_guid' => $user->bceid_business_guid,
+        ]);
+
+        foreach ($validated['sites'] as $site) {
+            $institution->sites()->create($this->siteAttributesForSubmission($site));
+        }
+
+        return $institution;
+    }
+
+    /**
+     * Map validated Portal input to site fields.
+     */
+    private function siteAttributesForSubmission(array $site): array
+    {
+        return [
+            'operating_name' => $site['operating_name'],
+            'primary_phone' => $site['primary_phone'],
+            'primary_email' => $site['primary_email'],
+            'website' => $site['website'] ?? null,
+            'regulating_body' => $site['regulating_body'],
+            'other_regulating_body' => $site['other_regulating_body'] ?? null,
+            'established_date' => $site['established_date'] ?? null,
+            'contact_first_name' => $site['contact_first_name'],
+            'contact_last_name' => $site['contact_last_name'],
+            'contact_email' => $site['contact_email'],
+            'contact_phone' => $site['contact_phone'],
+            'address_line_1' => $site['address_line_1'],
+            'address_line_2' => $site['address_line_2'] ?? null,
+            'city' => $site['city'],
+            'province_state' => $site['province_state'],
+            'country' => $site['country'],
+            'postal_code' => $site['postal_code'],
+            'standing_status' => $site['standing_status'] ?? null,
+            'economic_region' => $site['economic_region'] ?? null,
+        ];
     }
 }
