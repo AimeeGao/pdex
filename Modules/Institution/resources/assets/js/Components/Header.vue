@@ -74,9 +74,26 @@ export default {
             return user.roles.some(role => role.name === 'Institution Admin')
         })
 
+        // Check if user has a BCeID business GUID
+        const hasBCeIDBusinessGuid = computed(() => {
+            return page.props.institutionPortal?.hasBCeIDBusinessGuid || false
+        })
+
+        // Check if user has an existing institution
+        const hasExistingInstitution = computed(() => {
+            return page.props.institutionPortal?.hasExistingInstitution || false
+        })
+
         // Combine navigation links based on user role
         const navigationLinks = computed(() => {
             const links = [...baseNavigationLinks]
+
+            // Add links based on user's BCeID & existing institution status
+            if (hasExistingInstitution.value) {
+                links.push({ label: 'Institution Information', href: '/institution/institutions/profile' })
+            } else if (hasBCeIDBusinessGuid.value) {
+                links.push({ label: 'Add Institution', href: '/institution/institutions/create' })
+            }
             
             // Add admin-only links if user has INSTITUTION_ADMIN role
             if (hasInstitutionAdminRole.value) {
