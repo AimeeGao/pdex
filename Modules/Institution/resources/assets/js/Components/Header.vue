@@ -48,6 +48,7 @@
 <script>
 import NavLink from '@/Components/NavLink.vue'
 import { Link, usePage } from '@inertiajs/vue3'
+import { hasIn } from 'lodash';
 import { computed } from 'vue'
 
 export default {
@@ -88,10 +89,10 @@ export default {
         const navigationLinks = computed(() => {
             const links = [...baseNavigationLinks]
 
-            // Add links based on user's BCeID & existing institution status
-            if (hasExistingInstitution.value) {
+            // Add institution-related links based on user role and institution existence
+            if (hasInstitutionAdminRole.value && hasExistingInstitution.value) {
                 links.push({ label: 'Institution Information', href: '/institution/institutions/profile' })
-            } else if (hasBCeIDBusinessGuid.value) {
+            } else if (hasBCeIDBusinessGuid.value && !hasExistingInstitution.value) {
                 links.push({ label: 'Add Institution', href: '/institution/institutions/create' })
             }
             
