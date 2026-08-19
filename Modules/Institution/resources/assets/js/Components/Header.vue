@@ -48,7 +48,6 @@
 <script>
 import NavLink from '@/Components/NavLink.vue'
 import { Link, usePage } from '@inertiajs/vue3'
-import { hasIn } from 'lodash';
 import { computed } from 'vue'
 
 export default {
