@@ -8,6 +8,7 @@ use App\Models\Application;
 use App\Models\ApplicationDataPermission;
 use App\Models\Institution;
 use App\Models\InstitutionSite;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -188,6 +189,10 @@ class InstitutionController extends Controller
                 ->with('error', 'Invalid BCeID business GUID.');
         }
 
+        if (!$user->hasRole(Role::INSTITUTION_ADMIN)) {
+            abort(403, 'Only institution admins can view institution information.');
+        }
+
         $institution = $user->institution();
 
         if (!$institution) {
@@ -214,8 +219,7 @@ class InstitutionController extends Controller
         }
 
         if ($user->institution()) {
-            return redirect()->route('institution.institutions.profile')
-                ->with('error', 'An institution already exists for your BCeID account.');
+            return $this->handleExistingInstitution($user);
         }
 
         return Inertia::render('Institution::Create', [
@@ -242,12 +246,13 @@ class InstitutionController extends Controller
         }
 
         if ($user->institution()) {
-            return redirect()->route('institution.institutions.profile')
-                ->with('error', 'An institution already exists for your BCeID business.');
+            return $this->handleExistingInstitution($user);
         }
 
         DB::transaction(function () use ($request, $user) {
             $this->createSubmittedInstitutionWithSites($request->validated(), $user);
+            $this->assignInstitutionAdminRole($user);
+
         });
 
         return redirect()->route('institution.institutions.profile')
@@ -264,7 +269,7 @@ class InstitutionController extends Controller
     }
 
     /**
-     * Create the inactive institution (In Review) and sites for a BCeID portal submission.
+     * Create the inactive institution (Pending Review) and sites for a BCeID portal submission.
      */
     private function createSubmittedInstitutionWithSites(array $validated, User $user): Institution
     {
@@ -309,4 +314,35 @@ class InstitutionController extends Controller
             'economic_region' => $site['economic_region'] ?? null,
         ];
     }
+
+    /**
+     * Redirect the user to the institution profile page if they already have an existing institution.
+     */
+    private function handleExistingInstitution(User $user): RedirectResponse
+    {
+        if (!$user->hasRole(Role::INSTITUTION_ADMIN)) {
+            abort(403, 'Only institution admins can submit or view institution information.');
+        }
+
+        return redirect()->route('institution.institutions.profile');
+    }
+
+    /**
+     * Assign the Institution Admin role to the user, removing any existing Institution roles.
+     */
+    private function assignInstitutionAdminRole(User $user): void
+    {
+        $adminRole = Role::where('name', Role::INSTITUTION_ADMIN)->firstOrFail();
+        $currentInstitutionRoles = $user->roles()
+            ->whereIn('name', [Role::INSTITUTION_ADMIN, Role::INSTITUTION_USER])
+            ->pluck('roles.id');
+
+        if ($currentInstitutionRoles->isNotEmpty()) {
+            $user->roles()->detach($currentInstitutionRoles);
+        }
+
+        $user->roles()->syncWithoutDetaching([$adminRole->id]);
+        $user->load('roles');
+    }
+
 }

@@ -5,6 +5,7 @@ namespace Modules\Institution\Http\Requests;
 use App\Models\Institution;
 use App\Models\InstitutionSite;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class InstitutionStoreRequest extends FormRequest
 {
@@ -24,9 +25,9 @@ class InstitutionStoreRequest extends FormRequest
         $phoneRegex = 'regex:/^(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/';
 
         return [
-            'legal_operating_name' => 'required|string|max:255',
+            'legal_operating_name' => ['required', 'string', 'max:255', Rule::unique('institutions', 'legal_operating_name')->withoutTrashed()],
             'institution_type' => 'required|string|in:' . implode(',', Institution::getInstitutionTypes()),
-            'dli' => 'nullable|string|max:20',
+            'dli' => 'required|string|max:20',
             'sites' => 'required|array|min:1',
             'sites.*.operating_name' => 'required|string|max:255',
             'sites.*.primary_phone' => ['required', 'string', $phoneRegex, 'max:20'],
