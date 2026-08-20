@@ -11,7 +11,6 @@ use App\Models\InstitutionSite;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Institution\Http\Requests\InstitutionStoreRequest;
@@ -196,7 +195,7 @@ class InstitutionController extends Controller
         $institution = $user->institution();
 
         if (!$institution) {
-            return redirect()->route('institution.institutions.create');
+            return redirect()->route('institution.create');
         }
 
         return Inertia::render('Institution::Show', [
@@ -249,13 +248,10 @@ class InstitutionController extends Controller
             return $this->handleExistingInstitution($user);
         }
 
-        DB::transaction(function () use ($request, $user) {
-            $this->createSubmittedInstitutionWithSites($request->validated(), $user);
-            $this->assignInstitutionAdminRole($user);
+        $this->createSubmittedInstitutionWithSites($request->validated(), $user);
+        $this->assignInstitutionAdminRole($user);
 
-        });
-
-        return redirect()->route('institution.institutions.profile')
+        return redirect()->route('institution.profile')
             ->with('success', 'Institution submitted successfully.');
     }
 
@@ -324,7 +320,7 @@ class InstitutionController extends Controller
             abort(403, 'Only institution admins can submit or view institution information.');
         }
 
-        return redirect()->route('institution.institutions.profile');
+        return redirect()->route('institution.profile');
     }
 
     /**

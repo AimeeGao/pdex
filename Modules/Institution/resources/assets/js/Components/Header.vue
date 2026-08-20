@@ -90,9 +90,9 @@ export default {
 
             // Add institution-related links based on user role and institution existence
             if (hasInstitutionAdminRole.value && hasExistingInstitution.value) {
-                links.push({ label: 'Institution Information', href: '/institution/institutions/profile' })
+                links.push({ label: 'Institution Information', href: '/institution/profile' })
             } else if (hasBCeIDBusinessGuid.value && !hasExistingInstitution.value) {
-                links.push({ label: 'Add Institution', href: '/institution/institutions/create' })
+                links.push({ label: 'Add Institution', href: '/institution/create' })
             }
             
             // Add admin-only links if user has INSTITUTION_ADMIN role

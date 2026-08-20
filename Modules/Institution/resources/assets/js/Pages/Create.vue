@@ -628,7 +628,7 @@ export default {
         },
         submit() {
             this.clearedErrors = {};
-            this.form.post('/institution/institutions', {
+            this.form.post('/institution/store', {
                 preserveScroll: true
             });
         }
